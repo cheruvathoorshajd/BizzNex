@@ -1,0 +1,85 @@
+/* 
+
+  Styles for the main body of the document:
+  - Removes default margin and padding
+  - Sets box-sizing to border-box
+  - Applies a default font-family
+  - Sets a background color
+
+  Styles for anchor tags:
+  - Removes text decoration
+  - Inherits color from parent
+
+ 
+
+  Styles for footer class:
+  - Centers text
+  - Adds padding around the footer
+  - Sets text color and font size
+*/
+index.css 
+
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f3f2f1;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul, li {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+button {
+  cursor: pointer;
+}
+
+
+.container {
+  padding: 20px;
+}
+
+div, span, h1, h2, h3, h4, h5, h6, p {
+  margin: 0;
+  padding: 0;
+}
+/*
+ Styles for unordered lists and list items:
+  - Removes default list styling
+  - Removes default padding and margin
+
+  Styles for buttons:
+  - Changes cursor to pointer on hover
+
+  Styles for container class:
+  - Adds padding around the container
+
+  Styles for common HTML elements (div, span, headings, paragraphs):
+  - Removes default margin and padding
+
+  Styles for center-content class:
+  - Centers content using flexbox
+  */
+
+
+.center-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer {
+  text-align: center;
+  padding: 20px;
+  color: #605e5c;
+  font-size: 0.9rem;
+}
+

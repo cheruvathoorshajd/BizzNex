@@ -1,0 +1,20 @@
+meta {
+  name: Create a new task
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/tasks
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "projectId": "",
+    "taskName": "",
+    "description": "",
+    "timeline": ""
+  }
+}

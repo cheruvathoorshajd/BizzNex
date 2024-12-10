@@ -1,0 +1,17 @@
+meta {
+  name: Create a new project
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:3005/api/projects
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "projectName": ""
+  }
+}

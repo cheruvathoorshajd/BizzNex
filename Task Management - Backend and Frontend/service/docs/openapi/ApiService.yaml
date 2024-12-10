@@ -1,0 +1,246 @@
+
+openapi: 3.0.0
+info:
+  title: BizzHub - Project & Task Management API
+  description: REST API for managing projects, tasks, and related functionalities as implemented in the app.
+  version: 1.1.0
+
+paths:
+  /projects:
+    post:
+      summary: Create a new project
+      description: Adds a new project with a name and an empty list of tasks.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+            example:
+              projectName: "Thanksgiving Gifts"
+      responses:
+        '201':
+          description: Project created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectResponse'
+              example:
+                projectId: 101
+                projectName: "Thanksgiving Gifts"
+                tasks: []
+        '400':
+          description: Invalid project data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Project name is required"
+                code: 400
+
+  /projects/{projectId}:
+    delete:
+      summary: Delete a project
+      description: Removes a project and all its associated tasks.
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the project to delete.
+      responses:
+        '200':
+          description: Project deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Project deleted successfully."
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tasks:
+    post:
+      summary: Create a new task
+      description: Adds a new task to an existing project.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+            example:
+              projectId: 101
+              taskName: "Buy gift wrappers"
+              description: "Gift wrappers and decorative items for wrapping"
+              timeline:
+                startDate: "2024-01-01"
+                endDate: "2024-01-10"
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+              example:
+                taskId: 201
+                taskName: "Buy gift wrappers"
+                description: "Gift wrappers and decorative items for wrapping"
+                timeline:
+                  startDate: "2024-01-01"
+                  endDate: "2024-01-10"
+        '400':
+          description: Invalid task data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Task name and timeline are required"
+                code: 400
+
+  /tasks/{taskId}:
+    put:
+      summary: Update task details
+      description: Modify an existing task within a project.
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the task to update.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+            example:
+              taskName: "Buy additional gift items"
+              description: "Include chocolates and greeting cards"
+              timeline:
+                startDate: "2024-01-05"
+                endDate: "2024-01-15"
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete a task
+      description: Removes a task from a specific project.
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the task to delete.
+      responses:
+        '200':
+          description: Task deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Task deleted successfully."
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ProjectRequest:
+      type: object
+      properties:
+        projectName:
+          type: string
+      required:
+        - projectName
+
+    ProjectResponse:
+      type: object
+      properties:
+        projectId:
+          type: integer
+        projectName:
+          type: string
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskResponse'
+
+    TaskRequest:
+      type: object
+      properties:
+        projectId:
+          type: integer
+        taskName:
+          type: string
+        description:
+          type: string
+        timeline:
+          $ref: '#/components/schemas/DateRange'
+      required:
+        - projectId
+        - taskName
+        - timeline
+
+    TaskResponse:
+      type: object
+      properties:
+        taskId:
+          type: integer
+        taskName:
+          type: string
+        description:
+          type: string
+        timeline:
+          $ref: '#/components/schemas/DateRange'
+
+    DateRange:
+      type: object
+      properties:
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+      required:
+        - startDate
+        - endDate
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: integer

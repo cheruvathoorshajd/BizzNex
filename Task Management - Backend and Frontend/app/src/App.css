@@ -1,0 +1,79 @@
+/* App.css */
+
+/* Set the font for the entire application */
+.ThemeProvider {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Center the main content and set maximum width */
+.stack {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Style the header section */
+.header {
+  padding: 10px;
+  background-color: #0078d4;
+  border-radius: 5px;
+}
+
+/* Style the header text */
+.header-text {
+  color: white;
+  font-weight: 600;
+}
+
+/* Style the project and task sections */
+.project-section,
+.task-section {
+  background: #faf9f8;
+  border-radius: 5px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Add spacing to project and task areas */
+.project-area,
+.task-area {
+  margin-top: 20px;
+}
+
+/* Style individual project items */
+.project {
+  padding: 10px;
+  background: #deecf9;
+  border-radius: 5px;
+}
+
+/* Style project titles */
+.project-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* Style individual task items */
+.task {
+  padding: 10px;
+  margin-top: 10px;
+  background: #f3f2f1;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Style task titles */
+.task-title {
+  font-weight: 600;
+}
+
+/* Align task control buttons */
+.task-controls {
+  display: flex;
+}
+
+/* Style task footer information */
+.task-footer {
+  font-size: 0.8rem;
+  color: #605e5c;
+  margin-top: 5px;
+}

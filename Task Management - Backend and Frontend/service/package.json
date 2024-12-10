@@ -1,0 +1,28 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Dennis Sharon",
+  "license": "ISC",
+  "type": "module",
+  "description": "BizzHub - (Team : operateX)",
+  "dependencies": {
+    "@fluentui/react": "^8.121.13",
+    "antd": "^5.22.2",
+    "axios": "^1.7.9",
+    "cors": "^2.8.5",
+    "debug": "^4.3.7",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "mongoose": "^8.8.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.28.0"
+  }
+}
