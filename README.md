@@ -72,8 +72,8 @@ Ensure you have the following installed:
 1. Clone the repository:
 
    ```bash
-   git clone <repository_url>
-   cd <repository_name>
+   git clone https://github.com/cheruvathoorshajd/BizzNex.git
+   cd app
    ```
 
 2. Install dependencies: (if needed)
