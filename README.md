@@ -73,8 +73,7 @@ Ensure you have the following installed:
 
    ```bash
    git clone https://github.com/cheruvathoorshajd/BizzNex.git
-   cd app
-   ```
+  ```
 
 2. Install dependencies: (if needed)
 
@@ -102,7 +101,7 @@ Ensure you have the following installed:
 ---
 
 ## Running the Application
-
+Make sure your in the app directory or else use this in your Vscode terminal - ```bash cd app ```
 1. Start the development server:
 
    ```bash
