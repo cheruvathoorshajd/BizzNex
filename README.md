@@ -101,7 +101,13 @@ Ensure you have the following installed:
 ---
 
 ## Running the Application
-Make sure your in the app directory or else use this in your Vscode terminal - ```bash cd app ```
+
+Make sure your inside the app directory in your Vscode 
+
+```bash
+cd app
+```
+
 1. Start the development server:
 
    ```bash
