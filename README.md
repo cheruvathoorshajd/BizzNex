@@ -4,7 +4,7 @@
 A comprehensive business management suite designed to streamline and centralize essential operations. This tool provides an all-in-one platform for task management, CRM, inventory tracking, budgeting, invoicing, and analytics. With intuitive interfaces and interactive dashboards, users can oversee projects, track expenses, manage customer relationships, and analyze key metrics, making it perfect for businesses seeking to enhance productivity and gain a 360° view of operations.
 
 
-**BizzHub** is an all-in-one business management suite designed to streamline and centralize essential operations. This tool provides a 360° platform to support businesses by combining functionalities for task management, CRM, inventory tracking, budgeting, invoicing, and analytics. Built with a modular approach and Domain-Driven Design principles, BizzHub aims to enhance productivity and provide comprehensive insights into daily operations.
+**BizzNex** is an all-in-one business management suite designed to streamline and centralize essential operations. This tool provides a 360° platform to support businesses by combining functionalities for task management, CRM, inventory tracking, budgeting, invoicing, and analytics. Built with a modular approach and Domain-Driven Design principles, BizzNex aims to enhance productivity and provide comprehensive insights into daily operations.
 
 
 ---
@@ -218,6 +218,6 @@ Below are key libraries used in this project:
 
 This project is licensed under the MIT License.
 
-© 2024 BizzHub. All rights reserved.
+© 2024 BizzNex. All rights reserved.
 
 
