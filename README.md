@@ -1,5 +1,5 @@
 
-# BizzNex: Business Management Suite (Team - operateX)
+# BizzNex: Business Management Suite 
 
 A comprehensive business management suite designed to streamline and centralize essential operations. This tool provides an all-in-one platform for task management, CRM, inventory tracking, budgeting, invoicing, and analytics. With intuitive interfaces and interactive dashboards, users can oversee projects, track expenses, manage customer relationships, and analyze key metrics, making it perfect for businesses seeking to enhance productivity and gain a 360° view of operations.
 
