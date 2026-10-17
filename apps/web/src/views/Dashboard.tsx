@@ -89,7 +89,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (v: ViewId) => v
                   <div className="big num"><CountUp value={m.spend} format={fmtMoney} /></div>
                   {delta && (
                     <div className="delta" style={{ color: delta.up ? 'var(--ok)' : 'var(--bad)' }}>
-                      {delta.up ? '▲' : '▼'} {Math.abs(delta.pct).toFixed(1)}%&nbsp;&nbsp;{t('dash.trailing')}
+                      {delta.up ? '▲' : '▼'} {Math.abs(delta.pct).toFixed(1)}%&nbsp;&nbsp;{t('dash.vsStart')}
                     </div>
                   )}
                 </div>
