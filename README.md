@@ -1,11 +1,40 @@
-# BizzNex — Business Management Suite
+# BizzNex
 
-An all-in-one business workspace: **projects, tasks, notes, a full CRM, and seven
-productivity tools**, wrapped in **Aurora** — a container-less editorial design system
-built specifically to not look like generated software.
+[![CI](https://github.com/cheruvathoorshajd/BizzNex/actions/workflows/ci.yml/badge.svg)](https://github.com/cheruvathoorshajd/BizzNex/actions/workflows/ci.yml)
+![TypeScript](https://img.shields.io/badge/TypeScript-end--to--end-3178C6)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-Full-stack, typed end-to-end from database to component props, multi-user, i18n,
-light/dark, and containerised for deployment.
+**A business workspace for small teams.** Projects and tasks, a CRM with a deal pipeline,
+marketing tools and a built-in assistant, in one calm interface. Full-stack TypeScript:
+React + NestJS + PostgreSQL, with one shared Zod contract between them.
+
+![The BizzNex dashboard](docs/screenshots/dashboard.webp)
+
+**Try it:** run it locally ([§ 8](#8--running-it)) and click **Explore the demo** on the
+landing page, or sign in as `demo@bizznex.app` / `password`. The demo workspace resets
+itself every 30 minutes. *(A hosted demo isn't deployed yet.)*
+
+| | |
+|---|---|
+| ![Deals pipeline](docs/screenshots/deals.webp) **Deals:** a stage pipeline; cards arc to their new column | ![Studio windows](docs/screenshots/studio-windows.webp) **Studio:** tools open beside your work, with a dock |
+| ![Setup wizard](docs/screenshots/onboarding-wizard.webp) **Onboarding:** setup wizard, tour and checklist for new accounts | ![Product tour](docs/screenshots/onboarding-tour.webp) **Tour:** spotlights each area of the product |
+| ![Contacts](docs/screenshots/contacts.webp) **CRM:** contacts, companies and an activity timeline | ![Assistant](docs/screenshots/assistant.webp) **Assistant:** answers from your own data, no API key |
+| ![Settings](docs/screenshots/settings.webp) **Settings:** profile, security, data export, account deletion | ![Dark mode](docs/screenshots/dashboard-dark.webp) **Dark mode:** spreads from the switch |
+| ![Landing page](docs/screenshots/landing.webp) **Landing:** the signed-out home | ![Delete confirmation](docs/screenshots/confirm-delete.webp) **Safe deletes:** every delete says what goes with it |
+
+### What's worth a look (product engineering)
+- **Tenant isolation that covers links:** you can't read, edit or *attach* another
+  account's records, and e2e tests prove it ([§ 5](#5--architecture--engineering-decisions)).
+- **Sessions you can revoke:** a password change signs every other session out.
+- **A shared demo that can't be wrecked:** it resets itself on a timer, in one transaction.
+- **Onboarding that respects returning users:** guided for new accounts and demo visitors,
+  hands-off for sign-ins, with a `?` menu for everyone.
+- **Failure states designed in:** load errors with Retry, optimistic moves that roll back,
+  locked buttons while saving, readable API errors.
+- **Motion with a purpose:** things move to and from where they belong, and reduced
+  motion turns it all off.
+- **Shipping discipline:** migrations, CI with Postgres-backed e2e tests, Docker images,
+  and an honest list of what's simulated or not built ([§ 12](#12--honest-status)).
 
 > **New developer?** Start with **[`ONBOARDING.md`](./ONBOARDING.md)** — setup, a guided
 > first change, recipes, and troubleshooting. This README is the *what and why*;
@@ -74,7 +103,8 @@ Navigation is organised into three groups (`apps/web/src/nav.ts`):
 - **Contacts** — CRUD, linked to companies.
 - **Companies** — CRUD, with industry and website.
 - **Deals** — a **stage pipeline board** (`Lead → Qualified → Proposal → Won → Lost`).
-  Moving a deal to *Won* writes a real `Notification` row.
+  Moving a deal to *Won* writes a real `Notification` row, unless the "Deal won"
+  notification is turned off in Settings.
 - **Activities** — calls, emails, meetings, notes and tasks against the CRM, with
   done/not-done state.
 
@@ -105,7 +135,8 @@ rebuilding the scene.
   pretending to be empty. Save buttons lock while a request is in flight, and an expired
   session returns you to sign-in.
 - **i18n** — English, Spanish, French (real translations, not English copies).
-- **Theme** — light/dark via `data-theme`, with a 500 ms cross-fade.
+- **Theme** — light/dark via `data-theme`. The new theme spreads in a circle from the
+  switch (View Transitions); browsers without them get a 500 ms cross-fade.
 - **Motion** — the *Spatial* direction from [`design-style-guides/bizznex-motion.html`](./design-style-guides/bizznex-motion.html),
   in `apps/web/src/ui/motion.ts`. Pages slide the way you move through the sidebar
   (View Transitions API). Dialogs grow out of the button you pressed and shrink back
@@ -206,7 +237,7 @@ re-renders the tree), `layout/WindowLayer.tsx`, `layout/Dock.tsx`.
 
 ## 4 · The Aurora design system
 
-Source of truth: **`apps/web/src/styles/aurora.scss`** (506 lines). Both the style guide
+Source of truth: **`apps/web/src/styles/aurora.scss`** (about 530 lines). Both the style guide
 and the case study mirror it.
 
 ### Palette — one accent, warm paper, no pure white
@@ -236,8 +267,9 @@ Hierarchy is carried by **size and weight, never by tint**. Numeric data uses
   avatars) go round.
 - **Asymmetric spacing scale** — `6 · 12 · 20 · 34 · 56 · 92 · 140`. Deliberately not a
   doubling scale; the uneven jumps are what make the rhythm feel editorial.
-- **One easing curve** — `cubic-bezier(.22, 1, .36, 1)`, applied only to entrances and
-  hover. Static blocks never animate.
+- **Easing** — `--ease` (`cubic-bezier(.22, 1, .36, 1)`) for entrances and hover; the
+  Spatial motion layer adds `--ease-sp` and `--spring` (`ui/motion.ts`). Static blocks
+  never animate.
 - **Paper grain** — a fixed SVG `feTurbulence` overlay at 5% opacity across the whole
   viewport.
 - **Themed scrollbars** — 6px, accent-tinted via `color-mix`, in both engines.
@@ -260,8 +292,9 @@ entire point.
 
 ### API module pattern
 Every resource module mirrors the same shape: `JwtAuthGuard` + `@CurrentUser()` +
-`ZodValidationPipe`, with GET/POST/PATCH/DELETE. 14 controllers, all registered in
-`app.module.ts`. Errors funnel through one `AllExceptionsFilter`.
+`ZodValidationPipe`, with GET/POST/PATCH/DELETE. 16 controllers, all registered in
+`app.module.ts` behind a global `ThrottlerGuard`. Errors funnel through one
+`AllExceptionsFilter`.
 
 ### String enums, not Prisma enums
 `Deal.stage` and `Activity.type` are `String` columns constrained by Zod in the shared
@@ -324,9 +357,10 @@ error flags). Only genuinely local concerns — theme, language, active view, au
 ### Dependencies deliberately dropped
 The original app carried Fluent UI, MUI, framer-motion, styled-components and a
 Google Maps dependency. All removed in favour of a hand-built Aurora component layer.
-The entire UI primitive set is four files: `Icon`, `Modal`, `Toast`, `PreviewBadge`.
+The UI primitives live in `apps/web/src/ui/`: `Icon`, `Logo`, `Modal`, `Toast`, `Confirm`,
+`LoadError`, `CountUp` and `PreviewBadge`, plus `motion.ts` and `useThemeSwitch.ts`.
 The production build splits React, state and i18n into long-lived vendor chunks
-(about 78 kB gzipped for the app itself). The three.js globe is lazy-loaded into its own
+(about 83 kB gzipped for the app itself). The three.js globe is lazy-loaded into its own
 chunk so it never blocks first paint.
 
 ---
@@ -361,7 +395,7 @@ chunk so it never blocks first paint.
 
 | Layer | Tech |
 |---|---|
-| **Web** | React 18.3, TypeScript 5.6, Vite 6, Redux Toolkit 2.4 + RTK Query, react-intl 7, Sass, three.js 0.160 |
+| **Web** | React 18.3, TypeScript 5.6, Vite 6, Redux Toolkit 2.4 + RTK Query, react-intl 7, Sass, three.js 0.160, @formkit/auto-animate |
 | **API** | NestJS 10, Prisma 5.22, PostgreSQL, Passport JWT, bcryptjs, Zod, Swagger, helmet, @nestjs/throttler |
 | **Shared** | TypeScript types + Zod schemas |
 | **Infra** | Docker multi-stage, docker-compose, nginx, GitHub Actions, Railway |
@@ -434,7 +468,7 @@ POST   /auth/register · POST /auth/login · GET /auth/me
 
 PATCH  /account/profile       → fresh token (the email is in it)
 PATCH  /account/preferences · POST /account/password · DELETE /account
-GET/PATCH /onboarding · POST/DELETE /onboarding/sample
+PATCH /onboarding · POST/DELETE /onboarding/sample   (state comes back on GET /auth/me)
 
 GET    /projects · POST /projects · GET/PATCH/DELETE /projects/:id
 GET    /tasks
@@ -496,13 +530,13 @@ tests, 5 e2e tests against Postgres, a clean production build, and browser runs 
 onboarding, settings and CRUD flows (including dates in a US time zone).
 
 **Simulated by necessity** (needs third-party credentials, labelled with `PreviewBadge`
-in-product): real email sending, real social posting, live external web data. The in-app
+in-product): real email sending and real social posting. The in-app
 records these create are real and persisted.
 
 **Known limits:** lists aren't paginated yet. Deals and activities can't be edited
 beyond their stage or done state, and posts and campaigns can't be edited after they're
-created. Contacts, companies, deals, activities and the tools are English-only; the
-dashboard and projects are translated. The demo reset runs in-process, which is right for
+created. Navigation, the dashboard, projects and tasks are translated into Spanish and
+French; the CRM pages, tools, settings, landing, sign-in and onboarding are English-only. The demo reset runs in-process, which is right for
 a single API instance but would need a scheduled job behind a load balancer.
 
 **Not yet built** — the honest gap to full CRM/ERP parity: quotes and invoices, reporting,
@@ -526,6 +560,12 @@ teams and roles, CSV import, and the ERP modules (finance, inventory, orders, HR
 | `design-style-guides/windows-option-3-panels.html` | Panels ✕ |
 | `design-style-guides/windows-option-4-studio.html` | **Studio ✅** — the shipped model |
 | `design-style-guides/dashboard-3d/` | 8 dashboard-3D prototypes → globe-network adopted |
+| `design-style-guides/bizznex-identity-skyline.html` | **Skyline ✅** — the adopted logo and identity (served at `/brand/skyline.html`) |
+| `design-style-guides/bizznex-identity.html` · `bizznex-logo-options.html` | Earlier identity and logo explorations |
+| `design-style-guides/bizznex-motion.html` | Motion study — Quiet, Editorial, **Spatial ✅** (adopted at ×1.5) |
+| `design-style-guides/archive/` | Dated snapshot of the earlier case study |
+| `docs/onboarding-flow.md` | Step-by-step map of signup, demo and sign-in onboarding |
+| `docs/screenshots/` | The screenshots in this README, taken from the demo workspace |
 
 ---
 
@@ -537,15 +577,17 @@ bizznex/
 │   ├── web/              # React 18 + Vite + RTK Query + react-intl
 │   │   └── src/
 │   │       ├── layout/   # Sidebar · Topbar · ToolWindow · WindowLayer · Dock · useWindows
-│   │       ├── views/    # Dashboard · Projects · Tasks · CRM · Globe · Auth
+│   │       ├── ui/       # primitives (Modal, Toast, Confirm, LoadError, CountUp…) · motion.ts
+│   │       ├── onboarding/ # wizard · tour · checklist · page intros · help menu · guides
+│   │       ├── views/    # Dashboard · Projects · Tasks · Contacts · Companies · Deals · Activities · Globe · Landing · Auth · Settings
 │   │       │   └── tools/  # 7 tools — registry.tsx (pages) + widgets.tsx (compact)
 │   │       ├── styles/   # aurora.scss — the design system
 │   │       ├── store/    # authSlice · uiSlice
-│   │       ├── services/ # RTK Query API client
+│   │       ├── services/ # RTK Query client (api.ts) · errors.ts
 │   │       └── i18n/     # en · es · fr
 │   └── api/              # NestJS + Prisma + PostgreSQL, JWT
-│       ├── src/          # 14 resource modules + auth, prisma, health, assistant
-│       └── prisma/       # schema.prisma (12 models) · migrations/ · seed.ts
+│       ├── src/          # 13 resource modules + auth, users, prisma, health, assistant, demo, common
+│       └── prisma/       # schema.prisma (12 models) · migrations/0_init · seed.ts → src/demo
 ├── packages/shared/      # types + Zod schemas — one contract, both sides
 ├── design-style-guides/  # every explored direction, preserved
 ├── scripts/local-db.mjs  # embedded Postgres, no Docker needed
