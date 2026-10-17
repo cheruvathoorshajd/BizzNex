@@ -17,7 +17,7 @@ Everything is containerised, so it runs the same locally (`docker compose up`) a
 Run through this **before every production deploy**:
 
 - [ ] **Refresh the design case study** — [`bizznex-case-study.html`](./bizznex-case-study.html) is a living document. Re-diff it against `apps/web/src/styles/aurora.scss` (tokens), the shipped components, the tool inventory (`apps/web/src/views/tools/*`), the i18n locale set (en/es/fr) and the Studio interaction model. Update the "Last updated" date + changelog, tick the in-page checklist, and confirm it's linked from the landing page.
-- [ ] `npm run typecheck` and `npm run test` are clean.
+- [ ] `npm run typecheck`, `npm run lint` and `npm run test` are clean.
 - [ ] `npm run build` is clean (web + api).
 - [ ] Env vars set on the target (`DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN`, `VITE_API_URL`).
 - [ ] CORS origin matches the deployed web domain.
@@ -35,11 +35,11 @@ docker compose up --build
 ```
 
 The API container runs `prisma migrate deploy` on boot, so the schema is created automatically.
-Seed demo data (once the stack is up):
+Demo data: the first demo sign-in (*Explore the demo*) creates and fills the demo
+workspace. To seed it ahead of time, run from your host against the compose database (the
+runtime image has no dev tools, so seeding inside the container won't work):
 
 ```bash
-docker compose exec api npm run seed -w @bizznex/api    # from the repo image
-# or, against the compose DB from your host:
 DATABASE_URL=postgresql://bizznex:bizznex@localhost:5432/bizznex npm run seed -w @bizznex/api
 ```
 
@@ -69,7 +69,9 @@ neither Vercel nor AWS. Two services (api, web) + one Postgres plugin.
      Railway passes service variables as Docker build args, so this is baked into the static build.
    - Deploy and generate a public domain.
 6. **Wire CORS**: set the API's `CORS_ORIGIN` to the web domain; redeploy the API.
-7. **Seed** (optional): in the API service shell, run `npm run seed -w @bizznex/api`.
+7. **Demo data** (optional): nothing to do — the first demo sign-in creates it. To seed
+   ahead of time, run `npm run seed -w @bizznex/api` from your machine with `DATABASE_URL`
+   set to the Railway Postgres URL.
 
 Done — open the web domain, register or use the demo account.
 

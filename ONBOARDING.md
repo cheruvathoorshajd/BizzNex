@@ -93,12 +93,13 @@ DATABASE_URL=postgresql://bizznex:bizznex@localhost:5433/bizznex?schema=public
 npm run db:local
 ```
 
-Wait for `LOCAL_DB_READY`. On a fresh clone it downloads a Postgres binary first, so the
-first run takes a minute. Data persists in `.pgdata/` (gitignored).
+Wait for `LOCAL_DB_READY`. The Postgres binary comes from npm (`npm ci` installs it), and
+the first start runs `initdb`, which takes a few seconds. Data persists in `.pgdata/`
+(gitignored).
 
-> On first run you'll see `initdb: directory .pgdata exists but is not empty` and
-> `database "bizznex" already exists` on *subsequent* runs. **Both are expected** —
-> `local-db.mjs` catches them. Only treat it as broken if `LOCAL_DB_READY` never prints.
+> On later runs you may see `initdb: directory .pgdata exists but is not empty` and
+> `database "bizznex" already exists`. **Both are expected** — `local-db.mjs` catches them.
+> Only treat it as broken if `LOCAL_DB_READY` never prints.
 
 **Terminal 2 — schema, data, and the app:**
 
@@ -121,7 +122,9 @@ demo@bizznex.app / password
 ```bash
 docker compose up --build
 # web → http://localhost:8080 · api → http://localhost:3001/docs · db → :5432
-docker compose exec api npm run seed -w @bizznex/api
+# demo data: just click "Explore the demo" (the first demo sign-in creates it),
+# or seed from your host against the compose database:
+DATABASE_URL=postgresql://bizznex:bizznex@localhost:5432/bizznex npm run seed -w @bizznex/api
 ```
 
 Note the **different web port (8080)** and **DB port (5432)**. The API container runs
@@ -170,7 +173,7 @@ Invoke-WebRequest -Uri 'http://localhost:3001/projects' -Headers @{Authorization
 - [ ] http://localhost:3001/docs shows Swagger
 - [ ] `npm run typecheck && npm run lint && npm run test && npm run build` all clean
 
-That last line is exactly what CI runs. If it passes locally, CI will pass.
+That last line is what CI runs, minus the migrations and the e2e suite (`npm run test:e2e -w @bizznex/api`).
 
 ---
 
@@ -182,28 +185,33 @@ bizznex/
 ├── apps/api/
 │   ├── prisma/
 │   │   ├── schema.prisma            ★ 12 models — the data model
-│   │   └── seed.ts                  demo data
+│   │   ├── migrations/              ★ versioned schema history (0_init baseline)
+│   │   └── seed.ts                  thin wrapper → src/demo/demo-workspace.ts
 │   ├── src/
 │   │   ├── app.module.ts            every module registers here
-│   │   ├── main.ts                  bootstrap, CORS, Swagger
+│   │   ├── main.ts                  bootstrap, helmet, body limit, CORS, Swagger
 │   │   ├── auth/                    JWT strategy + guard
-│   │   ├── common/                  CurrentUser decorator · Zod pipe · exception filter
+│   │   ├── common/                  CurrentUser · Zod pipe · exception filter · ownership.ts · jwt-config.ts
 │   │   ├── prisma/                  PrismaService
 │   │   ├── notes/                   ★ THE PATTERN — copy this for new resources
 │   │   ├── assistant/               Brenda — local, key-free
-│   │   └── …11 more resource modules
+│   │   ├── demo/                    the shared demo workspace and its 30-minute self-reset
+│   │   └── …projects, tasks, CRM ×4, campaigns, posts, events, notifications, onboarding, account, users, health
 │   └── test/app.e2e-spec.ts
 └── apps/web/src/
     ├── App.tsx                      shell, routing, window wiring
     ├── nav.ts                       sidebar groups
     ├── types.ts                     re-exports shared + client-only types
-    ├── services/api.ts              ★ RTK Query — every endpoint
+    ├── services/api.ts              ★ RTK Query — every endpoint (a 401 signs out)
+    ├── services/errors.ts           API error → one readable sentence
     ├── store/                       authSlice · uiSlice (localStorage-backed)
     ├── styles/aurora.scss           ★ THE DESIGN SYSTEM — all tokens
     ├── layout/                      Sidebar · Topbar · ToolWindow · WindowLayer · Dock · useWindows
-    ├── ui/                          Icon · Modal · Toast · PreviewBadge (the whole primitive set)
+    ├── ui/                          Icon · Logo · Modal · Toast · Confirm · LoadError · CountUp · PreviewBadge
+    │                                motion.ts (Spatial motion) · useThemeSwitch.ts
+    ├── onboarding/                  wizard · tour · checklist · page intros · help menu · guides
     └── views/
-        ├── Dashboard · Projects · Tasks · Globe · Auth
+        ├── Dashboard · Projects · Tasks · Globe · Landing · Auth · Settings
         ├── Contacts · Companies · Deals · Activities
         └── tools/
             ├── registry.tsx         ★ full-page tool variants
@@ -212,7 +220,7 @@ bizznex/
 
 ### Read in this order
 
-1. `packages/shared/src/index.ts` — every entity in the system, ~278 lines
+1. `packages/shared/src/index.ts` — every entity in the system, ~360 lines
 2. `apps/api/prisma/schema.prisma` — how they're stored
 3. `apps/api/src/notes/` — all three files; this is the pattern every module follows
 4. `apps/web/src/services/api.ts` — how the client talks to all of it
@@ -283,7 +291,7 @@ Non-negotiables:
 | **One accent** (`--accent`) | A rainbow of semantic colours reads as a template |
 | **One radius** (`3px`) | Mixed radii are visual noise |
 | **Use the spacing scale** `--s1…--s7` (6·12·20·34·56·92·140) | The uneven jumps *are* the rhythm |
-| **One easing curve** (`--ease`) | Entrances and hover only — never static blocks |
+| **Easing** (`--ease`, plus `--ease-sp` / `--spring` for motion) | Entrances and hover only — never static blocks |
 | **Hierarchy by size/weight, never tint** | Tint hierarchy is the generated-UI tell |
 | **`.num` on all numeric data** | Tabular numerals so columns align |
 | **Never hardcode a colour** | Always `var(--token)` so dark mode works |
@@ -368,10 +376,10 @@ export interface Note {
 }
 
 export const createNoteSchema = z.object({
-  title: z.string().min(1),
+  title: z.string().max(200).min(1),
   date: isoOrNull,
-  location: z.string().default(''),
-  description: z.string().default(''),
+  location: z.string().max(200).default(''),
+  description: z.string().max(10000).default(''),
   priority: notePrioritySchema.default('Normal'),   // ← add
 });
 // updateNoteSchema is createNoteSchema.partial() — it picks this up for free
@@ -402,6 +410,12 @@ create(userId: string, dto: CreateNoteInput) {
 }
 ```
 
+`update` whitelists each field, so add it there too, or edits are silently dropped:
+
+```ts
+...(dto.priority !== undefined ? { priority: dto.priority } : {}),   // ← add
+```
+
 The controller needs **no change** — it validates with `createNoteSchema`, which already
 knows about the field. That's the contract doing its job.
 
@@ -411,13 +425,18 @@ knows about the field. That's the contract doing its job.
 (`.field`, `.inp`) rather than new styles:
 
 ```tsx
+const [priority, setPriority] = useState<NotePriority>('Normal');   // with the other form state
+…
 <div className="field">
-  <label>{t('notes.priority')}</label>
-  <select className="inp" value={priority} onChange={(e) => setPriority(e.target.value as NotePriority)}>
+  <label htmlFor="note-priority">Priority</label>
+  <select id="note-priority" className="inp" value={priority} onChange={(e) => setPriority(e.target.value as NotePriority)}>
     {NOTE_PRIORITIES.map((p) => <option key={p} value={p}>{p}</option>)}
   </select>
 </div>
 ```
+
+Pass it in the `createNote({ … })` call, and add the same select to `NoteModal` (and its
+`onSave` value type) so priority can be edited.
 
 RTK Query needs no change — `createNote` already sends the whole body, and
 `invalidatesTags: ['Notes']` refetches the list automatically.
@@ -426,10 +445,12 @@ Decide whether the **compact widget** (`views/tools/widgets.tsx` → `NotesWidge
 show it too. For a small field like priority, showing it as a coloured dot rather than a
 full select fits the window better.
 
-### Step 5 — Translations
+### Step 5 — Translations (when the page is translated)
 
-`apps/web/src/i18n/messages.ts` — add the key to **all three** locales. A key present in
-`en` but missing in `es`/`fr` renders as the raw key ID to those users:
+The tools are English-only today, so the label above is plain text. In a translated view
+(Dashboard, Projects, Tasks), use `const t = useT()` from `i18n/useT` and add the key to
+**all three** locales in `apps/web/src/i18n/messages.ts`. A key present in `en` but
+missing in `es`/`fr` renders as the raw key ID to those users:
 
 ```ts
 en: { 'notes.priority': 'Priority', … }
@@ -444,8 +465,8 @@ npm run typecheck && npm run lint && npm run test && npm run build
 ```
 
 Then exercise it in the browser: create a note with each priority, reload the page, and
-confirm it persisted. Switch to Spanish and confirm the label is translated. Toggle dark
-mode and confirm the control still reads.
+confirm it persisted. Edit one and confirm the change sticks. Toggle dark mode and
+confirm the control still reads.
 
 ### Files you touched
 
@@ -492,8 +513,11 @@ almost every change in this codebase.**
 4. `nav.ts` — add to the `group.tools` items with an icon key
 5. `types.ts` — add the id to `ViewId`
 6. `messages.ts` — `nav.myTool` in all three locales
+7. `nav.ts` `LABELS` and `onboarding/content.ts` `INTROS` — both are `Record<ViewId, …>`,
+   so typecheck fails until the new id is in them
 
-Both `TOOL_IDS` and `toolNode()` must know about it, or right-click opens an empty window.
+If `toolWidget()` has no case for it, right-click opens an empty window; if `toolNode()`
+has none, clicking it in the sidebar shows a blank page.
 
 ### Add or change a design token
 
@@ -516,7 +540,10 @@ npm run seed
 
 ### Change seed data
 
-`apps/api/prisma/seed.ts`. It upserts the demo user, so re-running is safe.
+Demo data lives in `apps/api/src/demo/demo-workspace.ts` (`fill()`). `npm run seed` upserts
+the demo user, then wipes and refills its records in one transaction, so re-running is
+safe. The same code runs on the 30-minute demo self-reset. Sample data for new accounts
+is separate, in `apps/api/src/onboarding/onboarding.service.ts`.
 
 ---
 
@@ -630,8 +657,11 @@ built then served by nginx with SPA fallback).
 | `DATABASE_URL` | required |
 | `JWT_SECRET` | **required in prod** — long random string |
 | `JWT_EXPIRES_IN` | e.g. `7d` |
-| `CORS_ORIGIN` | must match the deployed web domain |
+| `CORS_ORIGIN` | the web domain(s), comma-separated; **required in prod** |
 | `PORT` | injected by most PaaS |
+| `NODE_ENV` | `production` makes `JWT_SECRET` and `CORS_ORIGIN` mandatory (the API won't boot without them) |
+| `SWAGGER_ENABLED` | `false` hides `/docs` |
+| `DEMO_RESET_MINUTES` | how stale the shared demo gets before the next demo sign-in resets it (default 30) |
 
 **web**
 
@@ -645,8 +675,9 @@ built then served by nginx with SPA fallback).
 - [ ] Every env var set on the target; `CORS_ORIGIN` matches the web domain
 - [ ] Refresh `bizznex-case-study.html` — it's a **living document**; re-diff it against
       `aurora.scss` tokens, the shipped components, the tool inventory, and the locale set
-- [ ] Decide whether to seed — the demo account is `demo@bizznex.app` / `password`, which
-      should **not** exist on a public deployment
+- [ ] Know that the demo exists everywhere — the first demo sign-in creates
+      `demo@bizznex.app` / `password`, seeded or not, and the landing page links to it.
+      Turning it off on a public deployment needs a code change.
 
 ---
 
