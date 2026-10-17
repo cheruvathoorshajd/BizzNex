@@ -1,0 +1,32 @@
+{
+  "name": "bizznex",
+  "private": true,
+  "version": "1.0.0",
+  "description": "BizzNex — business management suite (monorepo)",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run build -w @bizznex/shared && concurrently -n api,web -c blue,magenta \"npm run dev -w @bizznex/api\" \"npm run dev -w @bizznex/web\"",
+    "build": "npm run build -w @bizznex/shared && npm run build -w @bizznex/api && npm run build -w @bizznex/web",
+    "typecheck": "npm run build -w @bizznex/shared && npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run build -w @bizznex/shared && npm run test --workspaces --if-present",
+    "prisma:generate": "npm run prisma:generate -w @bizznex/api",
+    "prisma:migrate": "npm run prisma:migrate -w @bizznex/api",
+    "seed": "npm run seed -w @bizznex/api",
+    "db:local": "node scripts/local-db.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "concurrently": "^9.1.0",
+    "embedded-postgres": "18.4.0-beta.17",
+    "eslint": "^9.39.5",
+    "globals": "^15.15.0",
+    "typescript-eslint": "^8.71.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

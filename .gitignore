@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+.pnp/
+
+# builds
+dist/
+build/
+apps/*/dist/
+packages/*/dist/
+*.tsbuildinfo
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# prisma local db
+*.db
+*.db-journal
+
+# test / coverage
+coverage/
+
+# misc
+.DS_Store
+*.local
+.vscode/
+.idea/
+.turbo/
+
+# local embedded postgres data
+.pgdata/
