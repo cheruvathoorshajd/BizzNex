@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<title>BizzNex Logo Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" />
+<style>
+/* Layout: a two-pane studio. Left: the choices (mark, wordmark, colour, layout).
+   Right: everything the choice touches, rendered live at real sizes, then a
+   compare-all grid and the export panel. Tokens are BizzNex's Aurora system. */
+:root {
+  --paper: #F5F1E9; --paper-2: #EDE7DA; --paper-3: #E4DDCC; --ink: #211D16; --ink-soft: #4E4A40; --muted: #8B8474;
+  --rule: rgba(33, 29, 22, .16); --rule-soft: rgba(33, 29, 22, .08);
+  --ui-accent: #5B41E0; --ui-tint: rgba(91, 65, 224, .10);
+  --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  --r: 3px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #141210; --paper-2: #1C1915; --paper-3: #26221C; --ink: #EDE8DD; --ink-soft: #C3BCAD; --muted: #8E877A;
+    --rule: rgba(237, 232, 221, .16); --rule-soft: rgba(237, 232, 221, .07);
+    --ui-accent: #A897FF; --ui-tint: rgba(168, 151, 255, .14);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #141210; --paper-2: #1C1915; --paper-3: #26221C; --ink: #EDE8DD; --ink-soft: #C3BCAD; --muted: #8E877A;
+  --rule: rgba(237, 232, 221, .16); --rule-soft: rgba(237, 232, 221, .07);
+  --ui-accent: #A897FF; --ui-tint: rgba(168, 151, 255, .14);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased; transition: background .4s, color .4s;
+}
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--ui-accent); outline-offset: 2px; }
+.label { font-family: var(--mono); font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 500; letter-spacing: -.02em; margin: 0; text-wrap: balance; }
+
+/* ── shell ── */
+.top {
+  position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 14px max(20px, env(safe-area-inset-right, 0px)) 14px max(20px, env(safe-area-inset-left, 0px));
+  background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--rule-soft);
+}
+.top h1 { font-size: 20px; }
+.top h1 span { color: var(--muted); font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; margin-left: 12px; font-weight: 400; }
+.top-actions { display: flex; gap: 8px; align-items: center; }
+.tbtn { background: none; border: 1px solid var(--rule); border-radius: var(--r); padding: 7px 12px; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); cursor: pointer; }
+.tbtn:hover { border-color: var(--ink); color: var(--ink); }
+.tbtn.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+.studio { display: grid; grid-template-columns: 340px minmax(0, 1fr); min-height: calc(100vh - 60px); }
+.panel { border-right: 1px solid var(--rule-soft); padding: 22px 20px 40px max(20px, env(safe-area-inset-left, 0px)); position: sticky; top: 60px; height: calc(100vh - 60px); overflow-y: auto; }
+.stage { padding: 26px max(24px, env(safe-area-inset-right, 0px)) 80px 28px; min-width: 0; }
+@media (max-width: 920px) {
+  .studio { grid-template-columns: minmax(0, 1fr); }
+  .panel { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--rule-soft); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+  .stage { padding-left: max(20px, env(safe-area-inset-left, 0px)); }
+}
+
+/* ── choice groups ── */
+.group { margin-bottom: 26px; }
+.group > .label { margin-bottom: 10px; display: flex; justify-content: space-between; }
+.group > .label b { color: var(--ink); font-weight: 500; letter-spacing: .08em; }
+.marks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.opt {
+  border: 1px solid var(--rule); border-radius: var(--r); background: var(--paper); cursor: pointer; padding: 10px 6px 8px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px; transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+.opt:hover { border-color: var(--ink-soft); transform: translateY(-1px); }
+.opt[aria-pressed="true"] { border-color: var(--ui-accent); box-shadow: 0 0 0 3px var(--ui-tint); }
+.opt svg { width: 34px; height: 34px; }
+.opt small { font-size: 10.5px; color: var(--ink-soft); line-height: 1.2; text-align: center; }
+.rows { display: grid; gap: 6px; }
+.row-opt {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid var(--rule); border-radius: var(--r);
+  background: var(--paper); padding: 10px 12px; cursor: pointer; text-align: left; transition: border-color .15s, box-shadow .15s;
+}
+.row-opt:hover { border-color: var(--ink-soft); }
+.row-opt[aria-pressed="true"] { border-color: var(--ui-accent); box-shadow: 0 0 0 3px var(--ui-tint); }
+.row-opt .wm { font-size: 19px; line-height: 1; white-space: nowrap; }
+.row-opt small { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+.swatches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.sw { display: flex; align-items: center; gap: 10px; border: 1px solid var(--rule); border-radius: var(--r); padding: 9px 10px; background: var(--paper); cursor: pointer; text-align: left; }
+.sw[aria-pressed="true"] { border-color: var(--ui-accent); box-shadow: 0 0 0 3px var(--ui-tint); }
+.sw i { width: 22px; height: 22px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+.sw span { font-size: 12.5px; line-height: 1.25; }
+.sw span small { display: block; font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.seg { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--rule); border-radius: var(--r); overflow: hidden; }
+.seg button { border: 0; border-left: 1px solid var(--rule); background: none; padding: 9px 4px; cursor: pointer; font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.seg button:first-child { border-left: 0; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.why { font-size: 13px; color: var(--ink-soft); border-left: 2px solid var(--ui-accent); padding: 8px 0 8px 12px; margin: 12px 0 0; }
+.why b { color: var(--ink); }
+.shuffle { width: 100%; justify-content: center; display: flex; gap: 8px; }
+
+/* ── stage blocks ── */
+.block { margin-bottom: 34px; }
+.block > .head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.block h2 { font-size: 1.35rem; }
+.hero { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 12px; }
+.ground { border-radius: var(--r); display: grid; place-items: center; min-height: 260px; padding: 28px; border: 1px solid var(--rule-soft); position: relative; overflow: hidden; }
+.ground .tag { position: absolute; left: 12px; top: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; opacity: .6; }
+@media (max-width: 720px) { .hero { grid-template-columns: minmax(0, 1fr); } }
+
+/* a lockup is rendered from --l-ink / --l-acc / --l-bg so each ground controls its colours */
+.lockup { display: inline-flex; align-items: center; gap: .42em; color: var(--l-ink); }
+.lockup.stacked { flex-direction: column; gap: .32em; }
+.lockup svg { width: 1.25em; height: 1.25em; flex: none; display: block; }
+.lockup.stacked svg { width: 1.9em; height: 1.9em; }
+.wm { display: inline-flex; align-items: baseline; color: var(--l-ink); }
+.wm .a { color: var(--l-acc); }
+
+.ladder { display: flex; align-items: flex-end; gap: 26px; flex-wrap: wrap; padding: 20px; border: 1px solid var(--rule-soft); border-radius: var(--r); }
+.ladder figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.ladder figcaption { font-family: var(--mono); font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.ladder .pair { display: flex; gap: 6px; }
+.ladder .pair > div { padding: 6px; border-radius: 3px; display: grid; place-items: center; }
+
+.scenes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 1100px) { .scenes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) { .scenes { grid-template-columns: minmax(0, 1fr); } }
+.scene { border: 1px solid var(--rule-soft); border-radius: var(--r); overflow: hidden; display: flex; flex-direction: column; }
+.scene .cap { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding: 9px 12px; border-top: 1px solid var(--rule-soft); background: var(--paper); }
+.scene .in { flex: 1; min-height: 200px; padding: 18px; display: flex; flex-direction: column; }
+/* sidebar */
+.sb { font-size: 19px; gap: 16px; }
+.sb .navl { display: grid; gap: 9px; font-size: 13px; font-family: var(--sans); }
+.sb .navl span { display: flex; align-items: center; gap: 9px; opacity: .75; }
+.sb .navl span i { width: 13px; height: 13px; border: 1.5px solid currentColor; border-radius: 3px; display: inline-block; }
+.sb .navl span.on { opacity: 1; }
+.sb .navl span.on i { border-color: var(--l-acc); }
+/* tab */
+.tabs { gap: 0; justify-content: flex-start; padding-top: 24px; }
+.tabbar { display: flex; align-items: flex-end; gap: 2px; }
+.tab-on { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 7px 7px 0 0; font-size: 12px; white-space: nowrap; overflow: hidden; }
+.tab-on svg { width: 16px; height: 16px; flex: none; }
+.tab-off { padding: 8px 12px; font-size: 12px; opacity: .55; white-space: nowrap; }
+.url { padding: 9px 12px; border-radius: 0 7px 7px 7px; font-family: var(--mono); font-size: 11px; opacity: .9; }
+/* home screen */
+.home { align-items: center; justify-content: center; }
+.grid-icons { display: grid; grid-template-columns: repeat(4, 54px); gap: 14px 16px; }
+.grid-icons div { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 9.5px; }
+.grid-icons .ic { width: 54px; height: 54px; border-radius: 14px; display: grid; place-items: center; box-shadow: 0 4px 12px rgba(0,0,0,.18); }
+.grid-icons .ic svg { width: 30px; height: 30px; }
+.grid-icons .ghost { background: rgba(127,127,127,.22); box-shadow: none; }
+/* sign in */
+.signin { justify-content: center; gap: 12px; font-size: 18px; }
+.signin h4 { font-family: var(--serif); font-weight: 500; font-size: 24px; margin: 4px 0 0; letter-spacing: -.02em; }
+.signin .f { height: 30px; border: 1px solid; opacity: .25; border-radius: 3px; }
+.signin .b { height: 32px; border-radius: 3px; display: grid; place-items: center; font-size: 12px; font-family: var(--sans); font-weight: 500; }
+/* masthead */
+.mast-s { justify-content: flex-start; gap: 22px; padding: 0; }
+.mast-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; font-size: 18px; border-bottom: 1px solid rgba(127,127,127,.18); }
+.mast-bar nav { display: flex; gap: 10px; font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; opacity: .6; }
+.mast-hero { padding: 6px 16px 16px; font-family: var(--serif); font-size: 30px; line-height: .95; letter-spacing: -.035em; font-weight: 500; }
+.mast-hero em { font-style: italic; }
+/* email / document */
+.doc { gap: 14px; font-size: 16px; justify-content: flex-start; }
+.doc .lines { display: grid; gap: 7px; margin-top: 8px; }
+.doc .lines i { height: 6px; border-radius: 2px; background: currentColor; opacity: .14; }
+
+/* compare */
+.compare { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 900px) { .compare { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.cmp { border: 1px solid var(--rule); border-radius: var(--r); background: var(--paper); cursor: pointer; padding: 0; text-align: left; overflow: hidden; display: flex; flex-direction: column; transition: border-color .15s, box-shadow .15s; }
+.cmp:hover { border-color: var(--ink-soft); }
+.cmp[aria-pressed="true"] { border-color: var(--ui-accent); box-shadow: 0 0 0 3px var(--ui-tint); }
+.cmp .art { display: grid; grid-template-columns: 1fr 1fr; }
+.cmp .art > div { display: grid; place-items: center; padding: 22px 0; }
+.cmp .art svg.big { width: 54px; height: 54px; }
+.cmp .meta { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 4px; }
+.cmp .meta b { font-family: var(--serif); font-weight: 500; font-size: 16px; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.cmp .meta b svg { width: 16px; height: 16px; }
+.cmp .meta span { font-size: 12px; color: var(--ink-soft); line-height: 1.4; }
+.score { display: flex; gap: 10px; font-family: var(--mono); font-size: 9.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-top: 4px; flex-wrap: wrap; }
+.score em { font-style: normal; color: var(--ink); }
+
+/* export */
+.export { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding: 20px; border: 1px solid var(--ui-accent); border-radius: var(--r); background: var(--ui-tint); }
+@media (max-width: 760px) { .export { grid-template-columns: minmax(0, 1fr); } }
+.spec { display: grid; gap: 0; }
+.spec div { display: grid; grid-template-columns: 100px 1fr; gap: 10px; padding: 8px 0; border-top: 1px solid var(--rule-soft); font-size: 14px; }
+.spec div:first-child { border-top: 0; }
+.spec .k { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding-top: 3px; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; }
+.btn { border: 1px solid var(--rule); border-radius: var(--r); background: var(--paper); padding: 10px 14px; font-size: 13.5px; font-weight: 500; cursor: pointer; }
+.btn:hover { border-color: var(--ink); }
+.btn.primary { background: var(--ui-accent); color: var(--paper); border-color: var(--ui-accent); }
+.summary { font-family: var(--mono); font-size: 12px; padding: 10px 12px; border: 1px dashed var(--rule); border-radius: var(--r); background: var(--paper); width: 100%; color: var(--ink); word-break: break-word; }
+.note { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; }
+.toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(14px); opacity: 0; pointer-events: none; background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 12px; padding: 10px 16px; border-radius: var(--r); transition: all .25s; z-index: 50; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>BizzNex Logo Studio <span>pick a mark · wordmark · colour · layout</span></h1>
+  <div class="top-actions">
+    <button class="tbtn" id="themeBtn" type="button">Dark page</button>
+  </div>
+</header>
+
+<div class="studio">
+  <!-- ── CHOICES ── -->
+  <aside class="panel" aria-label="Logo choices">
+    <div class="group">
+      <p class="label">Mark <b id="markName"></b></p>
+      <div class="marks" id="markOpts" role="group" aria-label="Mark"></div>
+      <p class="why" id="markWhy"></p>
+    </div>
+    <div class="group">
+      <p class="label">Wordmark <b id="wmName"></b></p>
+      <div class="rows" id="wmOpts" role="group" aria-label="Wordmark"></div>
+    </div>
+    <div class="group">
+      <p class="label">Colour <b id="palName"></b></p>
+      <div class="swatches" id="palOpts" role="group" aria-label="Colour"></div>
+    </div>
+    <div class="group">
+      <p class="label">Layout <b id="layName"></b></p>
+      <div class="seg" id="layOpts" role="group" aria-label="Layout"></div>
+    </div>
+    <button class="tbtn shuffle" id="shuffle" type="button">↻ Surprise me</button>
+  </aside>
+
+  <!-- ── EVERYTHING THE CHOICE TOUCHES ── -->
+  <main class="stage">
+    <section class="block">
+      <div class="head"><h2>Your logo</h2><p class="label">On light and on dark</p></div>
+      <div class="hero">
+        <div class="ground" id="gLight"><span class="tag">Paper</span></div>
+        <div class="ground" id="gDark"><span class="tag">Night</span></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="head"><h2>At real sizes</h2><p class="label">Favicon to splash · pixels</p></div>
+      <div class="ladder" id="ladder"></div>
+    </section>
+
+    <section class="block">
+      <div class="head"><h2>Inside BizzNex</h2><p class="label">Where it will actually live</p></div>
+      <div class="scenes" id="scenes"></div>
+    </section>
+
+    <section class="block">
+      <div class="head"><h2>Compare every mark</h2><p class="label">Click one to choose it · 16px shown beside the name</p></div>
+      <div class="compare" id="compare"></div>
+    </section>
+
+    <section class="block">
+      <div class="head"><h2>Use this logo</h2><p class="label">Saved in this browser</p></div>
+      <div class="export">
+        <div>
+          <div class="spec" id="spec"></div>
+          <p class="note">Wordmark SVGs use live text in Fraunces / IBM Plex. Convert the text to outlines before sending to print.</p>
+        </div>
+        <div class="btns">
+          <button class="btn primary" id="copySummary" type="button">Copy my choice</button>
+          <button class="btn" id="dlMark" type="button">Download mark SVG</button>
+          <button class="btn" id="dlMarkDark" type="button">Mark SVG for dark</button>
+          <button class="btn" id="dlLockup" type="button">Download lockup SVG</button>
+          <button class="btn" id="copySvg" type="button">Copy mark SVG code</button>
+          <div class="summary" id="summary"></div>
+          <p class="note">Paste “Copy my choice” back to Claude and it will be put into the app.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function () {
+  /* ── palettes: the accent for paper, and its lighter partner for night ── */
+  var SURF = { light: { bg: '#F5F1E9', ink: '#211D16', soft: '#EDE7DA' }, dark: { bg: '#141210', ink: '#EDE8DD', soft: '#1C1915' } };
+  var PALETTES = [
+    { id: 'violet', name: 'Aurora violet', note: 'Today’s brand colour', light: '#5B41E0', dark: '#A897FF' },
+    { id: 'forest', name: 'Ledger green', note: 'Calm, money-adjacent', light: '#2E6B4F', dark: '#6FCFA0' },
+    { id: 'ember', name: 'Ember', note: 'Warm, energetic', light: '#B5532A', dark: '#F08A5D' },
+    { id: 'mono', name: 'Ink only', note: 'One colour, no accent', light: null, dark: null }
+  ];
+
+  /* ── marks: each returns SVG content on a 48×48 grid ── */
+  var uid = 0;
+  var MARKS = [
+    { id: 'float', name: 'Float', why: '<b>A window lifting off the page.</b> Draws BizzNex’s own right-click-to-float feature, and grows out of today’s square.', small: 5, story: 5,
+      svg: function (c) { return '<rect x="4" y="14" width="30" height="30" rx="4" fill="' + c.ink + '"/><rect x="21" y="4" width="23" height="23" rx="4" fill="' + c.acc + '" stroke="' + c.bg + '" stroke-width="4" paint-order="stroke"/>'; } },
+    { id: 'fwdb', name: 'Forward B', why: '<b>A hairline B whose middle rule keeps going.</b> The brand rule (lines, never boxes) turned into a letter.', small: 3, story: 5,
+      svg: function (c) { return '<path d="M10 7V41M10 7H24a8.5 8.5 0 0 1 0 17H10M10 41H26a8.5 8.5 0 0 0 0-17" fill="none" stroke="' + c.ink + '" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 24H40" stroke="' + c.acc + '" stroke-width="4.6" stroke-linecap="round"/><circle cx="42" cy="24" r="4" fill="' + c.acc + '"/>'; } },
+    { id: 'stride', name: 'Stride N', why: '<b>Two stems and one step.</b> The N of Nex, with the move between them in colour. Bold at any size.', small: 5, story: 3,
+      svg: function (c) { return '<path d="M11 41V7M37 41V7" stroke="' + c.ink + '" stroke-width="5.4" stroke-linecap="round"/><path d="M11 7L37 41" stroke="' + c.acc + '" stroke-width="5.4" stroke-linecap="round"/>'; } },
+    { id: 'italic', name: 'Italic N', why: '<b>The italic N from the headline,</b> set in a solid tile. Pairs with the italic wordmark and makes a strong app icon.', small: 5, story: 3,
+      svg: function (c) { return '<rect x="3" y="3" width="42" height="42" rx="6" fill="' + c.acc + '"/><text x="24.5" y="35" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-style="italic" font-weight="600" font-size="31" fill="' + c.bg + '">N</text>'; } },
+    { id: 'ledger', name: 'Ledger', why: '<b>Three rules and a dot,</b> like a line of figures being totted up. The most quiet and editorial of the eight.', small: 4, story: 4,
+      svg: function (c) { return '<path d="M7 13H41M7 24H33M7 35H23" stroke="' + c.ink + '" stroke-width="5" stroke-linecap="round"/><circle cx="36" cy="35" r="5" fill="' + c.acc + '"/>'; } },
+    { id: 'nexus', name: 'Nexus', why: '<b>Two squares that share a corner.</b> Projects meet customers; the overlap, where the work connects, is the colour.', small: 4, story: 4,
+      svg: function (c) { return '<rect x="19" y="19" width="12" height="12" fill="' + c.acc + '"/><rect x="5" y="5" width="26" height="26" rx="4" fill="none" stroke="' + c.ink + '" stroke-width="4.5"/><rect x="17" y="17" width="26" height="26" rx="4" fill="none" stroke="' + c.ink + '" stroke-width="4.5"/>'; } },
+    { id: 'aurora', name: 'Aurora', why: '<b>The aurora mesh, as a coin.</b> The one colour moment from the product, shrunk into a mark. Ignores the colour choice by design.', small: 4, story: 3,
+      svg: function (c) { var g = 'au' + (++uid); return '<defs><linearGradient id="' + g + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7C6CF5"/><stop offset=".38" stop-color="#5FA8FF"/><stop offset=".7" stop-color="#34E0C4"/><stop offset="1" stop-color="#FF9EC0"/></linearGradient></defs><circle cx="24" cy="24" r="20" fill="url(#' + g + ')"/><rect x="17" y="17" width="14" height="14" rx="2.5" fill="none" stroke="' + c.bg + '" stroke-width="3.6"/>'; } },
+    { id: 'today', name: 'Today, refined', why: '<b>Keep today’s square,</b> with the inner square moved to a corner and thickened so it no longer blurs at 16px.', small: 4, story: 2,
+      svg: function (c) { return '<rect x="4" y="4" width="40" height="40" rx="5" fill="' + c.acc + '"/><rect x="21" y="11" width="16" height="16" rx="2.5" fill="none" stroke="' + c.bg + '" stroke-width="4.4"/>'; } }
+  ];
+
+  /* ── wordmarks ── */
+  var WORDMARKS = [
+    { id: 'serif', name: 'Serif', note: 'Fraunces 600', parts: [['Bizz', 'i', { f: 'serif', w: 600 }], ['Nex', 'a', { f: 'serif', w: 600 }]] },
+    { id: 'italic', name: 'Serif + italic', note: 'Matches the headline', parts: [['Bizz', 'i', { f: 'serif', w: 600 }], ['Nex', 'a', { f: 'serif', w: 600, it: true }]] },
+    { id: 'quiet', name: 'Serif, one colour', note: 'No accent in the name', parts: [['BizzNex', 'i', { f: 'serif', w: 500 }]] },
+    { id: 'caps', name: 'Spaced capitals', note: 'Plex Sans 600', parts: [['BIZZ', 'i', { f: 'sans', w: 600, ls: .12 }], ['NEX', 'a', { f: 'sans', w: 600, ls: .12 }]] },
+    { id: 'mono', name: 'Lowercase mono', note: 'Plex Mono 500', parts: [['bizz', 'i', { f: 'mono', w: 500, ls: -.02 }], ['nex', 'a', { f: 'mono', w: 500, ls: -.02 }]] }
+  ];
+  var FAM = { serif: "Fraunces, Georgia, 'Times New Roman', serif", sans: "'IBM Plex Sans', system-ui, sans-serif", mono: "'IBM Plex Mono', ui-monospace, monospace" };
+  var LAYOUTS = [{ id: 'row', name: 'Side by side' }, { id: 'stacked', name: 'Stacked' }, { id: 'mark', name: 'Mark only' }, { id: 'word', name: 'Name only' }];
+
+  /* ── state (remembered in this browser) ── */
+  var KEY = 'bizznex-logo-studio';
+  var state = { mark: 'float', wm: 'serif', pal: 'violet', lay: 'row' };
+  try { Object.assign(state, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+  var save = function () { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+  var find = function (list, id) { return list.filter(function (x) { return x.id === id; })[0] || list[0]; };
+
+  /* colours for a ground: 'light' or 'dark' */
+  function colours(ground, palId) {
+    var p = find(PALETTES, palId || state.pal), s = SURF[ground];
+    return { bg: s.bg, ink: s.ink, acc: p[ground] || s.ink, soft: s.soft };
+  }
+  function markSvg(markId, c, size, cls) {
+    var m = find(MARKS, markId);
+    return '<svg ' + (cls ? 'class="' + cls + '" ' : '') + 'viewBox="0 0 48 48"' + (size ? ' width="' + size + '" height="' + size + '"' : '') + ' aria-hidden="true">' + m.svg(c) + '</svg>';
+  }
+  function wmHtml(wmId, c) {
+    var w = find(WORDMARKS, wmId);
+    return '<span class="wm">' + w.parts.map(function (p) {
+      var st = p[2], css = 'font-family:' + FAM[st.f] + ';font-weight:' + st.w + ';letter-spacing:' + (st.ls != null ? st.ls : -0.02) + 'em;' + (st.it ? 'font-style:italic;' : '') + 'color:' + (p[1] === 'a' ? c.acc : c.ink);
+      return '<span style="' + css + '">' + p[0] + '</span>';
+    }).join('') + '</span>';
+  }
+  function lockup(c, layout) {
+    var lay = layout || state.lay;
+    if (lay === 'mark') return markSvg(state.mark, c, null, 'solo');
+    if (lay === 'word') return wmHtml(state.wm, c);
+    return '<span class="lockup ' + (lay === 'stacked' ? 'stacked' : '') + '" style="--l-ink:' + c.ink + ';--l-acc:' + c.acc + '">' + markSvg(state.mark, c) + wmHtml(state.wm, c) + '</span>';
+  }
+
+  /* ── panel ── */
+  function renderPanel() {
+    var pageDark = isDark(), c = colours(pageDark ? 'dark' : 'light');
+    document.getElementById('markOpts').innerHTML = MARKS.map(function (m) {
+      return '<button type="button" class="opt" data-mark="' + m.id + '" aria-pressed="' + (m.id === state.mark) + '">' + markSvg(m.id, c) + '<small>' + m.name + '</small></button>';
+    }).join('');
+    document.getElementById('wmOpts').innerHTML = WORDMARKS.map(function (w) {
+      return '<button type="button" class="row-opt" data-wm="' + w.id + '" aria-pressed="' + (w.id === state.wm) + '">' + wmHtml(w.id, c) + '<small>' + w.note + '</small></button>';
+    }).join('');
+    document.getElementById('palOpts').innerHTML = PALETTES.map(function (p) {
+      var col = p[pageDark ? 'dark' : 'light'] || c.ink;
+      return '<button type="button" class="sw" data-pal="' + p.id + '" aria-pressed="' + (p.id === state.pal) + '"><i style="background:' + col + '"></i><span>' + p.name + '<small>' + p.note + '</small></span></button>';
+    }).join('');
+    document.getElementById('layOpts').innerHTML = LAYOUTS.map(function (l) {
+      return '<button type="button" data-lay="' + l.id + '" aria-pressed="' + (l.id === state.lay) + '">' + l.name + '</button>';
+    }).join('');
+    var m = find(MARKS, state.mark);
+    document.getElementById('markName').textContent = m.name;
+    document.getElementById('wmName').textContent = find(WORDMARKS, state.wm).name;
+    document.getElementById('palName').textContent = find(PALETTES, state.pal).name;
+    document.getElementById('layName').textContent = find(LAYOUTS, state.lay).name;
+    document.getElementById('markWhy').innerHTML = m.why;
+  }
+
+  /* ── stage ── */
+  function renderStage() {
+    var L = colours('light'), D = colours('dark');
+    var big = 'font-size:clamp(34px,5vw,58px)';
+    var gl = document.getElementById('gLight'), gd = document.getElementById('gDark');
+    gl.style.background = L.bg; gl.style.color = L.ink; gd.style.background = D.bg; gd.style.color = D.ink;
+    gl.innerHTML = '<span class="tag">Paper</span><div style="' + big + '">' + sized(lockup(L)) + '</div>';
+    gd.innerHTML = '<span class="tag">Night</span><div style="' + big + '">' + sized(lockup(D)) + '</div>';
+
+    document.getElementById('ladder').innerHTML = [16, 24, 32, 48, 64, 128].map(function (s) {
+      return '<figure><div class="pair"><div style="background:' + L.bg + '">' + markSvg(state.mark, L, s) + '</div><div style="background:' + D.bg + '">' + markSvg(state.mark, D, s) + '</div></div><figcaption>' + s + ' px</figcaption></figure>';
+    }).join('');
+
+    var nav = '<div class="navl"><span class="on"><i></i>Dashboard</span><span><i></i>Projects</span><span><i></i>Deals</span><span><i></i>Assistant</span></div>';
+    var scenes = [
+      { cap: 'Sidebar · light', html: '<div class="in sb" style="background:' + L.bg + ';color:' + L.ink + ';--l-acc:' + L.acc + '">' + rowLock(L) + nav + '</div>' },
+      { cap: 'Sidebar · dark', html: '<div class="in sb" style="background:' + D.bg + ';color:' + D.ink + ';--l-acc:' + D.acc + '">' + rowLock(D) + nav + '</div>' },
+      { cap: 'Browser tab · 16 px', html: '<div class="in tabs" style="background:' + L.soft + ';color:' + L.ink + '"><div class="tabbar"><div class="tab-on" style="background:' + L.bg + '">' + markSvg(state.mark, L, 16) + 'BizzNex — Business Suite</div><div class="tab-off">Inbox</div></div><div class="url" style="background:' + L.bg + '">bizznex.app/deals</div></div>' },
+      { cap: 'App icon · home screen', html: '<div class="in home" style="background:linear-gradient(160deg,#2B2A3A,#14121A);color:#fff"><div class="grid-icons">' + ghost() + ghost() + '<div><span class="ic" style="background:' + iconBg() + '">' + markSvg(state.mark, iconColours()) + '</span>BizzNex</div>' + ghost() + ghost() + ghost() + ghost() + ghost() + '</div></div>' },
+      { cap: 'Sign-in page', html: '<div class="in signin" style="background:' + L.bg + ';color:' + L.ink + '">' + rowLock(L) + '<h4>Welcome back</h4><div class="f"></div><div class="f"></div><div class="b" style="background:' + L.acc + ';color:' + L.bg + '">Sign in</div></div>' },
+      { cap: 'Landing page · top bar', html: '<div class="in mast-s" style="background:' + L.bg + ';color:' + L.ink + '"><div class="mast-bar">' + rowLock(L) + '<nav><span>Features</span><span>Windows</span><span>Sign in</span></nav></div><div class="mast-hero">Business, run<br><em>beautifully.</em></div></div>' }
+    ];
+    document.getElementById('scenes').innerHTML = scenes.map(function (s) { return '<div class="scene">' + s.html + '<div class="cap">' + s.cap + '</div></div>'; }).join('');
+
+    document.getElementById('compare').innerHTML = MARKS.map(function (m) {
+      var stars = function (n) { return '●●●●●'.slice(0, n) + '<span style="opacity:.3">' + '●●●●●'.slice(0, 5 - n) + '</span>'; };
+      return '<button type="button" class="cmp" data-mark="' + m.id + '" aria-pressed="' + (m.id === state.mark) + '"><div class="art"><div style="background:' + L.bg + '">' + markSvg(m.id, L, null, 'big') + '</div><div style="background:' + D.bg + '">' + markSvg(m.id, D, null, 'big') + '</div></div><div class="meta"><b>' + m.name + markSvg(m.id, isDark() ? D : L, 16) + '</b><span>' + m.why.replace(/<[^>]+>/g, '') + '</span><div class="score"><span>Small sizes <em>' + stars(m.small) + '</em></span><span>Story <em>' + stars(m.story) + '</em></span></div></div></button>';
+    }).join('');
+
+    var p = find(PALETTES, state.pal);
+    document.getElementById('spec').innerHTML = [
+      ['Mark', find(MARKS, state.mark).name],
+      ['Wordmark', find(WORDMARKS, state.wm).name + ' · ' + find(WORDMARKS, state.wm).note],
+      ['Colour', p.name + (p.light ? ' · ' + p.light + ' on paper, ' + p.dark + ' on night' : '')],
+      ['Layout', find(LAYOUTS, state.lay).name],
+      ['Corner', '3px BizzNex radius · the gap is cut in the background colour']
+    ].map(function (r) { return '<div><span class="k">' + r[0] + '</span><span>' + r[1] + '</span></div>'; }).join('');
+    document.getElementById('summary').textContent = summary();
+  }
+  function rowLock(c) { return '<span class="lockup" style="--l-ink:' + c.ink + ';--l-acc:' + c.acc + '">' + markSvg(state.mark, c) + wmHtml(state.wm, c) + '</span>'; }
+  function sized(html) { return html.replace('class="solo"', 'class="solo" style="width:2.4em;height:2.4em;display:block"'); }
+  function ghost() { return '<div><span class="ic ghost"></span>&nbsp;</div>'; }
+  /* app icons need a filled tile: use the paper colour behind the mark */
+  function iconColours() { return colours('light'); }
+  function iconBg() { return SURF.light.bg; }
+  function summary() {
+    var p = find(PALETTES, state.pal);
+    return 'BizzNex logo → Mark: ' + find(MARKS, state.mark).name + ' · Wordmark: ' + find(WORDMARKS, state.wm).name + ' · Colour: ' + p.name + ' · Layout: ' + find(LAYOUTS, state.lay).name;
+  }
+
+  /* ── export ── */
+  function fileSvg(ground) {
+    var c = colours(ground);
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="512" height="512">' + find(MARKS, state.mark).svg(c) + '</svg>';
+  }
+  function lockupSvg(ground) {
+    var c = colours(ground), w = find(WORDMARKS, state.wm), size = 40;
+    var ctx = document.createElement('canvas').getContext('2d'), x = 0, spans = '';
+    w.parts.forEach(function (p) {
+      var st = p[2], fam = FAM[st.f].split(',')[0].replace(/'/g, '');
+      ctx.font = (st.it ? 'italic ' : '') + st.w + ' ' + size + 'px "' + fam + '"';
+      var ls = (st.ls != null ? st.ls : -0.02) * size, wd = ctx.measureText(p[0]).width + ls * p[0].length;
+      spans += '<tspan x="' + x.toFixed(1) + '" font-family="' + FAM[st.f].replace(/"/g, '') + '" font-weight="' + st.w + '"' + (st.it ? ' font-style="italic"' : '') + ' letter-spacing="' + ls.toFixed(2) + '" fill="' + (p[1] === 'a' ? c.acc : c.ink) + '">' + p[0] + '</tspan>';
+      x += wd;
+    });
+    var mark = find(MARKS, state.mark).svg(c), textW = Math.ceil(x);
+    if (state.lay === 'stacked') {
+      var W = Math.max(textW, 76) + 16, H = 76 + 14 + 50;
+      return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '"><g transform="translate(' + ((W - 76) / 2) + ' 0) scale(' + (76 / 48) + ')">' + mark + '</g><text y="' + (76 + 14 + 38) + '" font-size="' + size + '" transform="translate(' + ((W - textW) / 2) + ' 0)">' + spans + '</text></svg>';
+    }
+    if (state.lay === 'word') return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + (textW + 8) + ' 56"><text y="42" font-size="' + size + '">' + spans + '</text></svg>';
+    if (state.lay === 'mark') return fileSvg(ground);
+    var gap = 14, mk = 50;
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + (mk + gap + textW + 8) + ' 56"><g transform="translate(0 3) scale(' + (mk / 48) + ')">' + mark + '</g><text y="42" font-size="' + size + '" transform="translate(' + (mk + gap) + ' 0)">' + spans + '</text></svg>';
+  }
+  function download(name, text) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: 'image/svg+xml' }));
+    a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    toast('Saved ' + name);
+  }
+  function copy(text, msg) {
+    var done = function () { toast(msg); };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
+    function fallback() { var t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); done(); } catch (e) { toast('Select the text and copy it'); } t.remove(); }
+  }
+  var tt; function toast(m) { var el = document.getElementById('toast'); el.textContent = m; el.classList.add('show'); clearTimeout(tt); tt = setTimeout(function () { el.classList.remove('show'); }, 1500); }
+  var slug = function () { return 'bizznex-' + state.mark + '-' + state.pal; };
+
+  /* ── theme ── */
+  function isDark() { var t = document.documentElement.getAttribute('data-theme'); return t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches; }
+  function syncThemeBtn() { document.getElementById('themeBtn').textContent = isDark() ? 'Light page' : 'Dark page'; }
+
+  /* ── events ── */
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-mark],[data-wm],[data-pal],[data-lay]');
+    if (!t) return;
+    if (t.dataset.mark) state.mark = t.dataset.mark;
+    if (t.dataset.wm) state.wm = t.dataset.wm;
+    if (t.dataset.pal) state.pal = t.dataset.pal;
+    if (t.dataset.lay) state.lay = t.dataset.lay;
+    save(); render();
+    if (t.classList.contains('cmp')) window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  document.getElementById('shuffle').addEventListener('click', function () {
+    var pick = function (l) { return l[Math.floor(Math.random() * l.length)].id; };
+    state = { mark: pick(MARKS), wm: pick(WORDMARKS), pal: pick(PALETTES), lay: 'row' }; save(); render();
+  });
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    document.documentElement.setAttribute('data-theme', isDark() ? 'light' : 'dark'); syncThemeBtn(); render();
+  });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () { syncThemeBtn(); render(); });
+  document.getElementById('copySummary').addEventListener('click', function () { copy(summary(), 'Copied your choice'); });
+  document.getElementById('copySvg').addEventListener('click', function () { copy(fileSvg('light'), 'Copied mark SVG'); });
+  document.getElementById('dlMark').addEventListener('click', function () { download(slug() + '.svg', fileSvg('light')); });
+  document.getElementById('dlMarkDark').addEventListener('click', function () { download(slug() + '-dark.svg', fileSvg('dark')); });
+  document.getElementById('dlLockup').addEventListener('click', function () { download(slug() + '-' + state.wm + '-' + state.lay + '.svg', lockupSvg('light')); });
+
+  function render() { renderPanel(); renderStage(); }
+  syncThemeBtn(); render();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(render);
+})();
+</script>
+</body>
+</html>

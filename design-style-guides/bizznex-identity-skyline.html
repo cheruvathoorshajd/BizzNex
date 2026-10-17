@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<title>BizzNex Skyline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Outfit:wght@500;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" />
+<style>
+/* Layout: BizzNex's brand page for the adopted Skyline logo, set in the
+   platform's own Aurora theme (warm paper, ink, one violet accent, Fraunces and
+   IBM Plex). It opens in the theme chosen in the app. The reference review comes
+   first, then Skyline and its two sibling directions as tabs, each a full spread:
+   signature lockup, idea, construction, wordmark, colour, rules, uses, misuse. */
+:root {
+  color-scheme: light;
+  --bg: #F5F1E9; --bg-2: #EDE7DA; --bg-3: #E7E0D0; --fg: #211D16; --fg-soft: #4E4A40; --muted: #8B8474;
+  --line: rgba(33, 29, 22, .18); --line-soft: rgba(33, 29, 22, .09);
+  --hot: #5B41E0; --hot-tint: rgba(91, 65, 224, .10); --good: #2E8F60; --bad: #C24A3E;
+  --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --display: 'Outfit', 'Avenir Next', 'Segoe UI', system-ui, sans-serif; /* the logo wordmark only */
+  --mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  --r: 3px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #141210; --bg-2: #1C1915; --bg-3: #23201A; --fg: #EDE8DD; --fg-soft: #C3BCAD; --muted: #8E877A;
+    --line: rgba(237, 232, 221, .16); --line-soft: rgba(237, 232, 221, .07);
+    --hot: #A897FF; --hot-tint: rgba(168, 151, 255, .14); --good: #46C98A; --bad: #F0776B;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #141210; --bg-2: #1C1915; --bg-3: #23201A; --fg: #EDE8DD; --fg-soft: #C3BCAD; --muted: #8E877A;
+  --line: rgba(237, 232, 221, .16); --line-soft: rgba(237, 232, 221, .07);
+  --hot: #A897FF; --hot-tint: rgba(168, 151, 255, .14); --good: #46C98A; --bad: #F0776B;
+}
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: 9999; pointer-events: none; opacity: .05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+::selection { background: var(--hot); color: var(--bg); }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 15.5px; line-height: 1.6; -webkit-font-smoothing: antialiased; transition: background .4s, color .4s; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--hot); outline-offset: 2px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: max(20px, env(safe-area-inset-left, 0px)) max(20px, env(safe-area-inset-right, 0px)); }
+.lbl { font-family: var(--mono); font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.lbl b { color: var(--hot); font-weight: 500; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 500; letter-spacing: -.025em; margin: 0; text-wrap: balance; }
+p { margin: 0; max-width: 64ch; }
+
+.top { position: sticky; top: 0; z-index: 30; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line-soft); padding-top: env(safe-area-inset-top, 0px); }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding-block: 13px; flex-wrap: wrap; }
+.top b { font-family: var(--serif); font-weight: 600; font-size: 18px; letter-spacing: -.01em; }
+.top span { font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-left: 12px; }
+.ctrls { display: flex; gap: 8px; flex-wrap: wrap; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.seg button { border: 0; background: none; padding: 7px 13px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+
+/* reference review */
+.intro { padding-block: clamp(36px, 6vw, 80px) 30px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 64px); align-items: center; }
+.intro h1 { font-size: clamp(2.4rem, 5.4vw, 4.2rem); line-height: 1; font-weight: 500; margin-top: 14px; }
+.intro .lede { color: var(--fg-soft); font-size: 1.1rem; margin-top: 16px; }
+.refcard { border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: #000; }
+.refcard img { display: block; width: 100%; height: auto; }
+.refcard .cap { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding: 10px 12px; border-top: 1px solid var(--line-soft); background: var(--bg-2); }
+.reffallback { aspect-ratio: 4 / 3; display: grid; place-items: center; color: var(--muted); font-family: var(--mono); font-size: 12px; padding: 20px; text-align: center; }
+@media (max-width: 860px) { .intro { grid-template-columns: minmax(0, 1fr); } }
+.review { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-bottom: 38px; }
+.review > div { border: 1px solid var(--line-soft); border-radius: var(--r); padding: 18px 20px; background: var(--bg-2); }
+.review h3 { font-size: 1.05rem; display: flex; align-items: center; gap: 10px; }
+.review h3 i { font-style: normal; font-family: var(--mono); font-size: 11px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; }
+.review .keep h3 i { background: rgba(127, 209, 160, .16); color: var(--good); }
+.review .fix h3 i { background: var(--hot-tint); color: var(--hot); }
+.review ul { list-style: none; padding: 0; margin: 10px 0 0; font-size: 14.5px; color: var(--fg-soft); }
+.review li { padding: 8px 0; border-top: 1px solid var(--line-soft); }
+.review li b { color: var(--fg); font-weight: 600; }
+@media (max-width: 760px) { .review { grid-template-columns: minmax(0, 1fr); } }
+
+/* tabs */
+.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tab { display: grid; grid-template-columns: 56px 1fr; gap: 14px; align-items: center; text-align: left; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg-2); cursor: pointer; transition: border-color .2s, box-shadow .2s; }
+.tab:hover { border-color: var(--fg-soft); }
+.tab[aria-selected="true"] { border-color: var(--hot); box-shadow: 0 0 0 3px var(--hot-tint); }
+.tab .ico { width: 56px; height: 56px; border-radius: 12px; display: grid; place-items: center; }
+.tab .ico svg { width: 40px; height: 40px; }
+.tab b { display: block; font-family: var(--serif); font-size: 1.18rem; font-weight: 500; }
+.tab small { display: block; font-size: 12.5px; color: var(--fg-soft); line-height: 1.35; }
+.tab .chosen { font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--hot); }
+@media (max-width: 760px) { .tabs { grid-template-columns: minmax(0, 1fr); } }
+
+/* spreads */
+.sp { padding-block: 52px; border-top: 1px solid var(--line); }
+.sp-h { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
+.sp-h h3 { font-size: clamp(1.5rem, 2.8vw, 2rem); }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(20px, 4vw, 56px); align-items: start; }
+@media (max-width: 860px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+
+.hero { padding-block: 26px 0; }
+.signature { position: relative; border-radius: var(--r); overflow: hidden; display: grid; place-items: center; padding: clamp(40px, 7vw, 90px) 24px clamp(50px, 7vw, 90px); }
+.signature .tag { position: absolute; left: 14px; top: 12px; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; opacity: .55; }
+.hero-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-top: 12px; }
+@media (max-width: 860px) { .hero-row { grid-template-columns: minmax(0, 1fr); } }
+.ground { border-radius: var(--r); min-height: 190px; display: grid; place-items: center; padding: 28px; position: relative; }
+.ground .tag { position: absolute; left: 12px; top: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; opacity: .55; }
+.tools { display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-top: 12px; }
+.tbtn { background: none; border: 1px solid var(--line); border-radius: var(--r); padding: 8px 14px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--fg-soft); cursor: pointer; }
+.tbtn:hover, .tbtn[aria-pressed="true"] { border-color: var(--fg); color: var(--fg); }
+.slider { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.slider input { width: 180px; accent-color: var(--hot); }
+.live { display: flex; align-items: center; gap: 18px; padding: 14px 16px; border: 1px solid var(--line-soft); border-radius: var(--r); margin-top: 12px; min-height: 92px; flex-wrap: wrap; }
+.live .chip { padding: 8px; border-radius: 4px; display: grid; place-items: center; }
+.btn { border: 1px solid var(--line); border-radius: var(--r); background: var(--bg-2); padding: 10px 16px; font-size: 14px; font-weight: 500; cursor: pointer; }
+.btn:hover { border-color: var(--fg); }
+.btn.primary { background: var(--hot); color: var(--bg); border-color: var(--hot); }
+
+.idea h2 { font-size: clamp(2rem, 4vw, 3rem); line-height: 1.02; font-weight: 500; }
+.idea .lede { font-size: 1.1rem; color: var(--fg-soft); margin-top: 16px; }
+.facts div { display: grid; grid-template-columns: 118px 1fr; gap: 14px; padding: 12px 0; border-top: 1px solid var(--line-soft); font-size: 14.5px; }
+.facts .k { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding-top: 4px; }
+.constr { background: var(--bg-2); border-radius: var(--r); display: grid; place-items: center; padding: 18px; }
+.constr svg { width: min(100%, 460px); height: auto; overflow: visible; }
+.measure div { display: flex; justify-content: space-between; gap: 16px; padding: 11px 0; border-top: 1px solid var(--line-soft); font-size: 14.5px; }
+.measure div span:last-child { font-family: var(--mono); font-size: 12.5px; color: var(--fg-soft); text-align: right; }
+
+.wm-stage { border-radius: var(--r); padding: clamp(28px, 5vw, 60px); display: grid; place-items: center; }
+.notes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+.notes div { border-top: 2px solid var(--fg); padding-top: 10px; font-size: 14px; color: var(--fg-soft); }
+.notes b { display: block; color: var(--fg); font-weight: 600; margin-bottom: 2px; }
+@media (max-width: 760px) { .notes { grid-template-columns: minmax(0, 1fr); } }
+
+.pal { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 760px) { .pal { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.chipc { border-radius: var(--r); overflow: hidden; border: 1px solid var(--line-soft); cursor: pointer; background: var(--bg-2); text-align: left; padding: 0; }
+.chipc i { display: block; height: 96px; }
+.chipc span { display: block; padding: 10px 12px; font-size: 13.5px; }
+.chipc small { display: block; font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+.ratio { display: flex; height: 14px; border-radius: 2px; overflow: hidden; margin-top: 14px; }
+
+.rules-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 12px; }
+@media (max-width: 860px) { .rules-grid { grid-template-columns: minmax(0, 1fr); } }
+.clear { border-radius: var(--r); display: grid; place-items: center; padding: 40px 24px; min-height: 260px; }
+.clear .box { position: relative; outline: 1px dashed var(--hot); background: repeating-linear-gradient(45deg, var(--hot-tint) 0 6px, transparent 6px 12px); }
+.clear .box > span { display: block; }
+.mins { background: var(--bg-2); border-radius: var(--r); padding: 22px; display: grid; gap: 18px; align-content: center; }
+.mins .row { display: flex; align-items: center; gap: 16px; }
+.mins .row .ex { width: 130px; display: flex; align-items: center; gap: 10px; }
+.mins p { font-size: 14px; color: var(--fg-soft); }
+
+.apps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 1000px) { .apps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) { .apps { grid-template-columns: minmax(0, 1fr); } }
+.app { border: 1px solid var(--line-soft); border-radius: var(--r); overflow: hidden; display: flex; flex-direction: column; }
+.app .in { flex: 1; min-height: 230px; display: grid; place-items: center; padding: 22px; }
+.app .cap { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding: 9px 12px; border-top: 1px solid var(--line-soft); background: var(--bg-2); }
+.squircle { width: 120px; height: 120px; border-radius: 27px; display: grid; place-items: center; box-shadow: 0 14px 34px rgba(0,0,0,.4), inset 0 0 0 .5px rgba(255,255,255,.08); }
+.card { width: 100%; max-width: 300px; aspect-ratio: 1.75 / 1; border-radius: 4px; box-shadow: 0 12px 30px rgba(0,0,0,.3); display: flex; padding: 18px; }
+.cards { display: grid; gap: 12px; width: 100%; justify-items: center; }
+.tabmock { width: 100%; }
+.tabmock .bar { display: flex; align-items: flex-end; gap: 2px; }
+.tabmock .on { display: flex; align-items: center; gap: 8px; padding: 9px 13px; border-radius: 8px 8px 0 0; font-size: 12px; }
+.tabmock .off { padding: 9px 13px; font-size: 12px; opacity: .55; }
+.tabmock .url { border-radius: 0 8px 8px 8px; padding: 10px 13px; font-family: var(--mono); font-size: 11px; }
+.sbmock { width: 100%; align-self: stretch; display: flex !important; flex-direction: column; gap: 18px; }
+.sbmock .navl { display: grid; gap: 10px; font-size: 13.5px; }
+.sbmock .navl span { display: flex; gap: 9px; align-items: center; opacity: .7; }
+.sbmock .navl span i { width: 13px; height: 13px; border: 1.5px solid currentColor; border-radius: 3px; }
+.sbmock .navl span.on { opacity: 1; }
+.avatar { width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; }
+.sign { width: 100%; max-width: 320px; border-radius: 6px; padding: 26px 22px 22px; display: grid; place-items: center; box-shadow: 0 16px 36px rgba(0,0,0,.35); overflow: hidden; }
+
+.misuse { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 860px) { .misuse { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.mis { border: 1px solid var(--line-soft); border-radius: var(--r); overflow: hidden; }
+.mis .in { height: 150px; display: grid; place-items: center; position: relative; overflow: hidden; }
+.mis .in::after { content: ''; position: absolute; inset: 14px; background: linear-gradient(to top right, transparent calc(50% - 1px), var(--bad) calc(50% - 1px), var(--bad) calc(50% + 1px), transparent calc(50% + 1px)); opacity: .75; pointer-events: none; }
+.mis p { font-size: 13px; padding: 10px 12px; color: var(--fg-soft); }
+.mis p b { color: var(--bad); }
+
+.verdict-t { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.verdict-t th { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 500; text-align: left; padding: 0 14px 12px 0; border-bottom: 1px solid var(--line); }
+.verdict-t td { padding: 13px 14px 13px 0; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+.verdict-t td:first-child { font-weight: 500; white-space: nowrap; }
+.dots { letter-spacing: 2px; color: var(--hot); white-space: nowrap; }
+.dots span { opacity: .22; }
+.scroll-x { overflow-x: auto; }
+.scroll-x table { min-width: 680px; }
+.pick { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: center; padding: 22px; border: 1px solid var(--hot); border-radius: var(--r); background: var(--hot-tint); margin-top: 26px; }
+@media (max-width: 760px) { .pick { grid-template-columns: minmax(0, 1fr); } }
+.pick .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.summary { font-family: var(--mono); font-size: 12px; color: var(--fg-soft); margin-top: 6px; }
+.toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(14px); opacity: 0; pointer-events: none; background: var(--fg); color: var(--bg); font-family: var(--mono); font-size: 12px; padding: 10px 16px; border-radius: var(--r); transition: all .25s; z-index: 60; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+footer { padding-block: 40px 70px; border-top: 1px solid var(--line); margin-top: 40px; font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+
+/* ── logo parts ── */
+.name { font-family: var(--display); font-weight: 700; letter-spacing: -.02em; line-height: .8; white-space: nowrap; display: inline-flex; align-items: baseline; }
+.name .zz { letter-spacing: -.035em; }
+.name .ti { position: relative; display: inline-block; }
+.name .ti i { position: absolute; left: 50%; top: .015em; width: .145em; height: .145em; margin-left: -.0725em; border-radius: 50%; background: var(--l-hot); }
+.tagline { font-family: var(--display); font-weight: 500; font-size: .19em; letter-spacing: .26em; text-transform: uppercase; white-space: nowrap; }
+.lock { display: inline-flex; flex-direction: column; align-items: center; color: var(--l-ink); }
+/* one row: symbol + name standing on ONE rule that continues the symbol's own baseline (y 42 of 48) */
+.lrow { position: relative; display: inline-flex; align-items: flex-end; gap: .22em; }
+.lrow svg.sym { width: 1.3em; height: 1.3em; display: block; flex: none; }
+.lrow .name { margin-bottom: .265em; }
+.lrow .rule { position: absolute; left: .095em; right: 0; bottom: .1275em; height: .07em; background: var(--l-ink); border-radius: .035em; }
+.lock.norule .lrow .name { margin-bottom: .08em; }
+.lock .tagline { margin-top: .5em; color: var(--l-ink); opacity: .9; }
+.lock.stack .lrow { flex-direction: column; align-items: center; gap: .16em; }
+.lock.stack .lrow svg.sym { width: 1.8em; height: 1.8em; }
+.lock.stack .lrow .name { margin-bottom: 0; }
+.lock.stack .lrow .rule { display: none; }
+.sigwrap { position: relative; display: grid; place-items: center; padding: .9em 1.4em .3em; }
+.sigwrap svg.arc { position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 132%; height: auto; overflow: visible; pointer-events: none; }
+.sigwrap .lock { position: relative; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div><b>BizzNex · Brand</b><span>The Skyline logo</span></div>
+    <div class="ctrls">
+      <button class="tbtn" id="themeBtn" type="button" aria-label="Switch light or dark">Dark</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="intro">
+    <div>
+      <p class="lbl"><b>Adopted 16 Oct 2026</b> · Skyline is the BizzNex logo</p>
+      <h1>Your skyline, drawn properly</h1>
+      <p class="lede">The reference has the right instincts: architecture for business, a single line drawing, one baseline under everything, a horizon arc, a strong geometric name. Below is what I kept, what I fixed, and three directions that turn it into a logo that works from a 16px browser tab to a shop sign.</p>
+    </div>
+    <figure class="refcard" style="margin:0">
+      <img src="../image.png" alt="The reference: a line-art skyline beside a bold BizzNex wordmark on black, under a thin arc" onerror="this.outerHTML='&lt;div class=&quot;reffallback&quot;&gt;Reference image expected at D:\\BizzNex\\image.png&lt;/div&gt;'" />
+      <figcaption class="cap">Reference · image.png</figcaption>
+    </figure>
+  </section>
+
+  <div class="review">
+    <div class="keep">
+      <h3><i>✓</i> Kept from the reference</h3>
+      <ul>
+        <li><b>Buildings for business.</b> A clear, friendly metaphor anyone gets in a second.</li>
+        <li><b>One baseline under mark and name.</b> It ties the two into a single unit.</li>
+        <li><b>The horizon arc,</b> now with a job: it is the sun of the next day, and it sets the clear space.</li>
+        <li><b>A heavy geometric name,</b> a spaced-capital tagline, and one accent colour. The reference used orange on black; BizzNex sets it in its own colours, with the lit window in Aurora violet.</li>
+      </ul>
+    </div>
+    <div class="fix">
+      <h3><i>→</i> Fixed</h3>
+      <ul>
+        <li><b>Line weights.</b> The drawing mixes five or six; every direction here uses one stroke on a strict grid.</li>
+        <li><b>Small sizes.</b> The perspective buildings blur below 64px; each direction has a symbol that holds at 16px.</li>
+        <li><b>Spacing.</b> The “zz” crowds; the name is re-tracked and the baseline aligned to the drawing.</li>
+        <li><b>Words.</b> “Content creation, simplified.” describes another product, and “Microservices” is engineering talk; the tagline is BizzNex’s own, <i>Business, run beautifully.</i></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="Directions" id="tabs"></div>
+  <div id="dir"></div>
+
+  <section class="sp" aria-labelledby="v-h">
+    <div class="sp-h"><h3 id="v-h">The three side by side</h3><p class="lbl">Recommendation</p></div>
+    <div class="scroll-x"><table class="verdict-t" id="verdict"></table></div>
+    <p style="margin-top:16px;color:var(--fg-soft)"><b style="color:var(--fg)">Recommendation: Skyline.</b> It stays closest to the reference you liked, fixes everything that would break in real use, and adds one detail that gives it a story: a single lit window in the tallest tower, the light that says the business is open. The Arch is the better pick if the app icon matters most.</p>
+    <div class="pick">
+      <div>
+        <p class="lbl">Your choice</p>
+        <p style="font-size:1.4rem;font-weight:600;margin-top:4px" id="pickName"></p>
+        <p class="summary" id="summary"></p>
+      </div>
+      <div class="btns">
+        <button class="btn primary" id="copyChoice" type="button">Copy my choice</button>
+        <button class="btn" id="dlSym" type="button">Symbol SVG</button>
+        <button class="btn" id="dlSymAlt" type="button">Symbol SVG · light</button>
+        <button class="btn" id="dlLock" type="button">Lockup SVG</button>
+      </div>
+    </div>
+  </section>
+  <footer>BizzNex Skyline · developed from the client reference image.png · set in Outfit &amp; IBM Plex Mono · lockup SVGs use live text; convert to outlines before print.</footer>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function () {
+  /* ── colour worlds: each has a dark ground (the reference's) and a light one ── */
+  /* BizzNex's Aurora palette: a dark ground (night) and a light one (paper). The lit window is the accent. */
+  var PAL = {
+    dark: { bg: '#141210', ink: '#EDE8DD', hot: '#A897FF', soft: '#1C1915' },
+    light: { bg: '#F5F1E9', ink: '#211D16', hot: '#5B41E0', soft: '#EDE7DA' }
+  };
+  var SW = 2.6; /* the one stroke weight, at the 48px master */
+
+  var DIRS = [
+    {
+      id: 'skyline', name: 'Skyline', short: 'Your reference, drawn on a grid.',
+      thesis: 'Three towers, one lit window.',
+      lede: 'This is the reference with the craft put in. Three towers of stepped height drawn with a single line weight, standing on the same baseline as the name. One window in the tallest tower is lit in the accent colour: the light that says the business is open.',
+      facts: [['From the reference', 'The skyline, the shared baseline, the arc and the single accent.'], ['Fixed', 'One 2.6-unit stroke everywhere; flat fronts instead of wobbly perspective; window stripes on a 5-unit rhythm.'], ['The detail', 'The lit window. The only accent in the whole mark.'], ['Signature use', 'Under the arc with the tagline, as in your reference; the symbol alone for icons.']],
+      symbol: function (c) {
+        return '<g fill="none" stroke="' + c.ink + '" stroke-width="' + SW + '" stroke-linejoin="round" stroke-linecap="round">' +
+          '<path d="M6 42V25H16"/><path d="M16 42V11L28 6V42"/><path d="M28 18H41V42"/>' +
+          '<path d="M32 24.5H37M32 29.5H37M32 34.5H37"/><path d="M10 30V36" />' +
+          '<path d="M3.5 42H44.5"/></g>' +
+          '<rect x="20.4" y="15.6" width="3.6" height="4.6" rx=".6" fill="' + c.hot + '"/>';
+      },
+      construction: function (c) {
+        return gridLines(c) + '<g opacity=".92">' + this.symbol(c) + '</g>' +
+          '<g fill="none" stroke="' + c.hot + '" stroke-width=".28" stroke-dasharray="1 .8"><line x1="0" y1="11" x2="48" y2="11"/><line x1="0" y1="18" x2="48" y2="18"/><line x1="0" y1="25" x2="48" y2="25"/><line x1="0" y1="42" x2="48" y2="42"/></g>' +
+          label(c, 1, 10.3, 'tower 31') + label(c, 1, 17.3, 'block 24') + label(c, 1, 24.3, 'house 17') + label(c, 1, 46.2, 'baseline · shared with the name') + label(c, 29.5, 4, 'roof rises 5 units');
+      },
+      measures: [['Grid', '12 × 12 units of 4px at 48px'], ['Stroke', 'one weight, 2.6 units (5.4%)'], ['Heights', '17 · 24 · 31: steps of 7 units'], ['Windows', 'stripes 5 units apart; one lit window, 3.6 × 4.6'], ['Baseline', 'runs 1 unit past the towers, then on under the name']],
+      notes: [['Outfit Bold', 'A clean geometric sans with the reference’s round, sturdy letters, sharpened up.'], ['Tracking −2%, “zz” −3.5%', 'Closes the hole the reference has in the middle of the word.'], ['One baseline', 'The towers and the letters stand on the same rule, as in your reference.']],
+      stack: false,
+      scores: { small: 4, ref: 5, idea: 4, own: 4, risk: 'Low. Below 20px use the symbol only (the stripes drop out first).' }
+    },
+    {
+      id: 'arch', name: 'Arch', short: 'The skyline inside the arc.',
+      thesis: 'A doorway onto the city.',
+      lede: 'Your reference draws an arc over the whole logo. This direction pulls it in close: an arched window, like a shopfront or a studio doorway, with the skyline standing inside it. It makes one strong, closed shape, which is exactly what an app icon or a social avatar needs.',
+      facts: [['From the reference', 'The arc and the skyline, combined into one shape.'], ['Fixed', 'Solid towers inside a single outline: no stray lines to blur at small sizes.'], ['The detail', 'The arch is the same curve as the horizon arc in the signature lockup.'], ['Best at', 'App icons, avatars, favicons, a sign above a door.']],
+      symbol: function (c) {
+        return '<path d="M8 44V22.5A16 16 0 0 1 40 22.5V44Z" fill="none" stroke="' + c.ink + '" stroke-width="' + SW + '" stroke-linejoin="round"/>' +
+          '<rect x="13" y="30" width="7" height="12.7" fill="' + c.ink + '"/>' +
+          '<path d="M20 42.7V18.5L27.5 15.8V42.7Z" fill="' + c.ink + '"/>' +
+          '<rect x="27.5" y="25" width="7.5" height="17.7" fill="' + c.ink + '"/>' +
+          '<rect x="22.2" y="22" width="3" height="3.8" rx=".5" fill="' + c.hot + '"/>' +
+          '<path d="M29.6 29.5H33M29.6 33.5H33M29.6 37.5H33" stroke="' + c.bg + '" stroke-width="1.2"/>';
+      },
+      construction: function (c) {
+        return gridLines(c) + '<g opacity=".92">' + this.symbol(c) + '</g>' +
+          '<g fill="none" stroke="' + c.hot + '" stroke-width=".28" stroke-dasharray="1 .8"><circle cx="24" cy="22.5" r="16"/><line x1="24" y1="22.5" x2="24" y2="44"/></g>' +
+          label(c, 25, 26.5, 'r 16 · centre on the spring line') + label(c, 1, 47, 'arch 8 units wide · towers inset 1.25');
+      },
+      measures: [['Arch', 'semicircle r = 4 units on 4-unit legs'], ['Outline', 'one stroke, 2.6 units'], ['Towers', 'solid, inset 1.25 units from the arch'], ['Window', '3 × 3.8, the only accent'], ['Stripes', 'cut in the background colour']],
+      notes: [['Outfit SemiBold', 'Slightly lighter than Skyline, so the closed symbol stays the heavier element.'], ['Stacked lockup', 'Symbol above the name, like a sign over a door.'], ['Tagline', 'Spaced capitals at 19% of the name’s size, centred on the rule.']],
+      stack: true,
+      scores: { small: 5, ref: 4, idea: 4, own: 4, risk: 'Low. Needs a little more space around it than the others.' }
+    },
+    {
+      id: 'rise', name: 'Rise', short: 'Towers that double as a growth chart.',
+      thesis: 'A skyline that is also a chart.',
+      lede: 'Three solid towers rising left to right read as a city and as a bar chart going up at the same time: buildings for business, and the number moving in the right direction. Solid shapes hold up better than lines at every small size.',
+      facts: [['From the reference', 'The towers and the shared baseline, simplified to their mass.'], ['Fixed', 'No line work at all, so nothing can blur; the steps are exact.'], ['The detail', 'Each tower has one window slot; the tallest one’s is lit.'], ['Character', 'The most confident and modern of the three, and the furthest from the reference.']],
+      symbol: function (c) {
+        return '<path d="M5 42.7H43" stroke="' + c.ink + '" stroke-width="' + SW + '" stroke-linecap="round"/>' +
+          '<rect x="7" y="27" width="9" height="13.6" rx="1.2" fill="' + c.ink + '"/>' +
+          '<rect x="19.5" y="18" width="9" height="22.6" rx="1.2" fill="' + c.ink + '"/>' +
+          '<rect x="32" y="7" width="9" height="33.6" rx="1.2" fill="' + c.ink + '"/>' +
+          '<rect x="10" y="31" width="3" height="1.6" fill="' + c.bg + '"/><rect x="22.5" y="22" width="3" height="1.6" fill="' + c.bg + '"/>' +
+          '<rect x="35" y="11" width="3" height="4" rx=".4" fill="' + c.hot + '"/>';
+      },
+      construction: function (c) {
+        return gridLines(c) + '<g opacity=".92">' + this.symbol(c) + '</g>' +
+          '<g fill="none" stroke="' + c.hot + '" stroke-width=".28" stroke-dasharray="1 .8"><line x1="7" y1="27" x2="41" y2="7"/></g>' +
+          label(c, 1, 5, 'tops on one rising line') + label(c, 1, 46.5, 'towers 9 wide · gaps 3.5 · steps 9 and 11');
+      },
+      measures: [['Towers', '9 units wide, 3.5 apart'], ['Heights', '13.6 · 22.6 · 33.6, tops on one straight line'], ['Corner', '1.2 units, softened, never round'], ['Windows', 'one slot each; the top one lit'], ['Baseline', 'one stroke, 2.6 units']],
+      notes: [['Outfit ExtraBold', 'Heavy enough to balance three solid towers.'], ['The i’s dot', 'Turned into the accent, echoing the lit window.'], ['Tracking −2%', 'Tight and confident, like the mark.']],
+      stack: false,
+      scores: { small: 5, ref: 3, idea: 4, own: 3, risk: 'Medium. A rising bar chart is a familiar idea; the lit window keeps it ours.' }
+    }
+  ];
+
+  function gridLines(c) { var s = '<g stroke="' + c.hot + '" stroke-width=".1" opacity=".45">'; for (var i = 0; i <= 48; i += 4) s += '<line x1="' + i + '" y1="0" x2="' + i + '" y2="48"/><line x1="0" y1="' + i + '" x2="48" y2="' + i + '"/>'; return s + '</g>'; }
+  function label(c, x, y, t) { return '<text x="' + x + '" y="' + y + '" font-family="IBM Plex Mono, monospace" font-size="1.5" fill="' + c.ink + '">' + t + '</text>'; }
+
+  /* ── state ── */
+  var KEY = 'bizznex-skyline';
+  var st = { view: 'skyline', chosen: 'skyline', size: 48, grid: false };
+  try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+  var save = function () { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+  var byId = function (id) { return DIRS.filter(function (d) { return d.id === id; })[0] || DIRS[0]; };
+  var C = function (g) { return PAL[g]; };
+
+  function sym(d, c, size) { return '<svg class="sym" viewBox="0 0 48 48"' + (size ? ' width="' + size + '" height="' + size + '"' : '') + ' aria-hidden="true">' + d.symbol(c) + '</svg>'; }
+  function name(d) {
+    var w = d.id === 'arch' ? 600 : d.id === 'rise' ? 800 : 700;
+    var inner = d.id === 'rise' ? 'B<span class="ti">ı<i></i></span><span class="zz">zz</span>Nex' : 'Bi<span class="zz">zz</span>Nex';
+    return '<span class="name" style="font-weight:' + w + '">' + inner + '</span>';
+  }
+  function lockup(d, c, opts) {
+    opts = opts || {};
+    var stack = opts.stack != null ? opts.stack : d.stack;
+    var style = '--l-ink:' + c.ink + ';--l-hot:' + c.hot + ';';
+    var rule = !(opts.rule === false || d.id === 'arch');
+    return '<span class="lock' + (stack ? ' stack' : '') + (rule ? '' : ' norule') + '" style="' + style + '"><span class="lrow">' + sym(d, c) + name(d) +
+      (rule ? '<span class="rule"></span>' : '') + '</span>' +
+      (opts.tag ? '<span class="tagline">Business, run beautifully.</span>' : '') + '</span>';
+  }
+  function signature(d, c) {
+    return '<span class="sigwrap"><svg class="arc" viewBox="0 0 200 100" aria-hidden="true"><path d="M4 100A96 96 0 0 1 196 100" fill="none" stroke="' + c.ink + '" stroke-width=".7" opacity=".85"/></svg>' + lockup(d, c, { tag: true }) + '</span>';
+  }
+  var dots = function (n) { return '<span class="dots">' + '●●●●●'.slice(0, n) + '<span>' + '●●●●●'.slice(0, 5 - n) + '</span></span>'; };
+
+  /* ── render ── */
+  function renderTabs() {
+    var D = C('dark');
+    document.getElementById('tabs').innerHTML = DIRS.map(function (d) {
+      return '<button class="tab" role="tab" type="button" data-view="' + d.id + '" aria-selected="' + (d.id === st.view) + '"><span class="ico" style="background:' + D.bg + '">' + sym(d, D) + '</span><span><b>' + d.name + '</b><small>' + d.short + '</small>' + (st.chosen === d.id ? '<span class="chosen">✓ Your choice</span>' : '') + '</span></button>';
+    }).join('');
+  }
+
+  function renderDir() {
+    var d = byId(st.view), D = C('dark'), L = C('light'), h = '';
+    h += '<section class="hero">' +
+      '<div class="signature" style="background:' + D.bg + ';color:' + D.ink + '"><span class="tag">Signature lockup · as in your reference</span><div style="font-size:clamp(46px,8vw,104px)">' +
+        (st.grid ? '<svg viewBox="-1 -1 50 50" style="width:3.2em;height:3.2em;overflow:visible">' + d.construction(D) + '</svg>' : signature(d, D)) + '</div></div>' +
+      '<div class="hero-row">' +
+        '<div class="ground" style="background:' + L.bg + ';color:' + L.ink + '"><span class="tag">Light</span><div style="font-size:clamp(30px,3.6vw,44px)">' + lockup(d, L) + '</div></div>' +
+        '<div class="ground" style="background:' + D.soft + ';color:' + D.ink + '"><span class="tag">' + (d.stack ? 'Side by side' : 'Stacked') + '</span><div style="font-size:clamp(26px,3vw,36px)">' + lockup(d, D, { stack: !d.stack }) + '</div></div>' +
+        '<div class="ground" style="background:' + D.hot + ';color:#fff"><span class="tag">Accent ground · one colour</span><div style="font-size:clamp(30px,3.6vw,44px)">' + lockup(d, { bg: D.hot, ink: '#FFFFFF', hot: '#FFFFFF' }) + '</div></div>' +
+      '</div>' +
+      '<div class="tools"><button class="tbtn" id="gridBtn" type="button" aria-pressed="' + st.grid + '">' + (st.grid ? 'Hide construction' : 'Show construction') + '</button>' +
+        '<label class="slider" for="sizeIn">Symbol size <input id="sizeIn" type="range" min="12" max="160" value="' + st.size + '"><b id="sizeOut">' + st.size + 'px</b></label>' +
+        '<button class="btn primary" id="chooseBtn" type="button">' + (st.chosen === d.id ? '✓ Chosen' : 'Choose ' + d.name) + '</button></div>' +
+      '<div class="live" id="live"></div></section>';
+
+    h += '<section class="sp idea"><div class="cols"><div><p class="lbl"><b>' + d.name + '</b> · the idea</p><h2 style="margin-top:12px">' + d.thesis + '</h2><p class="lede">' + d.lede + '</p></div>' +
+      '<div class="facts">' + d.facts.map(function (f) { return '<div><span class="k">' + f[0] + '</span><span>' + f[1] + '</span></div>'; }).join('') + '</div></div></section>';
+
+    h += '<section class="sp"><div class="sp-h"><h3>Construction</h3><p class="lbl">48px master · 4px unit</p></div><div class="cols"><div class="constr"><svg viewBox="-1 -1 50 50">' + d.construction(isLightPage() ? L : D) + '</svg></div>' +
+      '<div class="measure">' + d.measures.map(function (m) { return '<div><span>' + m[0] + '</span><span>' + m[1] + '</span></div>'; }).join('') + '</div></div></section>';
+
+    h += '<section class="sp"><div class="sp-h"><h3>Wordmark</h3><p class="lbl">Set, not typed</p></div><div class="wm-stage" style="background:' + D.bg + ';color:' + D.ink + ';--l-hot:' + D.hot + '"><div style="font-size:clamp(60px,10vw,132px)">' + name(d) + '</div></div>' +
+      '<div class="notes">' + d.notes.map(function (n) { return '<div><b>' + n[0] + '</b>' + n[1] + '</div>'; }).join('') + '</div></section>';
+
+    var pal = [['Night', D.bg, 'Ground', 46], ['Cream', D.ink, 'Line, name, tagline', 40], ['Accent', D.hot, 'Lit window only', 4], ['Paper', L.bg, 'Light ground', 10]];
+    pal[2][0] = 'Aurora violet';
+    h += '<section class="sp"><div class="sp-h"><h3>Colour</h3><p class="lbl">BizzNex colours · click to copy</p></div><div class="pal">' +
+      pal.map(function (p) { return '<button class="chipc" type="button" data-copy="' + p[1] + '"><i style="background:' + p[1] + '"></i><span>' + p[0] + '<small>' + p[1] + ' · ' + p[2] + '</small></span></button>'; }).join('') +
+      '</div><div class="ratio" aria-hidden="true">' + pal.map(function (p) { return '<i style="flex:' + p[3] + ';background:' + p[1] + '"></i>'; }).join('') + '</div><p class="lbl" style="margin-top:8px">How much of each, in a typical layout</p></section>';
+
+    h += '<section class="sp"><div class="sp-h"><h3>Clear space &amp; minimum size</h3><p class="lbl">The rules that keep it intact</p></div><div class="rules-grid">' +
+      '<div class="clear" style="background:' + D.bg + ';color:' + D.ink + '"><div class="box" style="padding:' + (d.stack ? '26px' : '20px') + '"><span style="font-size:40px;background:' + D.bg + '">' + lockup(d, D) + '</span></div><p class="lbl" style="margin-top:18px">Clear space = the height of the tallest tower’s roof step on every side.</p></div>' +
+      '<div class="mins"><div class="row"><span class="ex">' + sym(d, isLightPage() ? L : D, 16) + sym(d, isLightPage() ? L : D, 24) + '</span><p><b>Symbol: ' + (d.id === 'skyline' ? '20px' : '16px') + '</b></p></div>' +
+      '<div class="row"><span class="ex" style="font-size:17px">' + lockup(d, isLightPage() ? L : D, { stack: false }) + '</span><p><b>Lockup: 100px wide</b></p></div>' +
+      '<p>' + (d.id === 'skyline' ? 'At 16px the window stripes merge; the favicon cut drops them and keeps the lit window.' : 'Holds at 16px without a special cut.') + ' The signature lockup with arc and tagline is for 320px and up.</p></div></div></section>';
+
+    h += '<section class="sp"><div class="sp-h"><h3>In use</h3><p class="lbl">Example names and details</p></div><div class="apps">' + apps(d, D, L) + '</div></section>';
+
+    h += '<section class="sp"><div class="sp-h"><h3>Never</h3><p class="lbl">The ways the reference itself could go wrong</p></div><div class="misuse">' +
+      mis(d, D, 'transform:scaleX(1.4)', 'Stretch or squash it') + mis(d, D, 'transform:perspective(200px) rotateY(28deg)', 'Put it in perspective') +
+      mis(d, D, 'filter:drop-shadow(0 0 6px ' + D.hot + ') drop-shadow(0 0 14px ' + D.hot + ')', 'Add glows or effects') + mis(d, D, 'filter:hue-rotate(120deg) saturate(3)', 'Recolour it') +
+      '</div></section>';
+
+    document.getElementById('dir').innerHTML = h;
+    renderLive();
+  }
+  function renderLive() {
+    var d = byId(st.view), D = C('dark'), L = C('light');
+    document.getElementById('live').innerHTML = '<span class="chip" style="background:' + D.bg + '">' + sym(d, D, st.size) + '</span><span class="chip" style="background:' + L.bg + '">' + sym(d, L, st.size) + '</span><p class="lbl">' + (st.size <= 20 ? 'Favicon range' : st.size <= 32 ? 'Interface range' : 'Display range') + ' · drag to test legibility</p>';
+  }
+  function apps(d, D, L) {
+    var nav = '<div class="navl"><span class="on"><i style="border-color:' + D.hot + '"></i>Dashboard</span><span><i></i>Projects</span><span><i></i>Deals</span><span><i></i>Assistant</span></div>';
+    var out = [
+      ['App icon', '<div class="in" style="background:linear-gradient(160deg,#2A2722,#0E0D0B)"><div class="squircle" style="background:' + D.bg + '">' + sym(d, D, 78) + '</div></div>'],
+      ['Browser tab · 16px', '<div class="in" style="background:' + D.soft + '"><div class="tabmock"><div class="bar"><div class="on" style="background:' + D.bg + ';color:' + D.ink + '">' + sym(d, D, 16) + 'BizzNex — Deals</div><div class="off" style="color:' + D.ink + '">Inbox</div></div><div class="url" style="background:' + D.bg + ';color:' + D.ink + '">bizznex.app/deals</div></div></div>'],
+      ['Sidebar', '<div class="in sbmock" style="background:' + D.bg + ';color:' + D.ink + ';font-size:21px">' + lockup(d, D, { stack: false, rule: false }) + nav + '</div>'],
+      ['Business card · front and back', '<div class="in" style="background:var(--bg-3)"><div class="cards"><div class="card" style="background:' + D.bg + ';color:' + D.ink + ';align-items:center;justify-content:center"><span style="font-size:24px">' + lockup(d, D, { stack: true }) + '</span></div><div class="card" style="background:' + L.bg + ';color:' + L.ink + ';flex-direction:column;justify-content:space-between"><span style="font-size:15px">' + lockup(d, L, { stack: false, rule: false }) + '</span><span style="font-size:11px;line-height:1.5"><b style="font-size:12.5px">Riley Chen</b><br>Founder<br><span style="font-family:var(--mono);font-size:10px">riley@example.com</span></span></div></div></div>'],
+      ['Social avatar', '<div class="in" style="background:var(--bg-2)"><div style="display:flex;gap:14px;align-items:center"><div class="avatar" style="background:' + D.bg + ';box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)">' + sym(d, D, 56) + '</div><div class="avatar" style="background:' + D.hot + ';width:64px;height:64px">' + sym(d, { bg: D.hot, ink: '#FFFFFF', hot: '#FFFFFF' }, 38) + '</div></div></div>'],
+      ['Shop or office sign', '<div class="in" style="background:linear-gradient(#3A352C,#211E19)"><div class="sign" style="background:' + D.bg + ';color:' + D.ink + '"><span style="font-size:34px">' + signature(d, D) + '</span></div></div>']
+    ];
+    return out.map(function (a) { return '<div class="app">' + a[1] + '<div class="cap">' + a[0] + '</div></div>'; }).join('');
+  }
+  function mis(d, D, style, text) { return '<div class="mis"><div class="in" style="background:' + D.bg + ';color:' + D.ink + '"><div style="font-size:24px;' + style + '">' + lockup(d, D, { stack: false }) + '</div></div><p><b>✕</b> ' + text + '</p></div>'; }
+  function renderVerdict() {
+    var rows = [['Holds at 16px', 'small'], ['Faithful to your reference', 'ref'], ['Strength of idea', 'idea'], ['Unmistakably BizzNex', 'own']];
+    document.getElementById('verdict').innerHTML = '<thead><tr><th></th>' + DIRS.map(function (d) { return '<th>' + d.name + (d.id === 'skyline' ? ' · recommended' : '') + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      rows.map(function (r) { return '<tr><td>' + r[0] + '</td>' + DIRS.map(function (d) { return '<td>' + dots(d.scores[r[1]]) + '</td>'; }).join('') + '</tr>'; }).join('') +
+      '<tr><td>Risk</td>' + DIRS.map(function (d) { return '<td>' + d.scores.risk + '</td>'; }).join('') + '</tr></tbody>';
+    document.getElementById('pickName').textContent = st.chosen ? byId(st.chosen).name : 'Nothing chosen yet';
+    document.getElementById('summary').textContent = summary();
+  }
+  function summary() { var d = st.chosen ? byId(st.chosen) : byId(st.view); return 'BizzNex Skyline identity → ' + d.name + (st.chosen ? '' : ' (viewing, not chosen yet)') + ' · ' + d.short; }
+
+  /* ── export ── */
+  function symbolFile(d, g) { return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="512" height="512"><rect width="48" height="48" fill="' + C(g).bg + '"/>' + d.symbol(C(g)) + '</svg>'; }
+  function lockupFile(d) {
+    var c = C('dark'), size = 44, w = d.id === 'arch' ? 600 : d.id === 'rise' ? 800 : 700, ctx = document.createElement('canvas').getContext('2d');
+    ctx.font = w + ' ' + size + 'px Outfit';
+    var ls = -0.02 * size, tw = ctx.measureText('BizzNex').width + ls * 7, mk = 58, gap = 10, W = Math.ceil(mk + gap + tw + 24), H = 90;
+    var base = 60, sw = mk * 2.6 / 48, ruled = d.id !== 'arch';
+    var symBase = ruled ? base : base + 0.08 * size, textY = ruled ? base - 0.13 * size : base;
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '"><rect width="' + W + '" height="' + H + '" fill="' + c.bg + '"/>' +
+      '<g transform="translate(10 ' + (symBase - mk * (ruled ? 42 : 44) / 48) + ') scale(' + (mk / 48) + ')">' + d.symbol(c) + '</g>' +
+      '<text x="' + (10 + mk + gap) + '" y="' + textY.toFixed(1) + '" font-family="Outfit, sans-serif" font-weight="' + w + '" font-size="' + size + '" letter-spacing="' + ls.toFixed(2) + '" fill="' + c.ink + '">BizzNex</text>' +
+      (ruled ? '<rect x="' + (10 + mk * 3.5 / 48) + '" y="' + (base - sw / 2).toFixed(2) + '" width="' + (mk + gap + tw - mk * 3.5 / 48).toFixed(1) + '" height="' + sw.toFixed(2) + '" rx="' + (sw / 2).toFixed(2) + '" fill="' + c.ink + '"/>' : '') +
+      '<text x="' + (10 + (mk + gap + tw) / 2) + '" y="' + (base + 22) + '" text-anchor="middle" font-family="Outfit, sans-serif" font-weight="500" font-size="8.4" letter-spacing="2.2" fill="' + c.ink + '">BUSINESS, RUN BEAUTIFULLY.</text></svg>';
+  }
+  function download(n, t) { var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([t], { type: 'image/svg+xml' })); a.download = n; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000); toast('Saved ' + n); }
+  function copy(text, msg) { var done = function () { toast(msg); }; var fb = function () { var t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); done(); } catch (e) { toast(text); } t.remove(); }; if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fb); else fb(); }
+  var tt; function toast(m) { var el = document.getElementById('toast'); el.textContent = m; el.classList.add('show'); clearTimeout(tt); tt = setTimeout(function () { el.classList.remove('show'); }, 1500); }
+  var target = function () { return st.chosen ? byId(st.chosen) : byId(st.view); };
+
+  /* ── page theme + controls ── */
+  /* Theme: the same one the user picked in BizzNex (stored by the app in 'bizznex-ui'), else the system. */
+  var UI_KEY = 'bizznex-ui';
+  function appTheme() { try { var u = JSON.parse(localStorage.getItem(UI_KEY) || '{}'); return u.theme === 'dark' || u.theme === 'light' ? u.theme : null; } catch (e) { return null; } }
+  function isLightPage() { var t = document.documentElement.getAttribute('data-theme'); return t ? t === 'light' : !window.matchMedia('(prefers-color-scheme: dark)').matches; }
+  function setTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    try { var u = JSON.parse(localStorage.getItem(UI_KEY) || '{}'); u.theme = t; localStorage.setItem(UI_KEY, JSON.stringify(u)); } catch (e) {}
+  }
+  function syncCtrls() { document.getElementById('themeBtn').textContent = isLightPage() ? 'Dark' : 'Light'; }
+  function render() { syncCtrls(); renderTabs(); renderDir(); renderVerdict(); }
+  if (appTheme()) document.documentElement.setAttribute('data-theme', appTheme());
+
+  document.addEventListener('click', function (e) {
+    var t;
+    if ((t = e.target.closest('[data-view]'))) { st.view = t.dataset.view; save(); render(); return; }
+    if (e.target.closest('#themeBtn')) { setTheme(isLightPage() ? 'dark' : 'light'); render(); return; }
+    if ((t = e.target.closest('[data-copy]'))) { copy(t.dataset.copy, 'Copied ' + t.dataset.copy); return; }
+    if (e.target.closest('#gridBtn')) { st.grid = !st.grid; save(); renderDir(); return; }
+    if (e.target.closest('#chooseBtn')) { st.chosen = st.view; save(); render(); toast(byId(st.view).name + ' chosen'); }
+  });
+  document.addEventListener('input', function (e) { if (e.target.id === 'sizeIn') { st.size = +e.target.value; document.getElementById('sizeOut').textContent = st.size + 'px'; save(); renderLive(); } });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
+  document.getElementById('copyChoice').addEventListener('click', function () { copy(summary(), 'Copied your choice'); });
+  document.getElementById('dlSym').addEventListener('click', function () { var d = target(); download('bizznex-' + d.id + '-symbol.svg', symbolFile(d, 'dark')); });
+  document.getElementById('dlSymAlt').addEventListener('click', function () { var d = target(); download('bizznex-' + d.id + '-symbol-light.svg', symbolFile(d, 'light')); });
+  document.getElementById('dlLock').addEventListener('click', function () { var d = target(); download('bizznex-' + d.id + '-lockup.svg', lockupFile(d)); });
+
+  render();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(render);
+})();
+</script>
+</body>
+</html>

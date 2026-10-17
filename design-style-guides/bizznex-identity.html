@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<title>BizzNex Identity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,100..900,0..100,0..1;1,9..144,100..900,0..100,0..1&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" />
+<style>
+/* Layout: an identity proposal book. A brief, three direction tabs, then one
+   long spread per direction (hero, idea, construction, wordmark, colour, rules,
+   applications, misuse), closing with a side-by-side verdict and export.
+   Tokens are BizzNex's own Aurora system; the proposal is set in it. */
+:root {
+  --paper: #F5F1E9; --paper-2: #EDE7DA; --paper-3: #E3DCCB; --ink: #211D16; --ink-soft: #4E4A40; --muted: #8B8474;
+  --rule: rgba(33, 29, 22, .16); --rule-soft: rgba(33, 29, 22, .08);
+  --accent: #5B41E0; --tint: rgba(91, 65, 224, .09); --bad: #C24A3E; --ok: #2E8F60;
+  --night: #141210; --night-2: #1C1915; --night-ink: #EDE8DD; --night-accent: #A897FF;
+  --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  --r: 3px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #141210; --paper-2: #1C1915; --paper-3: #26221C; --ink: #EDE8DD; --ink-soft: #C3BCAD; --muted: #8E877A;
+    --rule: rgba(237, 232, 221, .16); --rule-soft: rgba(237, 232, 221, .07);
+    --accent: #A897FF; --tint: rgba(168, 151, 255, .12); --bad: #F0776B; --ok: #46C98A;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #141210; --paper-2: #1C1915; --paper-3: #26221C; --ink: #EDE8DD; --ink-soft: #C3BCAD; --muted: #8E877A;
+  --rule: rgba(237, 232, 221, .16); --rule-soft: rgba(237, 232, 221, .07);
+  --accent: #A897FF; --tint: rgba(168, 151, 255, .12); --bad: #F0776B; --ok: #46C98A;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15.5px; line-height: 1.6; -webkit-font-smoothing: antialiased; transition: background .4s, color .4s; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: max(20px, env(safe-area-inset-left, 0px)) max(20px, env(safe-area-inset-right, 0px)); }
+.lbl { font-family: var(--mono); font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.lbl b { color: var(--accent); font-weight: 500; }
+h1, h2, h3, h4 { font-family: var(--serif); font-weight: 500; letter-spacing: -.022em; margin: 0; text-wrap: balance; font-variation-settings: 'opsz' 144; }
+p { margin: 0; max-width: 64ch; }
+
+/* top */
+.top { position: sticky; top: 0; z-index: 30; background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--rule-soft); padding-top: env(safe-area-inset-top, 0px); }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 14px; }
+.top b { font-family: var(--serif); font-weight: 600; font-size: 17px; letter-spacing: -.01em; }
+.top span { font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-left: 12px; }
+.tbtn { background: none; border: 1px solid var(--rule); border-radius: var(--r); padding: 7px 12px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); cursor: pointer; }
+.tbtn:hover, .tbtn[aria-pressed="true"] { border-color: var(--ink); color: var(--ink); }
+.tbtn[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+
+/* brief */
+.brief { padding-block: clamp(40px, 7vw, 88px) 34px; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 48px; align-items: end; }
+.brief h1 { font-size: clamp(2.4rem, 5.6vw, 4.4rem); line-height: .98; margin-top: 14px; }
+.brief .lede { color: var(--ink-soft); font-size: 1.1rem; margin-top: 18px; }
+.musts { list-style: none; padding: 0; margin: 0; font-size: 14px; }
+.musts li { display: grid; grid-template-columns: 22px 1fr; gap: 8px; padding: 10px 0; border-top: 1px solid var(--rule-soft); }
+.musts li::before { content: '✓'; color: var(--accent); font-weight: 600; }
+@media (max-width: 860px) { .brief { grid-template-columns: minmax(0, 1fr); gap: 24px; } }
+
+/* direction tabs */
+.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding-bottom: 8px; }
+.tab { display: grid; grid-template-columns: 54px 1fr; gap: 14px; align-items: center; text-align: left; padding: 14px 16px; border: 1px solid var(--rule); border-radius: var(--r); background: var(--paper); cursor: pointer; transition: border-color .2s, box-shadow .2s; }
+.tab:hover { border-color: var(--ink-soft); }
+.tab[aria-selected="true"] { border-color: var(--accent); box-shadow: 0 0 0 3px var(--tint); }
+.tab svg { width: 54px; height: 54px; }
+.tab b { display: block; font-family: var(--serif); font-weight: 500; font-size: 1.15rem; }
+.tab small { display: block; font-size: 12.5px; color: var(--ink-soft); line-height: 1.35; }
+.tab .chosen { font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+@media (max-width: 760px) { .tabs { grid-template-columns: minmax(0, 1fr); } }
+
+/* spreads */
+.sp { padding-block: 54px; border-top: 1px solid var(--rule); }
+.sp-h { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
+.sp-h h3 { font-size: clamp(1.5rem, 2.8vw, 2.1rem); }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(20px, 4vw, 56px); align-items: start; }
+@media (max-width: 860px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+
+/* hero */
+.hero { padding-block: 26px 0; }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 12px; }
+@media (max-width: 860px) { .hero-grid { grid-template-columns: minmax(0, 1fr); } }
+.ground { position: relative; border-radius: var(--r); min-height: 340px; display: grid; place-items: center; padding: 36px; overflow: hidden; }
+.ground.light { background: #F5F1E9; color: #211D16; box-shadow: inset 0 0 0 1px rgba(33,29,22,.08); }
+.ground.dark { background: #141210; color: #EDE8DD; }
+.ground .tag { position: absolute; left: 14px; top: 12px; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; opacity: .55; }
+.hero-tools { display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-top: 12px; }
+.slider { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.slider input { width: 180px; accent-color: var(--accent); }
+.live-size { display: flex; align-items: center; gap: 18px; padding: 14px 16px; border: 1px solid var(--rule-soft); border-radius: var(--r); margin-top: 12px; min-height: 92px; flex-wrap: wrap; }
+.live-size .chip { padding: 8px; border-radius: 3px; display: grid; place-items: center; }
+
+/* idea */
+.idea h2 { font-size: clamp(1.9rem, 4vw, 3rem); line-height: 1.04; }
+.idea .lede { font-size: 1.12rem; color: var(--ink-soft); margin-top: 16px; }
+.facts { display: grid; gap: 0; }
+.facts div { display: grid; grid-template-columns: 116px 1fr; gap: 14px; padding: 12px 0; border-top: 1px solid var(--rule-soft); font-size: 14px; }
+.facts .k { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding-top: 3px; }
+
+/* construction */
+.constr { background: var(--paper-2); border-radius: var(--r); display: grid; place-items: center; padding: 18px; }
+.constr svg { width: min(100%, 460px); height: auto; overflow: visible; }
+.measure { display: grid; gap: 0; }
+.measure div { display: flex; justify-content: space-between; gap: 16px; padding: 11px 0; border-top: 1px solid var(--rule-soft); font-size: 14px; }
+.measure div span:last-child { font-family: var(--mono); font-size: 12.5px; color: var(--ink-soft); text-align: right; font-variant-numeric: tabular-nums; }
+
+/* wordmark */
+.wm-stage { border-radius: var(--r); background: #F5F1E9; color: #211D16; padding: clamp(28px, 5vw, 56px); display: grid; place-items: center; box-shadow: inset 0 0 0 1px rgba(33,29,22,.08); position: relative; }
+.wm-stage .big { font-size: clamp(54px, 9vw, 120px); line-height: 1; }
+.wm-notes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+.wm-notes div { border-top: 2px solid var(--ink); padding-top: 10px; font-size: 13.5px; color: var(--ink-soft); }
+.wm-notes b { display: block; color: var(--ink); font-size: 14px; margin-bottom: 2px; }
+@media (max-width: 760px) { .wm-notes { grid-template-columns: minmax(0, 1fr); } }
+
+/* colour */
+.pal { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 760px) { .pal { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.chipc { border-radius: var(--r); overflow: hidden; border: 1px solid var(--rule-soft); cursor: pointer; background: var(--paper); text-align: left; padding: 0; }
+.chipc i { display: block; height: 96px; }
+.chipc span { display: block; padding: 10px 12px; font-size: 13px; }
+.chipc span small { display: block; font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+.ratio { display: flex; height: 14px; border-radius: 2px; overflow: hidden; margin-top: 14px; }
+.ratio + .lbl { margin-top: 8px; }
+
+/* rules */
+.rules-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 12px; }
+@media (max-width: 860px) { .rules-grid { grid-template-columns: minmax(0, 1fr); } }
+.clear { background: #F5F1E9; color: #211D16; border-radius: var(--r); display: grid; place-items: center; padding: 40px 24px; min-height: 260px; box-shadow: inset 0 0 0 1px rgba(33,29,22,.08); }
+.clear .box { position: relative; padding: var(--cs); outline: 1px dashed rgba(91,65,224,.6); background: repeating-linear-gradient(45deg, rgba(91,65,224,.07) 0 6px, transparent 6px 12px); }
+.clear .box > .inner { background: #F5F1E9; padding: 0; display: block; }
+.clear .box .xm { position: absolute; font-family: var(--mono); font-size: 10px; color: #5B41E0; }
+.mins { background: var(--paper-2); border-radius: var(--r); padding: 22px; display: grid; gap: 18px; align-content: center; }
+.mins .row { display: flex; align-items: center; gap: 16px; }
+.mins .row .ex { width: 120px; display: flex; align-items: center; }
+.mins p { font-size: 13.5px; color: var(--ink-soft); }
+
+/* applications */
+.apps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 1000px) { .apps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) { .apps { grid-template-columns: minmax(0, 1fr); } }
+.app { border: 1px solid var(--rule-soft); border-radius: var(--r); overflow: hidden; display: flex; flex-direction: column; }
+.app .in { flex: 1; min-height: 230px; display: grid; place-items: center; padding: 22px; position: relative; }
+.app .cap { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding: 9px 12px; border-top: 1px solid var(--rule-soft); }
+.squircle { width: 120px; height: 120px; border-radius: 27px; display: grid; place-items: center; box-shadow: 0 14px 34px rgba(10,8,4,.32), inset 0 0 0 .5px rgba(255,255,255,.08); overflow: hidden; }
+.card { width: 100%; max-width: 300px; aspect-ratio: 1.75 / 1; border-radius: 4px; box-shadow: 0 12px 30px rgba(10,8,4,.22); display: flex; padding: 18px; }
+.cards { display: grid; gap: 12px; width: 100%; justify-items: center; }
+.tabmock { width: 100%; }
+.tabmock .bar { display: flex; align-items: flex-end; gap: 2px; }
+.tabmock .on { display: flex; align-items: center; gap: 8px; padding: 9px 13px; border-radius: 8px 8px 0 0; background: #F5F1E9; font-size: 12px; color: #211D16; }
+.tabmock .off { padding: 9px 13px; font-size: 12px; color: #8B8474; }
+.tabmock .url { background: #F5F1E9; border-radius: 0 8px 8px 8px; padding: 10px 13px; font-family: var(--mono); font-size: 11px; color: #4E4A40; }
+.sbmock { width: 100%; align-self: stretch; display: flex; flex-direction: column; gap: 18px; place-items: start !important; }
+.sbmock .navl { display: grid; gap: 10px; font-size: 13px; }
+.sbmock .navl span { display: flex; gap: 9px; align-items: center; opacity: .7; }
+.sbmock .navl span i { width: 13px; height: 13px; border: 1.5px solid currentColor; border-radius: 3px; }
+.sbmock .navl span.on { opacity: 1; }
+.avatar { width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; overflow: hidden; }
+.sig { font-size: 13px; line-height: 1.5; width: 100%; max-width: 300px; }
+.sig .who { font-weight: 600; }
+.sig hr { border: 0; height: 1px; background: rgba(33,29,22,.15); margin: 10px 0; }
+
+/* misuse */
+.misuse { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 860px) { .misuse { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.mis { border: 1px solid var(--rule-soft); border-radius: var(--r); overflow: hidden; }
+.mis .in { height: 150px; display: grid; place-items: center; background: #F5F1E9; position: relative; overflow: hidden; }
+.mis .in::after { content: ''; position: absolute; inset: 14px; background: linear-gradient(to top right, transparent calc(50% - 1px), var(--bad) calc(50% - 1px), var(--bad) calc(50% + 1px), transparent calc(50% + 1px)); opacity: .7; pointer-events: none; }
+.mis p { font-size: 12.5px; padding: 10px 12px; color: var(--ink-soft); }
+.mis p b { color: var(--bad); font-weight: 600; }
+
+/* verdict */
+.verdict-t { width: 100%; border-collapse: collapse; font-size: 14px; }
+.verdict-t th { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 500; text-align: left; padding: 0 14px 12px 0; border-bottom: 1px solid var(--rule); }
+.verdict-t td { padding: 13px 14px 13px 0; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+.verdict-t td:first-child { font-weight: 500; white-space: nowrap; }
+.verdict-t .rec td { background: var(--tint); }
+.dots { letter-spacing: 2px; color: var(--accent); white-space: nowrap; }
+.dots span { opacity: .22; }
+.scroll-x { overflow-x: auto; }
+.scroll-x table { min-width: 680px; }
+
+.pick { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: center; padding: 22px; border: 1px solid var(--accent); border-radius: var(--r); background: var(--tint); margin-top: 26px; }
+@media (max-width: 760px) { .pick { grid-template-columns: minmax(0, 1fr); } }
+.pick .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { border: 1px solid var(--rule); border-radius: var(--r); background: var(--paper); padding: 10px 14px; font-size: 13.5px; font-weight: 500; cursor: pointer; }
+.btn:hover { border-color: var(--ink); }
+.btn.primary { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.summary { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); margin-top: 6px; }
+.toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(14px); opacity: 0; pointer-events: none; background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 12px; padding: 10px 16px; border-radius: var(--r); transition: all .25s; z-index: 60; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+footer { padding-block: 40px 70px; border-top: 1px solid var(--rule); margin-top: 40px; font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+
+/* ── the wordmarks (shared by every render) ── */
+.wm { display: inline-flex; align-items: baseline; white-space: nowrap; line-height: 1; }
+/* Lift: Fraunces at display optical size; the i's dot is the floating window */
+.wm-lift { font-family: var(--serif); font-weight: 600; font-optical-sizing: auto; font-variation-settings: 'SOFT' 0, 'WONK' 0; letter-spacing: -.028em; font-kerning: normal; }
+.wm-lift .ti { position: relative; display: inline-block; }
+.wm-lift .ti i { position: absolute; left: 50%; bottom: .655em; width: .2em; height: .2em; margin-left: -.085em; border-radius: .035em; background: var(--wm-acc); box-shadow: 0 0 0 .035em var(--wm-bg); }
+.wm-lift .zz { letter-spacing: -.045em; }
+/* Ledger: Plex Sans semibold, tracked, sitting on the double rule */
+.wm-ledger { font-family: var(--sans); font-weight: 600; letter-spacing: .015em; position: relative; padding-bottom: .34em; }
+.wm-ledger::before, .wm-ledger::after { content: ''; position: absolute; left: 0; right: .015em; height: .06em; background: currentColor; }
+.wm-ledger::before { bottom: .14em; }
+.wm-ledger::after { bottom: 0; background: var(--wm-acc); }
+/* Bloom: Fraunces italic with its soft, wonky cut, all lowercase */
+.wm-bloom { font-family: var(--serif); font-style: italic; font-weight: 520; font-optical-sizing: auto; font-variation-settings: 'SOFT' 100, 'WONK' 1; letter-spacing: -.035em; }
+.lock { display: inline-flex; align-items: center; gap: .36em; }
+.lock svg { width: 1.18em; height: 1.18em; flex: none; display: block; }
+.lock.ledger svg { width: 1.32em; height: 1.32em; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div><b>BizzNex Identity</b><span>Proposal · three directions</span></div>
+    <button class="tbtn" id="themeBtn" type="button">Dark page</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="brief">
+    <div>
+      <p class="lbl"><b>Brief</b> · October 2026</p>
+      <h1>A mark for a business suite that stays out of your way</h1>
+      <p class="lede">BizzNex is calm, editorial software for running a small business. The logo has to feel like the product: warm paper, one colour, nothing shouting. Three directions follow, each developed far enough to judge honestly.</p>
+    </div>
+    <ul class="musts" aria-label="What the logo must do">
+      <li>Read at 16px in a browser tab, and hold up as a 1024px app icon.</li>
+      <li>Work on warm paper and on night, with the colour switching like the app’s does.</li>
+      <li>Sit beside the Aurora interface without competing with it.</li>
+      <li>Belong to BizzNex alone: an idea, not a generic shape.</li>
+    </ul>
+  </section>
+
+  <div class="tabs" role="tablist" aria-label="Directions" id="tabs"></div>
+
+  <div id="dir"></div>
+
+  <!-- verdict -->
+  <section class="sp" aria-labelledby="v-h">
+    <div class="sp-h"><h3 id="v-h">The three side by side</h3><p class="lbl">Recommendation</p></div>
+    <div class="scroll-x">
+      <table class="verdict-t" id="verdict"></table>
+    </div>
+    <p style="margin-top:16px;color:var(--ink-soft)"><b style="color:var(--ink)">Recommendation: The Lift.</b> It is the only direction whose idea comes from BizzNex itself, the floating window. It carries into the wordmark through a single detail, and it keeps the brand’s existing violet and square, so it reads as BizzNex growing up rather than a different company. The Ledger is the strongest runner-up if you want something more traditional and trustworthy.</p>
+
+    <div class="pick">
+      <div>
+        <p class="lbl">Your choice</p>
+        <p style="font-family:var(--serif);font-size:1.4rem;margin-top:4px" id="pickName"></p>
+        <p class="summary" id="summary"></p>
+      </div>
+      <div class="btns">
+        <button class="btn primary" id="copyChoice" type="button">Copy my choice</button>
+        <button class="btn" id="dlSym" type="button">Symbol SVG</button>
+        <button class="btn" id="dlSymDark" type="button">Symbol SVG · night</button>
+        <button class="btn" id="dlLock" type="button">Lockup SVG</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>BizzNex identity proposal · set in Fraunces &amp; IBM Plex · the lockup SVGs use live text; convert to outlines before print.</footer>
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function () {
+  var LIGHT = { bg: '#F5F1E9', ink: '#211D16', acc: '#5B41E0', soft: '#EDE7DA' };
+  var NIGHT = { bg: '#141210', ink: '#EDE8DD', acc: '#A897FF', soft: '#1C1915' };
+  var GREEN = { light: '#2E6B4F', dark: '#6FCFA0' };
+  var uid = 0;
+
+  /* ─────────────────────────  DIRECTIONS  ───────────────────────── */
+  var DIRS = [
+    {
+      id: 'lift', name: 'The Lift', short: 'A window lifts off the page.',
+      thesis: 'A window, lifting off the page.',
+      lede: 'Right-click any tool in BizzNex and it lifts off the page into a small floating window, so you can keep it beside your work. No other suite does this, so it is the idea the mark is built on: a page, and a window rising from its corner.',
+      facts: [
+        ['Idea', 'Product-led. The symbol draws the one interaction only BizzNex has.'],
+        ['Proportion', 'The window is the page ÷ √2: the same ratio as a sheet of A-paper folded once. Its diagonal equals the page’s side.'],
+        ['Detail', 'In the wordmark the i loses its dot, and the floating window takes its place. One accent, used once.'],
+        ['Continuity', 'Keeps today’s violet and square, so it reads as BizzNex growing up, not a rebrand.']
+      ],
+      accent: 'violet',
+      symbol: function (c) {
+        return '<rect x="4" y="12" width="32" height="32" rx="4" fill="' + c.ink + '"/>' +
+               '<rect x="21.37" y="4" width="22.63" height="22.63" rx="3.2" fill="' + c.acc + '" stroke="' + c.bg + '" stroke-width="3.2" paint-order="stroke"/>';
+      },
+      construction: function (c) {
+        return '<g stroke="' + c.acc + '" stroke-width=".12" opacity=".55">' + grid() + '</g>' +
+          '<rect x="4" y="12" width="32" height="32" rx="4" fill="' + c.ink + '" opacity=".9"/>' +
+          '<rect x="21.37" y="4" width="22.63" height="22.63" rx="3.2" fill="' + c.acc + '" opacity=".9" stroke="' + c.bg + '" stroke-width="3.2" paint-order="stroke"/>' +
+          '<g fill="none" stroke="' + c.acc + '" stroke-width=".28" stroke-dasharray="1 .8">' +
+            '<line x1="21.37" y1="26.63" x2="44" y2="4"/><line x1="4" y1="46.4" x2="36" y2="46.4"/><line x1="46.4" y1="4" x2="46.4" y2="26.63"/>' +
+            '<circle cx="20" cy="28" r="16" opacity=".6"/>' +
+          '</g>' +
+          '<g font-family="IBM Plex Mono, monospace" font-size="1.55" fill="' + c.ink + '">' +
+            '<text x="20" y="48.6" text-anchor="middle">page · 8 units</text>' +
+            '<text x="47.4" y="16" transform="rotate(90 47.4 16)" text-anchor="middle">window · 8/√2</text>' +
+            '<text x="34.5" y="13.6" transform="rotate(-45 34.5 13.6)" text-anchor="middle" fill="' + c.bg + '">diagonal = 8</text>' +
+            '<text x="2" y="2.2">gap 0.8 · cut in the background</text>' +
+          '</g>';
+      },
+      measures: [['Grid', '12 × 12 units of 4px at 48px'], ['Page', '8 × 8 units · corner 1 unit'], ['Window', '5.66 × 5.66 units (8 ÷ √2)'], ['Gap', '0.8 units, cut in the background colour'], ['Optical centre', 'shared circle, r = 4 units']],
+      wordmark: function () {
+        return '<span class="wm wm-lift">B<span class="ti">ı<i></i></span><span class="zz">zz</span>Nex</span>';
+      },
+      wmNotes: [['Fraunces SemiBold, optical size follows the size', 'Fine, high-contrast display cut when large; sturdier joins at sidebar and email sizes.'], ['Tracking −2.8%, zz tightened to −4.5%', 'The double z otherwise opens a hole in the middle of the word.'], ['The i’s dot is the window', 'A dotless ı with the symbol’s violet square in place of the tittle. One colour, used once.']],
+      palette: [['Ink', '#211D16', 'Page, wordmark', 62], ['Aurora violet', '#5B41E0', 'The window only', 8], ['Paper', '#F5F1E9', 'Ground', 26], ['Night violet', '#A897FF', 'Window on dark', 4]],
+      clear: 'Clear space = one window (5.66 units) on every side.',
+      min: ['Symbol: 16px', 'Lockup: 96px wide', 'Below 96px, use the symbol alone; the tittle disappears first.'],
+      scores: { small: 5, idea: 5, fit: 5, own: 4, risk: 'Low. The gap must be cut in the background, never drawn as a line.' }
+    },
+    {
+      id: 'ledger', name: 'The Ledger', short: 'The double rule under a final total.',
+      thesis: 'The books balance.',
+      lede: 'In bookkeeping, a double rule under a figure means it is final: the total is checked and the books balance. It is the most trusted mark in business, and it is made of lines, which is exactly how BizzNex groups everything on screen.',
+      facts: [
+        ['Idea', 'Business-led. Borrowed from the ledger, the oldest document in business.'],
+        ['Brand fit', 'Pure hairlines: the logo itself obeys the rule the product is designed by, lines never boxes.'],
+        ['Detail', 'The lower rule is the accent. Everything else stays in ink.'],
+        ['Character', 'Traditional, steady, trustworthy. The safest choice for finance-minded customers.']
+      ],
+      accent: 'green',
+      symbol: function (c) {
+        return '<g transform="translate(1.6 0)"><path d="M13 5V28.2M13 5H22.6a6.05 6.05 0 0 1 0 12.1H13M13 17.1H24.4a5.55 5.55 0 0 1 0 11.1H13" fill="none" stroke="' + c.ink + '" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/></g>' +
+               '<path d="M7 35.4H41" stroke="' + c.ink + '" stroke-width="3.3"/>' +
+               '<path d="M7 41.9H41" stroke="' + c.acc + '" stroke-width="3.3"/>';
+      },
+      construction: function (c) {
+        return '<g stroke="' + c.acc + '" stroke-width=".12" opacity=".55">' + grid() + '</g>' +
+          '<g opacity=".9">' + this.symbol(c) + '</g>' +
+          '<g fill="none" stroke="' + c.acc + '" stroke-width=".28" stroke-dasharray="1 .8">' +
+            '<line x1="2" y1="30.7" x2="46" y2="30.7"/><line x1="2" y1="2.5" x2="46" y2="2.5"/>' +
+            '<line x1="44" y1="33.75" x2="44" y2="43.55"/>' +
+          '</g>' +
+          '<g font-family="IBM Plex Mono, monospace" font-size="1.55" fill="' + c.ink + '">' +
+            '<text x="2" y="1.6">cap height · 6.5 units</text><text x="2" y="30" >baseline</text>' +
+            '<text x="45.2" y="39" transform="rotate(90 45.2 39)" text-anchor="middle">rule · gap · rule</text>' +
+          '</g>';
+      },
+      measures: [['Letter', 'Monoline B, stroke 1.25 units, lower bowl 8% wider'], ['Rules', 'two × 0.83 units, 1.6 units apart'], ['Gap to letter', 'equal to the rule pair’s height'], ['Width', 'rules span 8.5 units, letter centred optically']],
+      wordmark: function () { return '<span class="wm wm-ledger">BizzNex</span>'; },
+      wmNotes: [['IBM Plex Sans SemiBold', 'The interface face, so the name and the product speak with one voice.'], ['Tracking +1.5%', 'Opened slightly so the word sits evenly over the rules.'], ['The name is the lockup', 'Its own B is the symbol’s letter, so the name sits alone on one double rule. The B symbol is for square spaces: icons, avatars, favicons.']],
+      palette: [['Ink', '#211D16', 'Letter, upper rule', 64], ['Ledger green', '#2E6B4F', 'Lower rule only', 8], ['Paper', '#F5F1E9', 'Ground', 24], ['Night green', '#6FCFA0', 'Lower rule on dark', 4]],
+      clear: 'Clear space = the height of the double rule on every side.',
+      min: ['Symbol: 20px', 'Lockup: 88px wide', 'At 16px the rules merge; use the heavier favicon cut (one rule).'],
+      scores: { small: 3, idea: 4, fit: 5, own: 3, risk: 'Medium. Needs a separate one-rule cut for 16px.' }
+    },
+    {
+      id: 'bloom', name: 'The Bloom', short: 'The aurora, held in a coin.',
+      thesis: 'The one colour moment.',
+      lede: 'BizzNex is almost entirely ink on paper, with a single soft aurora glowing behind each hero. This direction makes that glow the brand: a small sun of the four aurora colours, with a spark of paper where the light catches.',
+      facts: [
+        ['Idea', 'Feeling-led. The warmth of the interface, distilled.'],
+        ['Detail', 'The wordmark uses Fraunces’ soft, slightly wonky italic, set in lowercase to stay friendly.'],
+        ['Character', 'Expressive and memorable. Strongest on marketing, social and the app icon.'],
+        ['Trade-off', 'Gradients are fashionable; it will date fastest, and it needs full colour to work.']
+      ],
+      accent: 'violet',
+      symbol: function (c) {
+        var id = 'bl' + (++uid);
+        return '<defs><clipPath id="' + id + 'c"><circle cx="24" cy="24" r="20"/></clipPath><filter id="' + id + 'f" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4.2"/></filter></defs>' +
+          '<g clip-path="url(#' + id + 'c)"><rect x="0" y="0" width="48" height="48" fill="#7C6CF5"/><g filter="url(#' + id + 'f)">' +
+          '<circle cx="34" cy="12" r="13" fill="#5FA8FF"/><circle cx="14" cy="34" r="13" fill="#34E0C4"/><circle cx="38" cy="38" r="11" fill="#FF9EC0"/><circle cx="12" cy="12" r="10" fill="#8F7BFF"/></g></g>' +
+          '<rect x="27.6" y="11.6" width="8.4" height="8.4" rx="1.7" fill="' + c.bg + '"/>';
+      },
+      construction: function (c) {
+        return '<g stroke="' + c.acc + '" stroke-width=".12" opacity=".55">' + grid() + '</g>' +
+          '<g opacity=".92">' + this.symbol(c) + '</g>' +
+          '<g fill="none" stroke="' + c.ink + '" stroke-width=".28" stroke-dasharray="1 .8">' +
+            '<circle cx="24" cy="24" r="20"/><line x1="24" y1="24" x2="38.1" y2="9.9"/><circle cx="24" cy="24" r="12" opacity=".6"/>' +
+          '</g>' +
+          '<g font-family="IBM Plex Mono, monospace" font-size="1.55" fill="' + c.ink + '">' +
+            '<text x="24" y="47" text-anchor="middle">coin · r 5 units</text><text x="39" y="9">45°</text><text x="2" y="2.2">spark at 0.6 r on the 45° line</text>' +
+          '</g>';
+      },
+      measures: [['Coin', 'circle, r = 5 units'], ['Light', 'four aurora stops, blurred 1 unit'], ['Spark', '2.1 units square, centred at 0.6 r, 45°'], ['Colour', 'fixed: the coin ignores light and dark']],
+      wordmark: function () { return '<span class="wm wm-bloom">bizznex</span>'; },
+      wmNotes: [['Fraunces Italic, Soft 100, Wonk on', 'Fraunces’ own soft, leaning italic letterforms: warm, a little hand-made.'], ['Lowercase, tracking −3.5%', 'Friendly and compact, like a signature.'], ['No accent in the name', 'The coin carries all the colour; the word stays ink.']],
+      palette: [['Iris', '#7C6CF5', 'Coin base', 30], ['Sky', '#5FA8FF', 'Coin light', 20], ['Aqua', '#34E0C4', 'Coin light', 20], ['Blush', '#FF9EC0', 'Coin light', 12]],
+      clear: 'Clear space = half the coin’s radius on every side.',
+      min: ['Symbol: 20px', 'Lockup: 90px wide', 'Below 20px the light turns to mud; use a flat violet disc.'],
+      scores: { small: 3, idea: 3, fit: 4, own: 3, risk: 'Higher. Trend-led, and it needs full colour everywhere.' }
+    }
+  ];
+
+  function grid() { var s = ''; for (var i = 0; i <= 48; i += 4) { s += '<line x1="' + i + '" y1="0" x2="' + i + '" y2="48"/><line x1="0" y1="' + i + '" x2="48" y2="' + i + '"/>'; } return s; }
+  function colours(d, ground) {
+    var base = ground === 'dark' ? NIGHT : LIGHT, c = { bg: base.bg, ink: base.ink, acc: base.acc, soft: base.soft };
+    if (d.accent === 'green') c.acc = ground === 'dark' ? GREEN.dark : GREEN.light;
+    return c;
+  }
+  function sym(d, c, size, extra) {
+    return '<svg viewBox="0 0 48 48"' + (size ? ' width="' + size + '" height="' + size + '"' : '') + (extra || '') + ' aria-hidden="true">' + d.symbol(c) + '</svg>';
+  }
+  function wm(d, c) { return '<span style="--wm-acc:' + c.acc + ';--wm-bg:' + c.bg + ';color:' + c.ink + '">' + d.wordmark() + '</span>'; }
+  /* The Ledger's lockup is the name alone: its own B is the letter of the symbol, and one double rule is enough. */
+  function lockup(d, c) { return '<span class="lock ' + d.id + '" style="color:' + c.ink + '">' + (d.id === 'ledger' ? '' : sym(d, c)) + wm(d, c) + '</span>'; }
+  var dots = function (n) { return '<span class="dots">' + '●●●●●'.slice(0, n) + '<span>' + '●●●●●'.slice(0, 5 - n) + '</span></span>'; };
+
+  /* ─────────────────────────  STATE  ───────────────────────── */
+  var KEY = 'bizznex-identity';
+  var st = { view: 'lift', chosen: null, size: 48, grid: false };
+  try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+  var save = function () { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+  var byId = function (id) { return DIRS.filter(function (d) { return d.id === id; })[0] || DIRS[0]; };
+
+  /* ─────────────────────────  RENDER  ───────────────────────── */
+  function renderTabs() {
+    document.getElementById('tabs').innerHTML = DIRS.map(function (d) {
+      return '<button class="tab" role="tab" type="button" data-view="' + d.id + '" aria-selected="' + (d.id === st.view) + '">' + sym(d, colours(d, isDark() ? 'dark' : 'light')) +
+        '<span><b>' + d.name + '</b><small>' + d.short + '</small>' + (st.chosen === d.id ? '<span class="chosen">✓ Your choice</span>' : '') + '</span></button>';
+    }).join('');
+  }
+
+  function renderDir() {
+    var d = byId(st.view), L = colours(d, 'light'), N = colours(d, 'dark');
+    var heroSize = 'font-size:clamp(40px,6.4vw,76px)';
+    var html = '';
+
+    /* hero */
+    html += '<section class="hero" aria-label="' + d.name + '">' +
+      '<div class="hero-grid">' +
+        '<div class="ground light"><span class="tag">' + d.name + ' · paper</span><div style="' + heroSize + '">' + (st.grid ? '<svg viewBox="-2 -2 52 52" style="width:3.4em;height:3.4em;overflow:visible">' + d.construction(L) + '</svg>' : lockup(d, L)) + '</div></div>' +
+        '<div class="ground dark"><span class="tag">night</span><div style="font-size:clamp(34px,4.6vw,56px)">' + lockup(d, N) + '</div></div>' +
+      '</div>' +
+      '<div class="hero-tools"><button class="tbtn" id="gridBtn" type="button" aria-pressed="' + st.grid + '">' + (st.grid ? 'Hide construction' : 'Show construction') + '</button>' +
+        '<label class="slider" for="sizeIn">Symbol size <input id="sizeIn" type="range" min="12" max="160" step="1" value="' + st.size + '"><b id="sizeOut" class="num">' + st.size + 'px</b></label>' +
+        '<button class="btn primary" id="chooseBtn" type="button">' + (st.chosen === d.id ? '✓ Chosen' : 'Choose ' + d.name) + '</button></div>' +
+      '<div class="live-size" id="liveSize"></div>' +
+    '</section>';
+
+    /* idea */
+    html += '<section class="sp idea"><div class="cols"><div><p class="lbl"><b>' + d.name + '</b> · the idea</p><h2 style="margin-top:12px">' + d.thesis + '</h2><p class="lede">' + d.lede + '</p></div>' +
+      '<div class="facts">' + d.facts.map(function (f) { return '<div><span class="k">' + f[0] + '</span><span>' + f[1] + '</span></div>'; }).join('') + '</div></div></section>';
+
+    /* construction */
+    html += '<section class="sp"><div class="sp-h"><h3>Construction</h3><p class="lbl">48px master · 4px unit</p></div><div class="cols">' +
+      '<div class="constr"><svg viewBox="-2 -2 52 52">' + d.construction(L) + '</svg></div>' +
+      '<div class="measure">' + d.measures.map(function (m) { return '<div><span>' + m[0] + '</span><span>' + m[1] + '</span></div>'; }).join('') + '</div></div></section>';
+
+    /* wordmark */
+    html += '<section class="sp"><div class="sp-h"><h3>Wordmark</h3><p class="lbl">Set, not typed</p></div>' +
+      '<div class="wm-stage"><div class="big">' + wm(d, L) + '</div></div>' +
+      '<div class="wm-notes">' + d.wmNotes.map(function (n) { return '<div><b>' + n[0] + '</b>' + n[1] + '</div>'; }).join('') + '</div></section>';
+
+    /* colour */
+    html += '<section class="sp"><div class="sp-h"><h3>Colour</h3><p class="lbl">Click a colour to copy</p></div><div class="pal">' +
+      d.palette.map(function (p) { return '<button class="chipc" type="button" data-copy="' + p[1] + '"><i style="background:' + p[1] + ';' + (p[1] === '#F5F1E9' ? 'box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)' : '') + '"></i><span>' + p[0] + '<small>' + p[1] + ' · ' + p[2] + '</small></span></button>'; }).join('') +
+      '</div><div class="ratio" aria-hidden="true">' + d.palette.map(function (p) { return '<i style="flex:' + p[3] + ';background:' + p[1] + '"></i>'; }).join('') + '</div><p class="lbl">How much of each, in a typical layout</p></section>';
+
+    /* rules */
+    html += '<section class="sp"><div class="sp-h"><h3>Clear space &amp; minimum size</h3><p class="lbl">The rules that keep it intact</p></div><div class="rules-grid">' +
+      '<div class="clear"><div class="box" style="--cs:' + (d.id === 'lift' ? '22px' : d.id === 'ledger' ? '16px' : '18px') + '"><span class="inner" style="font-size:42px">' + lockup(d, L) + '</span></div><p class="lbl" style="margin-top:18px;color:#8B8474">' + d.clear + '</p></div>' +
+      '<div class="mins">' +
+        '<div class="row"><span class="ex">' + sym(d, isDark() ? N : L, 16) + '&nbsp;&nbsp;' + sym(d, isDark() ? N : L, 24) + '</span><p><b>' + d.min[0] + '</b></p></div>' +
+        '<div class="row"><span class="ex" style="font-size:17px">' + lockup(d, isDark() ? N : L) + '</span><p><b>' + d.min[1] + '</b></p></div>' +
+        '<p>' + d.min[2] + '</p></div></div></section>';
+
+    /* applications */
+    html += '<section class="sp"><div class="sp-h"><h3>In use</h3><p class="lbl">Example names and details</p></div><div class="apps">' + apps(d, L, N) + '</div></section>';
+
+    /* misuse */
+    html += '<section class="sp"><div class="sp-h"><h3>Never</h3><p class="lbl">Common ways a mark gets broken</p></div><div class="misuse">' +
+      mis(d, L, 'transform:scaleX(1.45)', 'Stretch or squash it') +
+      mis(d, L, 'transform:rotate(-14deg)', 'Rotate or tilt it') +
+      mis(d, L, 'filter:drop-shadow(4px 6px 3px rgba(0,0,0,.45))', 'Add shadows or effects') +
+      mis(d, L, 'filter:hue-rotate(150deg) saturate(2)', 'Recolour it') +
+      '</div></section>';
+
+    document.getElementById('dir').innerHTML = html;
+    renderLive();
+  }
+
+  function renderLive() {
+    var d = byId(st.view), L = colours(d, 'light'), N = colours(d, 'dark');
+    document.getElementById('liveSize').innerHTML = '<span class="chip" style="background:' + L.bg + ';box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)">' + sym(d, L, st.size) + '</span><span class="chip" style="background:' + N.bg + '">' + sym(d, N, st.size) + '</span>' +
+      '<p class="lbl">' + (st.size <= 20 ? 'Favicon range · ' : st.size <= 32 ? 'Interface range · ' : 'Display range · ') + 'drag the slider to test legibility</p>';
+  }
+
+  function apps(d, L, N) {
+    var nav = '<div class="navl"><span class="on"><i style="border-color:' + L.acc + '"></i>Dashboard</span><span><i></i>Projects</span><span><i></i>Deals</span><span><i></i>Assistant</span></div>';
+    var out = [];
+    out.push(['App icon', '<div class="in" style="background:linear-gradient(160deg,#2A2836,#121018)"><div class="squircle" style="background:' + (d.id === 'bloom' ? '#F5F1E9' : d.id === 'ledger' ? '#F5F1E9' : '#F5F1E9') + '">' + sym(d, L, 74) + '</div></div>']);
+    out.push(['Browser tab · 16px', '<div class="in" style="background:#E7E0D0"><div class="tabmock"><div class="bar"><div class="on">' + sym(d, L, 16) + 'BizzNex — Deals</div><div class="off">Inbox</div></div><div class="url">bizznex.app/deals</div></div></div>']);
+    out.push(['Sidebar', '<div class="in sbmock" style="background:' + L.bg + ';color:' + L.ink + ';font-size:20px">' + lockup(d, L) + nav + '</div>']);
+    out.push(['Business card · front and back', '<div class="in" style="background:var(--paper-3)"><div class="cards"><div class="card" style="background:' + N.bg + ';align-items:center;justify-content:center">' + sym(d, N, 54) + '</div><div class="card" style="background:' + L.bg + ';color:' + L.ink + ';flex-direction:column;justify-content:space-between"><span style="font-size:15px">' + lockup(d, L) + '</span><span style="font-size:11px;line-height:1.5"><b style="font-size:12.5px">Riley Chen</b><br>Founder<br><span style="font-family:var(--mono);font-size:10px">riley@example.com</span></span></div></div></div>']);
+    out.push(['Social avatar', '<div class="in" style="background:var(--paper-2)"><div style="display:flex;gap:14px;align-items:center"><div class="avatar" style="background:' + N.bg + '">' + sym(d, N, 52) + '</div><div class="avatar" style="background:' + L.bg + ';width:64px;height:64px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)">' + sym(d, L, 34) + '</div></div></div>']);
+    out.push(['Email signature', '<div class="in" style="background:#FFFFFF;color:#211D16"><div class="sig"><div class="who">Riley Chen</div><div style="color:#4E4A40">Founder</div><hr><span style="font-size:15px">' + lockup(d, L) + '</span><div style="font-family:var(--mono);font-size:10.5px;color:#8B8474;margin-top:6px">Business, run beautifully.</div></div></div>']);
+    return out.map(function (a) { return '<div class="app">' + a[1] + '<div class="cap">' + a[0] + '</div></div>'; }).join('');
+  }
+  function mis(d, L, style, text) {
+    return '<div class="mis"><div class="in"><div style="font-size:26px;' + style + '">' + lockup(d, L) + '</div></div><p><b>✕</b> ' + text + '</p></div>';
+  }
+
+  function renderVerdict() {
+    var rows = [['Reads at 16px', 'small'], ['Strength of idea', 'idea'], ['Fits the Aurora UI', 'fit'], ['Unmistakably BizzNex', 'own']];
+    var head = '<thead><tr><th></th>' + DIRS.map(function (d) { return '<th>' + d.name + (d.id === 'lift' ? ' · recommended' : '') + '</th>'; }).join('') + '</tr></thead>';
+    var body = '<tbody>' + rows.map(function (r) { return '<tr><td>' + r[0] + '</td>' + DIRS.map(function (d) { return '<td>' + dots(d.scores[r[1]]) + '</td>'; }).join('') + '</tr>'; }).join('') +
+      '<tr><td>Risk</td>' + DIRS.map(function (d) { return '<td>' + d.scores.risk + '</td>'; }).join('') + '</tr></tbody>';
+    document.getElementById('verdict').innerHTML = head + body;
+    var c = st.chosen ? byId(st.chosen) : null;
+    document.getElementById('pickName').textContent = c ? c.name : 'Nothing chosen yet';
+    document.getElementById('summary').textContent = summary();
+  }
+  function summary() {
+    var c = st.chosen ? byId(st.chosen) : byId(st.view);
+    return 'BizzNex identity → ' + c.name + (st.chosen ? '' : ' (viewing, not chosen yet)') + ' · ' + c.short;
+  }
+
+  /* ─────────────────────────  EXPORT  ───────────────────────── */
+  function symbolFile(d, ground) { return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="512" height="512">' + d.symbol(colours(d, ground)) + '</svg>'; }
+  function lockupFile(d, ground) {
+    var c = colours(d, ground), ctx = document.createElement('canvas').getContext('2d'), size = 40, mk = d.id === 'ledger' ? 52 : 48, gap = 14, text = '', w = 0, extra = '';
+    if (d.id === 'lift') {
+      ctx.font = '600 ' + size + 'px Fraunces';
+      var ls = -0.028 * size, wB = ctx.measureText('B').width + ls, wI = ctx.measureText('ı').width + ls;
+      w = ctx.measureText('Bızz' + 'Nex').width + ls * 7;
+      text = '<text x="' + (mk + gap) + '" y="42" font-family="Fraunces, serif" font-weight="600" font-size="' + size + '" letter-spacing="' + ls.toFixed(2) + '" fill="' + c.ink + '" style="font-variation-settings:\'opsz\' 144">Bızz' + 'Nex</text>';
+      var tx = mk + gap + wB + wI / 2 - 0.1 * size + ls / 2, ty = 42 - 0.655 * size - 0.2 * size;
+      extra = '<rect x="' + tx.toFixed(2) + '" y="' + ty.toFixed(2) + '" width="' + (0.2 * size) + '" height="' + (0.2 * size) + '" rx="' + (0.035 * size) + '" fill="' + c.acc + '"/>';
+    } else if (d.id === 'ledger') {
+      mk = 0; gap = 0;
+      ctx.font = '600 ' + size + 'px "IBM Plex Sans"';
+      var ls2 = 0.015 * size; w = ctx.measureText('BizzNex').width + ls2 * 7;
+      text = '<text x="' + (mk + gap) + '" y="36" font-family="IBM Plex Sans, sans-serif" font-weight="600" font-size="' + size + '" letter-spacing="' + ls2.toFixed(2) + '" fill="' + c.ink + '">BizzNex</text>';
+      extra = '<rect x="' + (mk + gap) + '" y="' + (36 + .2 * size - .06 * size) + '" width="' + w.toFixed(1) + '" height="' + (.06 * size) + '" fill="' + c.ink + '"/><rect x="' + (mk + gap) + '" y="' + (36 + .34 * size - .06 * size) + '" width="' + w.toFixed(1) + '" height="' + (.06 * size) + '" fill="' + c.acc + '"/>';
+    } else {
+      ctx.font = 'italic 520 ' + size + 'px Fraunces';
+      var ls3 = -0.035 * size; w = ctx.measureText('bizznex').width + ls3 * 7;
+      text = '<text x="' + (mk + gap) + '" y="40" font-family="Fraunces, serif" font-style="italic" font-weight="520" font-size="' + size + '" letter-spacing="' + ls3.toFixed(2) + '" fill="' + c.ink + '" style="font-variation-settings:\'opsz\' 144, \'SOFT\' 100, \'WONK\' 1">bizznex</text>';
+    }
+    var W = Math.ceil(mk + gap + w + 6);
+    var symbolPart = mk ? '<g transform="translate(0 4) scale(' + (mk / 48) + ')">' + d.symbol(c) + '</g>' : '';
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' 56">' + symbolPart + text + extra + '</svg>';
+  }
+  function download(name, txt) {
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'image/svg+xml' })); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000); toast('Saved ' + name);
+  }
+  function copy(text, msg) {
+    var done = function () { toast(msg); };
+    var fb = function () { var t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); done(); } catch (e) { toast(text); } t.remove(); };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fb); else fb();
+  }
+  var tt; function toast(m) { var el = document.getElementById('toast'); el.textContent = m; el.classList.add('show'); clearTimeout(tt); tt = setTimeout(function () { el.classList.remove('show'); }, 1500); }
+  var target = function () { return st.chosen ? byId(st.chosen) : byId(st.view); };
+
+  /* ─────────────────────────  THEME + EVENTS  ───────────────────────── */
+  function isDark() { var t = document.documentElement.getAttribute('data-theme'); return t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches; }
+  function syncTheme() { document.getElementById('themeBtn').textContent = isDark() ? 'Light page' : 'Dark page'; }
+  function render() { renderTabs(); renderDir(); renderVerdict(); }
+
+  document.addEventListener('click', function (e) {
+    var v = e.target.closest('[data-view]');
+    if (v) { st.view = v.dataset.view; save(); render(); return; }
+    var cp = e.target.closest('[data-copy]');
+    if (cp) { copy(cp.dataset.copy, 'Copied ' + cp.dataset.copy); return; }
+    if (e.target.closest('#gridBtn')) { st.grid = !st.grid; save(); renderDir(); return; }
+    if (e.target.closest('#chooseBtn')) { st.chosen = st.view; save(); render(); toast(byId(st.view).name + ' chosen'); return; }
+  });
+  document.addEventListener('input', function (e) {
+    if (e.target.id === 'sizeIn') { st.size = +e.target.value; document.getElementById('sizeOut').textContent = st.size + 'px'; save(); renderLive(); }
+  });
+  document.getElementById('themeBtn').addEventListener('click', function () { document.documentElement.setAttribute('data-theme', isDark() ? 'light' : 'dark'); syncTheme(); render(); });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () { syncTheme(); render(); });
+  document.getElementById('copyChoice').addEventListener('click', function () { copy(summary(), 'Copied your choice'); });
+  document.getElementById('dlSym').addEventListener('click', function () { var d = target(); download('bizznex-' + d.id + '-symbol.svg', symbolFile(d, 'light')); });
+  document.getElementById('dlSymDark').addEventListener('click', function () { var d = target(); download('bizznex-' + d.id + '-symbol-night.svg', symbolFile(d, 'dark')); });
+  document.getElementById('dlLock').addEventListener('click', function () { var d = target(); download('bizznex-' + d.id + '-lockup.svg', lockupFile(d, 'light')); });
+
+  syncTheme(); render();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(render);
+})();
+</script>
+</body>
+</html>
