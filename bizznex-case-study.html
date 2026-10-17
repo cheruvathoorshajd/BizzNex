@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<title>BizzNex — Case Study · Aurora Edition 2026</title>
+<meta name="description" content="The BizzNex case study: the business suite as it ships today, the container-less Aurora design system, the Studio windowing model, onboarding, and how it is built." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Outfit:wght@500;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   BizzNex · Case Study (Aurora Edition 2026)
+   One document, merged from the original design case study and the
+   Aurora style guide. Rendered IN the system it documents.
+   Tokens mirror apps/web/src/styles/aurora.scss (the shipped source of truth).
+   Served by the app at /case-study.html (see apps/web/vite.config.ts); the app's
+   opening page, apps/web/src/views/Landing.tsx, tells the product half and links here.
+   ============================================================ */
+:root {
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --radius: 3px;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --s1: 6px; --s2: 12px; --s3: 20px; --s4: 34px; --s5: 56px; --s6: 92px; --s7: 140px;
+  --gutter: clamp(1.25rem, 6vw, 6rem);
+  --gap: clamp(10px, 1.5vw, 22px);
+}
+:root[data-theme="light"] {
+  --paper: #F5F1E9; --paper-2: #EDE7DA; --paper-3: #E7E0D0;
+  --ink: #211D16; --ink-soft: #4E4A40; --muted: #8B8474; --faint: #C0B9A6;
+  --rule: rgba(33, 29, 22, .18); --rule-soft: rgba(33, 29, 22, .09);
+  --accent: #5B41E0; --accent-tint: rgba(91, 65, 224, .10);
+  --ok: #2E8F60; --warn: #B67A16; --bad: #C24A3E;
+  --bloom-op: .40; --grain-op: .05; --hover: rgba(33, 29, 22, .045);
+  --shadow: 0 12px 34px rgba(40, 30, 12, .16);
+}
+:root[data-theme="dark"] {
+  --paper: #141210; --paper-2: #1C1915; --paper-3: #23201A;
+  --ink: #EDE8DD; --ink-soft: #C3BCAD; --muted: #8E877A; --faint: rgba(237, 232, 221, .34);
+  --rule: rgba(237, 232, 221, .16); --rule-soft: rgba(237, 232, 221, .07);
+  --accent: #A897FF; --accent-tint: rgba(168, 151, 255, .14);
+  --ok: #46C98A; --warn: #E7B24E; --bad: #F0776B;
+  --bloom-op: .55; --grain-op: .05; --hover: rgba(237, 232, 221, .05);
+  --shadow: 0 16px 44px rgba(0, 0, 0, .5);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: var(--sans); font-size: 15.5px; line-height: 1.6; letter-spacing: -.006em;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  transition: background .5s var(--ease), color .5s var(--ease); overflow-x: hidden;
+}
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: 9999; pointer-events: none; opacity: var(--grain-op);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+::selection { background: var(--accent); color: var(--paper); }
+* { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--accent) 55%, transparent) transparent; }
+a { color: inherit; }
+button { font-family: inherit; }
+img, svg { max-width: 100%; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── utilities ── */
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums lining-nums; letter-spacing: -.02em; }
+.mono { font-family: var(--mono); }
+.spec { font-family: var(--mono); font-size: 11.5px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 20px; align-items: baseline; margin: 0; }
+.spec .k { color: var(--accent); }
+.sublab { font-family: var(--mono); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); margin: var(--s5) 0 var(--s3); }
+.cap { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .04em; margin-top: 14px; }
+p { max-width: 68ch; }
+p.small { font-size: 13.5px; color: var(--muted); }
+strong, b { font-weight: 600; }
+code { font-family: var(--mono); font-size: .86em; background: var(--accent-tint); color: var(--accent); padding: 1px 6px; border-radius: 2px; }
+h3 { font-family: var(--serif); font-weight: 500; font-size: 1.45rem; letter-spacing: -.02em; margin: var(--s5) 0 var(--s2); }
+h4 { font-family: var(--mono); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin: var(--s4) 0 var(--s2); font-weight: 500; }
+ul.clean { list-style: none; padding: 0; margin: var(--s2) 0; max-width: 72ch; }
+ul.clean li { padding: 9px 0 9px 22px; border-bottom: 1px solid var(--rule-soft); position: relative; }
+ul.clean li::before { content: '—'; position: absolute; left: 0; color: var(--accent); }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(20px, 4vw, 56px); align-items: start; }
+@media (max-width: 820px) { .two { grid-template-columns: minmax(0, 1fr); } }
+
+/* ── master grid ── */
+.page { overflow-x: clip; display: grid; grid-template-columns: [full-start] var(--gutter) [main-start] minmax(0, 1fr) [main-end] var(--gutter) [full-end]; }
+.page > * { grid-column: main-start / main-end; min-width: 0; }
+.page > .bleed { grid-column: full-start / full-end; }
+.rule { height: 1px; background: var(--rule); border: 0; margin: 0; }
+
+/* ── masthead ── */
+.mast { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 18px var(--gutter); background: color-mix(in srgb, var(--paper) 86%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--rule-soft); }
+.word { font-family: var(--serif); font-weight: 600; font-size: 19px; letter-spacing: -.02em; display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.word b { color: var(--accent); font-weight: 600; }
+/* Skyline logo (adopted 2026-10-16): mark + Outfit Bold wordmark */
+.word .sky { width: 28px; height: 28px; flex: none; }
+.word > span { font-family: 'Outfit', 'Avenir Next', system-ui, sans-serif; font-weight: 700; letter-spacing: -.02em; font-size: 20px; }
+.word .zz { letter-spacing: -.035em; }
+.mast nav { display: flex; gap: 24px; align-items: center; font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.mast nav a { text-decoration: none; transition: color .2s; }
+.mast nav a:hover { color: var(--ink); }
+.tgl { background: none; border: 0; cursor: pointer; font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 0; display: inline-flex; gap: 7px; align-items: center; }
+.tgl:hover { color: var(--ink); }
+@media (max-width: 980px) { .mast nav .opt { display: none; } }
+
+/* ── hero ── */
+.hero { position: relative; isolation: isolate; padding: clamp(40px, 9vw, 120px) 0 var(--s5); }
+.bloom { position: absolute; z-index: -1; top: -18%; right: -14%; width: 74vw; height: 78vh; pointer-events: none; filter: blur(64px); opacity: var(--bloom-op);
+  background:
+    radial-gradient(38% 48% at 66% 30%, #7C6CF5 0, transparent 62%),
+    radial-gradient(34% 44% at 90% 18%, #5FA8FF 0, transparent 62%),
+    radial-gradient(40% 42% at 58% 62%, #34E0C4 0, transparent 62%),
+    radial-gradient(34% 40% at 88% 72%, #FF9EC0 0, transparent 62%);
+  animation: float 34s var(--ease) infinite alternate; }
+@keyframes float { from { transform: translate(0, 0); } to { transform: translate(-4vw, 3vh); } }
+.hero h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(3.2rem, 10.5vw, 9rem); line-height: .92; letter-spacing: -.045em; margin: 22px 0 0; max-width: 15ch; text-wrap: balance; opacity: 0; transform: translateY(18px); animation: rise 1s var(--ease) .1s forwards; }
+.hero h1 em { font-style: italic; font-weight: 500; }
+@keyframes rise { to { opacity: 1; transform: none; } }
+.hero-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); align-items: end; margin-top: var(--s4); }
+.hero-grid .lede { grid-column: 1 / span 6; font-size: clamp(1.05rem, 1.6vw, 1.3rem); color: var(--ink-soft); line-height: 1.5; max-width: 44ch; margin: 0; }
+.hero-grid .cta { grid-column: 8 / 13; justify-self: end; display: flex; gap: 22px; flex-wrap: wrap; justify-content: flex-end; }
+.hero .meta { display: flex; flex-wrap: wrap; gap: 8px 26px; margin-top: var(--s4); font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.hero .meta b { color: var(--ink); font-weight: 500; }
+@media (max-width: 820px) { .hero-grid .lede { grid-column: 1 / -1; } .hero-grid .cta { grid-column: 1 / -1; justify-self: start; justify-content: flex-start; margin-top: var(--s3); } }
+@media (prefers-reduced-motion: reduce) { .bloom { animation: none; } .hero h1 { animation: none; opacity: 1; transform: none; } }
+.link { font-family: var(--mono); font-size: 13px; letter-spacing: .04em; text-transform: uppercase; text-decoration: none; color: var(--ink); border: 0; border-bottom: 1.5px solid var(--accent); padding: 0 0 3px; background: none; cursor: pointer; transition: color .2s; display: inline-flex; gap: 8px; align-items: center; }
+.link:hover { color: var(--accent); }
+.link.muted { border-bottom-color: var(--rule); }
+
+/* ── stat band + chart ── */
+.stat { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); align-items: start; margin-top: var(--s5); }
+.stat .hero-metric { grid-column: 1 / span 6; }
+.stat .big { font-family: var(--serif); font-weight: 500; font-size: clamp(3.4rem, 8vw, 6.4rem); line-height: .9; letter-spacing: -.04em; margin: 12px 0 6px; }
+.stat .delta { font-family: var(--mono); font-size: 13px; color: var(--ok); letter-spacing: .02em; }
+.lrows { grid-column: 8 / 13; align-self: end; }
+.lrows .row { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; padding: 15px 0; border-top: 1px solid var(--rule-soft); }
+.lrows .row:first-child { border-top: 0; }
+.lrows .l { font-size: 15px; color: var(--ink-soft); }
+.lrows .v { font-family: var(--mono); font-size: 22px; font-variant-numeric: tabular-nums; }
+.lrows .d { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-left: 10px; }
+@media (max-width: 820px) { .stat .hero-metric, .lrows { grid-column: 1 / -1; } .lrows { margin-top: var(--s4); } }
+.chart { margin-top: var(--s5); }
+.chart svg { width: 100%; height: clamp(150px, 24vw, 230px); display: block; overflow: visible; }
+.chart .xlab { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 12px; letter-spacing: .05em; }
+
+/* ── sections ── */
+section.sec { padding: var(--s6) 0 0; }
+.sec-h { display: flex; align-items: baseline; gap: clamp(16px, 3vw, 40px); margin: 0 0 var(--s4); padding-top: var(--s4); border-top: 1px solid var(--rule-soft); }
+.folio { font-family: var(--serif); font-weight: 500; font-size: clamp(2.4rem, 6vw, 4.4rem); line-height: .7; color: var(--faint); flex: none; }
+.sec-t { font-family: var(--serif); font-weight: 500; font-size: clamp(1.8rem, 3.4vw, 2.7rem); letter-spacing: -.02em; margin: 0 0 6px; line-height: 1.05; }
+.sec-lede { font-size: clamp(1.02rem, 1.6vw, 1.18rem); color: var(--ink-soft); max-width: 62ch; margin: 0 0 var(--s3); }
+.pullquote { font-family: var(--serif); font-weight: 400; font-style: italic; font-size: clamp(1.4rem, 3vw, 2.1rem); line-height: 1.3; letter-spacing: -.02em; margin: var(--s3) 0 0; max-width: 32ch; text-indent: -.4em; }
+.pullquote::before { content: '“'; color: var(--accent); }
+.pullquote b { font-style: normal; font-weight: 600; }
+
+/* ── full-bleed band ── */
+.band { background: var(--paper-2); margin-top: var(--s6); }
+.band .in { max-width: 1240px; margin-inline: auto; padding: var(--s6) var(--gutter); display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); }
+.band .lab { grid-column: 1 / -1; }
+.band blockquote { grid-column: 3 / 12; margin: var(--s3) 0 0; font-family: var(--serif); font-weight: 400; font-style: italic; font-size: clamp(1.5rem, 3.4vw, 2.5rem); line-height: 1.28; letter-spacing: -.02em; text-indent: -.4em; }
+.band blockquote b { font-style: normal; font-weight: 600; }
+.band blockquote::before { content: '“'; color: var(--accent); }
+.band .by { grid-column: 3 / 12; margin-top: var(--s3); font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .04em; }
+@media (max-width: 820px) { .band blockquote, .band .by { grid-column: 1 / -1; } }
+
+/* ── feature groups (the platform) ── */
+.groups { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap); margin-top: var(--s3); }
+.grp { border-top: 2px solid var(--ink); padding-top: 14px; }
+.grp .gk { font-family: var(--mono); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+.grp h5 { font-family: var(--serif); font-weight: 500; font-size: 1.5rem; letter-spacing: -.02em; margin: 6px 0 10px; }
+.grp ul { list-style: none; padding: 0; margin: 0; }
+.grp li { padding: 11px 0; border-top: 1px solid var(--rule-soft); font-size: 14px; color: var(--ink-soft); }
+.grp li b { display: block; color: var(--ink); font-weight: 600; font-size: 14.5px; }
+@media (max-width: 900px) { .groups { grid-template-columns: minmax(0, 1fr); } }
+
+/* ── tables ── */
+.scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table.ledger { width: 100%; border-collapse: collapse; margin: var(--s3) 0; }
+.scroll-x table.ledger { min-width: 640px; }
+table.ledger thead th { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 0 14px 12px 0; border-bottom: 1px solid var(--rule); vertical-align: bottom; }
+table.ledger thead th.r, table.ledger td.r { text-align: right; padding-right: 0; }
+table.ledger tbody td { padding: 14px 14px 14px 0; border-bottom: 1px solid var(--rule-soft); vertical-align: middle; font-size: 14px; }
+table.ledger tbody tr:hover td { background: var(--hover); }
+table.ledger.spec-t tbody td { vertical-align: top; }
+table.ledger.spec-t tbody td:first-child { font-weight: 500; white-space: nowrap; }
+td.yes { color: var(--ok); } td.no { color: var(--bad); }
+tr.pick td { background: var(--accent-tint) !important; }
+tr.pick td:first-child { color: var(--accent); }
+.pname { font-size: 16px; font-weight: 500; letter-spacing: -.01em; }
+.pmeta { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 3px; letter-spacing: .03em; }
+.money { font-family: var(--mono); font-size: 15px; font-variant-numeric: tabular-nums; }
+.spark { width: 88px; height: 26px; }
+
+/* ── direction cards ── */
+.dirs { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin: var(--s3) 0; }
+.dir { border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
+.dir.win { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-tint); }
+.dir .prev { height: 88px; display: flex; align-items: flex-end; padding: 12px; gap: 6px; }
+.dir .prev span { width: 20px; height: 20px; border-radius: 5px; border: 1px solid rgba(255,255,255,.4); }
+.dir .db { padding: 16px; }
+.dir .db h5 { margin: 0 0 6px; font-family: var(--serif); font-weight: 500; font-size: 1.25rem; letter-spacing: -.01em; }
+.dir .verdict { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; }
+.dir .db p { font-size: 13.5px; color: var(--ink-soft); margin: 8px 0 0; }
+.dir .stack { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 12px; letter-spacing: .04em; }
+.tag-pick { color: var(--accent); } .tag-no { color: var(--bad); } .tag-rec { color: var(--ok); }
+
+/* ── system: spectrum, swatches, type, scale ── */
+.spectrum { display: flex; margin-top: var(--s4); border: 1px solid var(--rule-soft); border-radius: var(--radius); overflow: hidden; }
+.spec-col { flex: 1; cursor: pointer; min-width: 0; background: none; border: 0; padding: 0; text-align: left; color: var(--ink); }
+.spec-col .band-c { height: clamp(80px, 11vw, 140px); }
+.spec-col .lbl { display: block; font-family: var(--mono); font-size: 11px; padding: 10px 12px 12px; }
+.spec-col .lbl .n { display: block; } .spec-col .lbl .h { color: var(--muted); }
+.spec-col:hover .band-c { filter: brightness(1.06); }
+@media (max-width: 640px) { .spectrum { flex-wrap: wrap; } .spec-col { flex: 1 1 33%; } }
+.sw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 12px; margin: var(--s3) 0; }
+.sw { border: 1px solid var(--rule-soft); border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: border-color .2s, transform .15s; background: var(--paper); text-align: left; padding: 0; color: var(--ink); font: inherit; }
+.sw:hover { border-color: var(--accent); transform: translateY(-2px); }
+.sw .chip-c { height: 52px; display: block; }
+.sw .lab { display: block; padding: 8px 10px; }
+.sw .nm { display: block; font-size: 13px; font-weight: 500; }
+.sw .hex { display: block; font-family: var(--mono); font-size: 10.5px; color: var(--muted); text-transform: uppercase; }
+.type-row { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); align-items: baseline; padding: 20px 0; border-bottom: 1px solid var(--rule-soft); }
+.type-row .lbl { grid-column: 1 / span 3; font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; color: var(--muted); }
+.type-row .samp { grid-column: 4 / 13; }
+.ty-d { font-family: var(--serif); font-weight: 500; font-size: clamp(2rem, 4.5vw, 3.2rem); letter-spacing: -.03em; line-height: 1; } .ty-d em { font-style: italic; }
+.ty-h { font-family: var(--serif); font-weight: 500; font-size: 1.7rem; letter-spacing: -.02em; }
+.ty-b { font-size: 1.05rem; } .ty-m { font-family: var(--mono); font-size: 1rem; } .ty-c { font-family: var(--mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+@media (max-width: 820px) { .type-row .lbl, .type-row .samp { grid-column: 1 / -1; } .type-row .samp { margin-top: 8px; } }
+.trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 3vw, 40px); margin-top: var(--s4); }
+@media (max-width: 900px) { .trio { grid-template-columns: minmax(0, 1fr); } }
+.scale { display: flex; flex-direction: column; gap: 10px; }
+.scale .r { display: flex; align-items: center; gap: 14px; }
+.scale .b { height: 12px; background: var(--accent-tint); border-left: 2px solid var(--accent); }
+.scale .t { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.radbox { width: 56px; height: 56px; background: var(--accent-tint); border: 1px solid var(--accent); border-radius: var(--radius); display: grid; place-items: end center; font-family: var(--mono); font-size: 10px; color: var(--accent); padding-bottom: 5px; }
+.elev { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.elevbox { width: 110px; height: 52px; background: var(--paper); border: 1px solid var(--rule-soft); border-radius: var(--radius); display: grid; place-items: center; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.elevbox.sh { box-shadow: var(--shadow); border-color: transparent; }
+
+/* ── live components (mirrors aurora.scss) ── */
+.specimen { display: flex; flex-wrap: wrap; gap: 16px 20px; align-items: center; padding: 22px; border: 1px dashed var(--rule); border-radius: var(--radius); }
+.btn { font-family: var(--sans); font-size: 14px; font-weight: 500; letter-spacing: -.01em; padding: 11px 20px; border-radius: var(--radius); border: 1px solid transparent; cursor: pointer; background: none; color: var(--ink); display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: transform .16s var(--ease), background .2s, border-color .2s, filter .2s, opacity .2s; }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--accent); color: var(--paper); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.ghost { border-color: var(--rule); } .btn.ghost:hover { border-color: var(--ink); }
+.btn.quiet { color: var(--muted); padding-inline: 8px; } .btn.quiet:hover { color: var(--ink); }
+.btn.danger { color: var(--bad); } .btn.danger:hover { background: color-mix(in srgb, var(--bad) 12%, transparent); }
+.btn.sm { padding: 7px 13px; font-size: 13px; }
+.btn[disabled] { opacity: .36; cursor: not-allowed; }
+.btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.swt { width: 46px; height: 26px; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--rule-soft); position: relative; cursor: pointer; transition: background .25s var(--ease), border-color .25s; flex: none; padding: 0; }
+.swt::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 2px; background: var(--paper); box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: left .25s var(--ease); }
+.swt.on { background: var(--accent); border-color: var(--accent); } .swt.on::after { left: 22px; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; }
+.seg button { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; border: 0; border-left: 1px solid var(--rule); background: none; color: var(--muted); padding: 9px 15px; cursor: pointer; transition: background .2s, color .2s; }
+.seg button:first-child { border-left: 0; } .seg button.on { background: var(--accent); color: var(--paper); }
+.check { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; user-select: none; position: relative; }
+.check input { position: absolute; opacity: 0; pointer-events: none; }
+.check .box { width: 18px; height: 18px; border: 1px solid var(--rule); border-radius: 2px; display: inline-grid; place-items: center; flex: none; transition: background .2s, border-color .2s; }
+.check .box.round { border-radius: 50%; }
+.check input:checked + .box { background: var(--accent); border-color: var(--accent); }
+.check .box svg { width: 11px; height: 11px; stroke: var(--paper); fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+.check input:checked + .box svg { opacity: 1; }
+.check input:focus-visible + .box { box-shadow: 0 0 0 3px var(--accent-tint); }
+.fields { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); row-gap: 18px; }
+.field { grid-column: span 4; } .field.wide { grid-column: span 8; }
+.field label { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.inp { font-family: var(--sans); font-size: 15px; padding: 11px 13px; background: transparent; border: 1px solid var(--rule); border-radius: var(--radius); color: var(--ink); width: 100%; transition: border-color .2s, box-shadow .2s; }
+.inp::placeholder { color: var(--faint); } textarea.inp { resize: vertical; min-height: 84px; }
+.inp:focus { outline: 0; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
+.inp.bad { border-color: var(--bad); }
+.field-err { font-family: var(--mono); font-size: 11.5px; color: var(--bad); margin: 7px 0 0; }
+@media (max-width: 820px) { .field, .field.wide { grid-column: 1 / -1; } }
+.tag { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding: 3px 9px; border-radius: 2px; border: 1px solid var(--rule); color: var(--ink-soft); }
+.tag.solid { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.tag.soft { background: var(--accent-tint); color: var(--accent); border-color: transparent; }
+.preview-badge { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--warn); border: 1px solid color-mix(in srgb, var(--warn) 40%, transparent); border-radius: 2px; padding: 2px 7px; }
+.stat-dot { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-soft); white-space: nowrap; }
+.stat-dot::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+.stat-dot.pending { color: var(--warn); } .stat-dot.progress { color: var(--accent); } .stat-dot.done { color: var(--ok); }
+.av { width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: var(--paper); font-family: var(--mono); font-size: 12px; display: grid; place-items: center; flex: none; }
+.avstack { display: flex; } .avstack .av { margin-left: -9px; border: 2px solid var(--paper); } .avstack .av:first-child { margin-left: 0; }
+.bar { height: 4px; width: 160px; background: var(--rule); border-radius: 2px; overflow: hidden; display: inline-block; } .bar > i { display: block; height: 100%; background: var(--accent); }
+.chip { font-family: var(--mono); font-size: 11px; letter-spacing: .04em; padding: 7px 12px; border: 1px solid var(--rule); border-radius: 999px; background: none; color: var(--ink-soft); cursor: pointer; }
+.chip.on { background: var(--accent-tint); border-color: var(--accent); color: var(--accent); }
+.tip { position: relative; border-bottom: 1px dashed var(--rule); cursor: help; }
+.tip::after { content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%) translateY(4px); background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 11px; padding: 6px 10px; border-radius: var(--radius); white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; }
+.tip:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+.iconset { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; }
+.iconset svg { width: 22px; height: 22px; stroke: var(--ink); fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.demo-lift { padding: 11px 18px; border: 1px solid var(--rule); border-radius: var(--radius); font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; transition: transform .25s var(--ease), border-color .25s; }
+.demo-lift:hover { transform: translateY(-4px); border-color: var(--accent); }
+.demo-arrow { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; display: inline-flex; gap: 8px; align-items: center; } .demo-arrow span { transition: transform .25s var(--ease); } .demo-arrow:hover span { transform: translateX(6px); }
+.demo-fill { width: 200px; height: 4px; background: var(--rule); border-radius: 2px; overflow: hidden; cursor: pointer; } .demo-fill > i { display: block; height: 100%; width: 28%; background: var(--accent); transition: width .5s var(--ease); } .demo-fill:hover > i { width: 100%; }
+.tgrp { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: var(--s4) 0 6px; }
+.tgrp:first-child { margin-top: 0; }
+.titem { display: flex; align-items: baseline; gap: 18px; padding: 15px 0; border-bottom: 1px solid var(--rule-soft); }
+.titem .idx { font-family: var(--mono); font-size: 12px; color: var(--faint); flex: none; width: 28px; }
+.titem .nm { font-size: 16px; font-weight: 500; flex: 1; }
+.titem .dt { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.tasks { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); margin-top: var(--s3); }
+.tasks .aside { grid-column: 1 / span 3; }
+.tasks .list { grid-column: 5 / 13; }
+@media (max-width: 820px) { .tasks .aside, .tasks .list { grid-column: 1 / -1; } .tasks .list { margin-top: var(--s3); } }
+.win { width: 280px; background: var(--paper); border: 1px solid var(--rule); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+.win-bar { display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 14px; background: var(--paper-2); border-bottom: 1px solid var(--rule-soft); }
+.win-bar .wt { flex: 1; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.win-btn { width: 24px; height: 24px; display: grid; place-items: center; border: 1px solid var(--rule); border-radius: 3px; background: none; color: var(--muted); cursor: pointer; font-family: var(--mono); }
+.win-body { padding: 16px; }
+.dock { display: inline-flex; gap: 6px; padding: 7px; background: color-mix(in srgb, var(--paper) 82%, transparent); backdrop-filter: blur(14px); border: 1px solid var(--rule); border-radius: 999px; box-shadow: var(--shadow); }
+.dock-item { padding: 8px 15px; border-radius: 999px; border: 1px solid transparent; background: none; cursor: pointer; color: var(--muted); font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.dock-item.active { color: var(--ink); background: var(--paper-2); border-color: var(--rule-soft); }
+.coach { width: 300px; background: var(--paper); border: 1px solid var(--rule); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 18px; }
+.coach h6 { font-family: var(--serif); font-weight: 500; font-size: 19px; margin: 8px 0 4px; letter-spacing: -.02em; }
+.coach p { margin: 0; font-size: 13px; color: var(--ink-soft); }
+.coach .dots { display: flex; gap: 5px; margin-top: 14px; } .coach .dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--rule); } .coach .dots i.on { background: var(--accent); width: 18px; border-radius: 3px; }
+.pill { display: inline-flex; align-items: center; gap: 10px; padding: 9px 16px 9px 11px; border-radius: 999px; border: 1px solid var(--rule); background: var(--paper); box-shadow: var(--shadow); font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; }
+.pill .ring { width: 18px; height: 18px; border-radius: 50%; border: 2.5px solid var(--rule); border-top-color: var(--accent); }
+
+/* ── flow (onboarding) ── */
+.flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap); margin-top: var(--s3); counter-reset: f; }
+.flow .st { border-top: 2px solid var(--rule); padding-top: 12px; counter-increment: f; }
+.flow .st::before { content: counter(f, decimal-leading-zero); font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: .1em; }
+.flow .st b { display: block; font-size: 15px; margin: 6px 0 4px; }
+.flow .st span { font-size: 13.5px; color: var(--ink-soft); }
+@media (max-width: 820px) { .flow { grid-template-columns: minmax(0, 1fr); } }
+
+/* ── keep current / colophon ── */
+.status { border: 1px solid var(--accent); border-left-width: 3px; border-radius: var(--radius); padding: 20px 22px; background: var(--accent-tint); }
+.status .badge { font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; background: var(--accent); color: var(--paper); padding: 4px 10px; border-radius: 2px; }
+.status ul { margin: 10px 0 0; padding: 0; list-style: none; }
+.status li { display: flex; gap: 10px; padding: 6px 0; font-size: 14px; }
+.status li .bx { width: 16px; height: 16px; border: 1.5px solid var(--accent); border-radius: 2px; flex: none; margin-top: 3px; }
+.colophon { margin: var(--s6) 0 var(--s5); padding-top: var(--s3); border-top: 1px solid var(--rule); font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .03em; line-height: 2; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s3); }
+.colophon b { color: var(--ink); font-weight: 500; }
+@media (max-width: 820px) { .colophon { grid-template-columns: minmax(0, 1fr); } }
+/* ── 11 · the logo ── */
+.sig-panel { position: relative; overflow: hidden; border-radius: var(--radius); background: #141210; color: #EDE8DD; --lit: #A897FF; display: grid; place-items: center; padding: clamp(46px, 8vw, 96px) 20px clamp(40px, 6vw, 70px); margin-top: var(--s3); }
+.sig-arc { position: absolute; left: 50%; top: clamp(18px, 3vw, 34px); transform: translateX(-50%); width: min(92%, 760px); height: auto; }
+.sig-lock { position: relative; display: inline-flex; flex-direction: column; align-items: center; font-size: clamp(42px, 8vw, 92px); line-height: 1; }
+.sig-row { position: relative; display: inline-flex; align-items: flex-end; gap: .22em; }
+.sig-mark { width: 1.3em; height: 1.3em; display: block; flex: none; }
+.sig-name { font-family: 'Outfit', 'Avenir Next', system-ui, sans-serif; font-weight: 700; letter-spacing: -.02em; line-height: .8; margin-bottom: .265em; white-space: nowrap; }
+.sig-name .zz { letter-spacing: -.035em; }
+.sig-rule { position: absolute; left: .095em; right: 0; bottom: .1275em; height: .07em; background: currentColor; border-radius: .035em; }
+.sig-tag { font-family: 'Outfit', 'Avenir Next', system-ui, sans-serif; font-weight: 500; font-size: .19em; letter-spacing: .26em; text-transform: uppercase; margin-top: .55em; white-space: nowrap; }
+.ref-fig { margin: 0 0 var(--s2); border-radius: var(--radius); overflow: hidden; background: #000; }
+.ref-fig img { display: block; width: 100%; height: auto; }
+.ref-fig .cap { background: var(--paper-2); margin: 0; padding: 8px 10px; }
+.mark-big { background: var(--paper-2); border-radius: var(--radius); display: grid; place-items: center; padding: 22px; color: var(--ink); }
+.mark-big svg { width: min(100%, 260px); height: auto; overflow: visible; }
+.toast { position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(16px); opacity: 0; pointer-events: none; background: var(--ink); color: var(--paper); padding: 11px 20px; border-radius: var(--radius); font-family: var(--mono); font-size: 12.5px; letter-spacing: .04em; transition: all .3s var(--ease); z-index: 100; box-shadow: var(--shadow); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs>
+  <symbol id="ic-tick" viewBox="0 0 20 20"><path d="M4 10.5l3.5 3.5 8.5-9.5"/></symbol>
+  <symbol id="ic-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="ic-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="ic-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="ic-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></symbol>
+  <symbol id="ic-brief" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></symbol>
+  <symbol id="ic-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></symbol>
+  <symbol id="ic-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M4 7l8 6 8-6"/></symbol>
+  <symbol id="ic-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-4 4V5z"/></symbol>
+  <symbol id="ic-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6M10 20a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="ic-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></symbol>
+  <symbol id="ic-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+</defs></svg>
+
+<!-- MASTHEAD -->
+<header class="mast">
+  <a class="word" href="#top"><svg class="sky" viewBox="0 0 48 48" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"><path d="M6 42V25H16"/><path d="M16 42V11L28 6V42"/><path d="M28 18H41V42"/><path d="M32 24.5H37M32 29.5H37M32 34.5H37"/><path d="M10 30V36"/><path d="M3.5 42H44.5"/></g><rect x="20.4" y="15.6" width="3.6" height="4.6" rx=".6" fill="var(--accent)"/></svg><span>Bi<span class="zz">zz</span>Nex</span></a>
+  <nav aria-label="Sections">
+    <a class="opt" href="#platform">Platform</a>
+    <a class="opt" href="#story">Story</a>
+    <a class="opt" href="#system">System</a>
+    <a class="opt" href="#studio">Studio</a>
+    <a class="opt" href="#onboarding">Onboarding</a>
+    <a class="opt" href="#build">Build</a>
+    <a class="opt" href="#logo">Logo</a>
+    <button class="tgl" id="tgl" type="button"><span id="tgld">◑</span> <span id="tglt">Dark</span></button>
+    <!-- the running app; change if it is hosted elsewhere -->
+    <a class="btn primary sm" data-app href="http://localhost:3005/?start=signup" style="color:var(--paper)">Open BizzNex</a>
+  </nav>
+</header>
+
+<div class="page" id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="bloom"></div>
+    <p class="spec"><span class="k">BizzNex — Business Suite</span><span>Aurora · Edition 2026</span><span>Case study</span></p>
+    <h1>Business, run<br><em>beautifully.</em></h1>
+    <div class="hero-grid">
+      <p class="lede">One quiet surface for projects, customers, deals, marketing and the tools in between — set like a page, not stacked in boxes. This is the story of how it was designed, and how it ships.</p>
+      <div class="cta">
+        <a data-app href="http://localhost:3005/?start=signup" class="link">Open the app <span>→</span></a>
+        <a href="#platform" class="link muted">Read the case study <span>↓</span></a>
+      </div>
+    </div>
+    <div class="meta">
+      <span>System <b>Aurora · v4 editorial</b></span>
+      <span>Layout <b>Studio</b></span>
+      <span>Set in <b>Fraunces</b> &amp; <b>IBM Plex</b></span>
+      <span>Updated <b>2026-10-16</b></span>
+    </div>
+  </section>
+
+  <!-- STAT BAND (the sample workspace a new account can start with) -->
+  <section class="stat" aria-label="Sample workspace">
+    <div class="hero-metric">
+      <p class="spec"><span class="k">§ Spend</span><span>Sample workspace · trailing 6 months</span></p>
+      <div class="big num">$27,600</div>
+      <div class="delta">▲ 78.8%&nbsp;&nbsp;across the six months</div>
+    </div>
+    <div class="lrows">
+      <div class="row"><span class="l">Active projects</span><span><span class="v">2</span></span></div>
+      <div class="row"><span class="l">Open tasks</span><span><span class="v">3</span><span class="d">1 in progress</span></span></div>
+      <div class="row"><span class="l">Pipeline</span><span><span class="v">$86.1k</span><span class="d">4 deals</span></span></div>
+      <div class="row"><span class="l">Completion</span><span><span class="v">40%</span><span class="d">2 of 5 tasks</span></span></div>
+    </div>
+  </section>
+  <section class="chart" aria-hidden="true">
+    <svg viewBox="0 0 1000 240" preserveAspectRatio="none">
+      <defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".22"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
+      <line x1="0" y1="60" x2="1000" y2="60" stroke="var(--rule-soft)"/><line x1="0" y1="140" x2="1000" y2="140" stroke="var(--rule-soft)"/><line x1="0" y1="220" x2="1000" y2="220" stroke="var(--rule)"/>
+      <path d="M0,196 C120,180 160,170 200,160 C300,140 340,128 400,122 C500,110 560,104 600,98 C700,80 760,70 800,62 C880,50 940,40 1000,36 L1000,220 L0,220 Z" fill="url(#fill)"/>
+      <path d="M0,196 C120,180 160,170 200,160 C300,140 340,128 400,122 C500,110 560,104 600,98 C700,80 760,70 800,62 C880,50 940,40 1000,36" fill="none" stroke="var(--accent)" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+      <circle cx="1000" cy="36" r="4.5" fill="var(--accent)"/>
+    </svg>
+    <div class="xlab"><span>−5 mo</span><span>−4</span><span>−3</span><span>−2</span><span>−1</span><span>Now</span></div>
+  </section>
+  <p class="cap">Figures are BizzNex's built-in sample business — the data a new account can start with in one click.</p>
+
+  <!-- 01 · PLATFORM -->
+  <section class="sec" id="platform">
+    <header class="sec-h"><span class="folio">01</span><div><p class="spec"><span class="k">§ The platform</span><span>What ships today</span></p><h2 class="sec-t">Fourteen pages, three groups, one surface</h2></div></header>
+    <p class="sec-lede">BizzNex began as a project and task manager with simulated tools. It now ships a real CRM, persisted tools and a built-in assistant — every page backed by the API and a PostgreSQL database.</p>
+    <div class="groups">
+      <div class="grp"><span class="gk">Workspace</span><h5>Plan the work</h5><ul>
+        <li><b>Dashboard</b>Spend, tasks and completion at a glance, a live 3D relationship globe, and an “Intelligence” note.</li>
+        <li><b>Projects</b>Each project tracks its spend trend, tasks and progress.</li>
+        <li><b>Tasks</b>Every task grouped by project, with dates and status.</li>
+      </ul></div>
+      <div class="grp"><span class="gk">CRM</span><h5>Know the customer</h5><ul>
+        <li><b>Contacts &amp; Companies</b>People linked to the companies they work for.</li>
+        <li><b>Deals</b>A pipeline board: Lead → Qualified → Proposal → Won or Lost, with a total per stage.</li>
+        <li><b>Activities</b>Calls, emails, meetings, notes and follow-ups, linked to contacts and deals.</li>
+      </ul></div>
+      <div class="grp"><span class="gk">Tools</span><h5>Everything in between</h5><ul>
+        <li><b>Assistant (Brenda)</b>Answers from your own BizzNex data — runs inside BizzNex, no outside service.</li>
+        <li><b>Publisher &amp; Newsletter</b>Social posts and email campaigns, saved in BizzNex. <span class="preview-badge">Delivery simulated</span></li>
+        <li><b>Notes, Events, Notifications, Calculator</b>The everyday utilities, each also available as a floating window.</li>
+      </ul></div>
+    </div>
+    <p class="small">Honesty rule: the only simulated step left is <em>external delivery</em> (real email sends and social posting need connected accounts), and every such spot carries a visible “simulated” badge.</p>
+  </section>
+
+  <!-- INTELLIGENCE BAND -->
+  <section class="band bleed" aria-label="Dashboard intelligence">
+    <div class="in">
+      <p class="spec lab"><span class="k">Intelligence</span><span>From the dashboard · sample workspace</span></p>
+      <blockquote><b>Website relaunch</b> has 1 task still pending — assigning it now keeps the timeline on track.</blockquote>
+      <p class="by">The dashboard names the project with the most pending tasks. One sentence, set as a pull-quote — the “insight” moment, never a widget.</p>
+    </div>
+  </section>
+
+  <!-- 02 · PROBLEM -->
+  <section class="sec" id="story">
+    <header class="sec-h"><span class="folio">02</span><div><p class="spec"><span class="k">§ The problem</span><span>Why redraw it</span></p><h2 class="sec-t">Why the default looks AI-generated</h2></div></header>
+    <p>The original BizzNex frontend was assembled from stock component libraries (Fluent UI, MUI) with drop-in cards, gradients and rounded boxes. It worked — and looked like every other tool built the same way. The root cause is <strong>distributional convergence</strong>: the industry defaults (Tailwind / shadcn) share one habit — <strong>containerization</strong>. Every element becomes a bordered, shadowed, rounded card, so screens collapse into a grid of near-identical boxes.</p>
+    <p>The brief was therefore not “pick nicer colours” but <strong>change the grouping mechanism</strong>. The thesis that carried every later decision:</p>
+    <p class="pullquote">Group with space, type and hairlines — never boxes. <b>Delete every border and the structure should still read.</b></p>
+  </section>
+
+  <!-- 03 · RESEARCH -->
+  <section class="sec">
+    <header class="sec-h"><span class="folio">03</span><div><p class="spec"><span class="k">§ Inputs</span><span>Research</span></p><h2 class="sec-t">Research &amp; north stars</h2></div></header>
+    <div class="two">
+      <div>
+        <h4>Three research passes</h4>
+        <ul class="clean">
+          <li><b>Why AI UIs look generic</b> — the containerization habit; the fix is editorial grouping.</li>
+          <li><b>Container-less, editorial layout</b> — named-line grids, whitespace (Gestalt proximity), hairline rules, asymmetric splits, bleed and overlap; data in borderless tables with tabular numerals.</li>
+          <li><b>Systems audit</b> — how restrained products carry density without boxes.</li>
+        </ul>
+      </div>
+      <div>
+        <h4>North stars</h4>
+        <ul class="clean">
+          <li><b>Mercury, Linear, Attio, Stripe, Anthropic</b> — data-dense but human.</li>
+          <li><b>AREA 17, RoAndCo</b> — editorial studios, for type and grid discipline.</li>
+          <li>Colophon credit, verbatim: <span class="mono">“Distilled from Mercury, Linear, Stripe &amp; Anthropic.”</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 · DIRECTIONS -->
+  <section class="sec">
+    <header class="sec-h"><span class="folio">04</span><div><p class="spec"><span class="k">§ Exploration</span><span>Three identities</span></p><h2 class="sec-t">Three visual directions</h2></div></header>
+    <p class="sec-lede">Three standalone, browser-openable style guides argued for competing identities. Only one satisfied the thesis.</p>
+    <div class="dirs">
+      <div class="dir win"><div class="prev" style="background:linear-gradient(120deg,#F5F1E9,#EDE7DA 60%,#E4DCC9)"><span style="background:#5B41E0"></span><span style="background:#211D16"></span><span style="background:#EDE7DA"></span></div>
+        <div class="db"><h5>1 · Aurora <span class="verdict tag-pick">✓ adopted</span></h5><p>Container-less and editorial. Warm paper, one accent, a single aurora mesh, asymmetric grid with bleed, hairline rules instead of cards, a borderless ledger table.</p><div class="stack">Fraunces × IBM Plex · asymmetric · type-led</div></div></div>
+      <div class="dir"><div class="prev" style="background:#F8FAFC"><span style="background:#4F46E5"></span><span style="background:#0EA5A4"></span><span style="background:#0F172A"></span></div>
+        <div class="db"><h5>2 · Meridian <span class="verdict tag-no">✕ rejected</span></h5><p>Enterprise SaaS — indigo and teal on cool slate, crisp 1px borders, elevated KPI tiles, hover-lift cards. Serious, but the exact card grid the brief set out to escape.</p><div class="stack">Plus Jakarta Sans · structured · data-dense</div></div></div>
+      <div class="dir"><div class="prev" style="background:radial-gradient(600px 300px at 20% 0%, rgba(139,92,246,.5), transparent 60%),radial-gradient(500px 300px at 100% 0%, rgba(34,211,238,.35), transparent 55%),#0B0E14"><span style="background:#8B5CF6"></span><span style="background:#22D3EE"></span><span style="background:#141922"></span></div>
+        <div class="db"><h5>3 · Nocturne <span class="verdict tag-no">✕ rejected</span></h5><p>Premium dark command centre — near-black canvas, electric violet→cyan gradient, glowing accents. Striking, but loud for an all-day business tool, and still box-based.</p><div class="stack">Space Grotesk · dark · vibrant · glow</div></div></div>
+    </div>
+    <div class="scroll-x"><table class="ledger spec-t">
+      <thead><tr><th>Dimension</th><th>Aurora — adopted</th><th>Meridian — rejected</th><th>Nocturne — rejected</th></tr></thead>
+      <tbody>
+        <tr class="pick"><td>Grouping</td><td>Whitespace + hairlines · <b>no boxes</b></td><td>Bordered, shadowed cards</td><td>Glowing bordered cards</td></tr>
+        <tr><td>Display font</td><td>Fraunces (serif, editorial voice)</td><td>Plus Jakarta Sans (geometric 800)</td><td>Space Grotesk (gradient clip-text)</td></tr>
+        <tr><td>Surface</td><td>Warm paper <code>#F5F1E9</code> · no white</td><td>Cool <code>#F8FAFC</code> + white cards</td><td>Near-black <code>#0B0E14</code></td></tr>
+        <tr><td>Accent</td><td>One flat <code>#5B41E0</code></td><td>Indigo + teal</td><td>Violet→cyan gradient</td></tr>
+        <tr><td>Radius</td><td>Single <code>3px</code></td><td>6 / 10 / 14px</td><td>8 / 14 / 18 / 999px</td></tr>
+        <tr><td>Theming</td><td class="yes">Light + dark</td><td class="no">Light only</td><td class="no">Dark only</td></tr>
+        <tr><td>Verdict</td><td class="yes">Satisfies the thesis</td><td class="no">Is the box grid we’re escaping</td><td class="no">Loud; competes with data</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Four iterations to get there</h3>
+    <div class="scroll-x"><table class="ledger spec-t">
+      <thead><tr><th>Iteration</th><th>Direction</th><th>Introduced</th><th>Why it changed</th></tr></thead>
+      <tbody>
+        <tr><td>v1 · Aurora (early)</td><td>Light, Apple-style</td><td>One gradient, glassy rounded cards</td><td>Baseline; still flat</td></tr>
+        <tr><td>v2 · Living</td><td>Animated, editorial</td><td>Breathing aurora, Fraunces display, dark toggle, click-to-copy</td><td>Wanted more character</td></tr>
+        <tr><td>v3 · Command Center</td><td>2026 SaaS</td><td>Dark-first bento, Stripe-grade table, AI card, ⌘K palette</td><td>Researched Linear / Stripe / Vercel</td></tr>
+        <tr class="pick"><td>v4 · Editorial ✓</td><td>Container-less</td><td><b>Killed the boxes</b> — asymmetric grid, hairlines, warm paper, one accent, ledger table</td><td>Fixed the “everything is a box” feel</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- 05 · SYSTEM -->
+  <section class="sec" id="system">
+    <header class="sec-h"><span class="folio">05</span><div><p class="spec"><span class="k">§ The system</span><span>Colour · type · space · motion</span><span>click a colour to copy</span></p><h2 class="sec-t">Aurora — the token reference</h2></div></header>
+    <p class="sec-lede">Every value is the shipped source of truth in <code>apps/web/src/styles/aurora.scss</code>. This page is rendered with the same tokens — switch to dark mode (top right) to see both palettes.</p>
+
+    <div class="spectrum">
+      <button class="spec-col" data-copy="#5B41E0"><span class="band-c" style="display:block;background:#5B41E0"></span><span class="lbl"><span class="n">Accent</span><span class="h">#5B41E0</span></span></button>
+      <button class="spec-col" data-copy="#7C6CF5"><span class="band-c" style="display:block;background:#7C6CF5"></span><span class="lbl"><span class="n">Iris</span><span class="h">#7C6CF5</span></span></button>
+      <button class="spec-col" data-copy="#5FA8FF"><span class="band-c" style="display:block;background:#5FA8FF"></span><span class="lbl"><span class="n">Sky</span><span class="h">#5FA8FF</span></span></button>
+      <button class="spec-col" data-copy="#34E0C4"><span class="band-c" style="display:block;background:#34E0C4"></span><span class="lbl"><span class="n">Aqua</span><span class="h">#34E0C4</span></span></button>
+      <button class="spec-col" data-copy="#FF9EC0"><span class="band-c" style="display:block;background:#FF9EC0"></span><span class="lbl"><span class="n">Blush</span><span class="h">#FF9EC0</span></span></button>
+      <button class="spec-col" data-copy="#F5F1E9"><span class="band-c" style="display:block;background:#F5F1E9"></span><span class="lbl"><span class="n">Paper</span><span class="h">#F5F1E9</span></span></button>
+      <button class="spec-col" data-copy="#211D16"><span class="band-c" style="display:block;background:#211D16"></span><span class="lbl"><span class="n">Ink</span><span class="h">#211D16</span></span></button>
+    </div>
+    <p class="cap">The accent, the four aurora-mesh stops (used once, blurred 64px, behind a hero), and the two ends of the warm neutral scale.</p>
+
+    <h3>Palette · light</h3>
+    <div class="sw-grid">
+      <button class="sw" data-copy="#F5F1E9"><span class="chip-c" style="background:#F5F1E9;border-bottom:1px solid rgba(0,0,0,.08)"></span><span class="lab"><span class="nm">Paper</span><span class="hex">#F5F1E9</span></span></button>
+      <button class="sw" data-copy="#EDE7DA"><span class="chip-c" style="background:#EDE7DA"></span><span class="lab"><span class="nm">Paper-2</span><span class="hex">#EDE7DA</span></span></button>
+      <button class="sw" data-copy="#E7E0D0"><span class="chip-c" style="background:#E7E0D0"></span><span class="lab"><span class="nm">Paper-3</span><span class="hex">#E7E0D0</span></span></button>
+      <button class="sw" data-copy="#211D16"><span class="chip-c" style="background:#211D16"></span><span class="lab"><span class="nm">Ink</span><span class="hex">#211D16</span></span></button>
+      <button class="sw" data-copy="#4E4A40"><span class="chip-c" style="background:#4E4A40"></span><span class="lab"><span class="nm">Ink-soft</span><span class="hex">#4E4A40</span></span></button>
+      <button class="sw" data-copy="#8B8474"><span class="chip-c" style="background:#8B8474"></span><span class="lab"><span class="nm">Muted</span><span class="hex">#8B8474</span></span></button>
+      <button class="sw" data-copy="#C0B9A6"><span class="chip-c" style="background:#C0B9A6"></span><span class="lab"><span class="nm">Faint</span><span class="hex">#C0B9A6</span></span></button>
+      <button class="sw" data-copy="#5B41E0"><span class="chip-c" style="background:#5B41E0"></span><span class="lab"><span class="nm">Accent</span><span class="hex">#5B41E0</span></span></button>
+      <button class="sw" data-copy="#2E8F60"><span class="chip-c" style="background:#2E8F60"></span><span class="lab"><span class="nm">OK</span><span class="hex">#2E8F60</span></span></button>
+      <button class="sw" data-copy="#B67A16"><span class="chip-c" style="background:#B67A16"></span><span class="lab"><span class="nm">Warn</span><span class="hex">#B67A16</span></span></button>
+      <button class="sw" data-copy="#C24A3E"><span class="chip-c" style="background:#C24A3E"></span><span class="lab"><span class="nm">Bad</span><span class="hex">#C24A3E</span></span></button>
+    </div>
+    <h3>Palette · dark</h3>
+    <div class="sw-grid">
+      <button class="sw" data-copy="#141210"><span class="chip-c" style="background:#141210"></span><span class="lab"><span class="nm">Paper</span><span class="hex">#141210</span></span></button>
+      <button class="sw" data-copy="#1C1915"><span class="chip-c" style="background:#1C1915"></span><span class="lab"><span class="nm">Paper-2</span><span class="hex">#1C1915</span></span></button>
+      <button class="sw" data-copy="#23201A"><span class="chip-c" style="background:#23201A"></span><span class="lab"><span class="nm">Paper-3</span><span class="hex">#23201A</span></span></button>
+      <button class="sw" data-copy="#EDE8DD"><span class="chip-c" style="background:#EDE8DD"></span><span class="lab"><span class="nm">Ink</span><span class="hex">#EDE8DD</span></span></button>
+      <button class="sw" data-copy="#C3BCAD"><span class="chip-c" style="background:#C3BCAD"></span><span class="lab"><span class="nm">Ink-soft</span><span class="hex">#C3BCAD</span></span></button>
+      <button class="sw" data-copy="#8E877A"><span class="chip-c" style="background:#8E877A"></span><span class="lab"><span class="nm">Muted</span><span class="hex">#8E877A</span></span></button>
+      <button class="sw" data-copy="#A897FF"><span class="chip-c" style="background:#A897FF"></span><span class="lab"><span class="nm">Accent</span><span class="hex">#A897FF</span></span></button>
+      <button class="sw" data-copy="#46C98A"><span class="chip-c" style="background:#46C98A"></span><span class="lab"><span class="nm">OK</span><span class="hex">#46C98A</span></span></button>
+      <button class="sw" data-copy="#E7B24E"><span class="chip-c" style="background:#E7B24E"></span><span class="lab"><span class="nm">Warn</span><span class="hex">#E7B24E</span></span></button>
+      <button class="sw" data-copy="#F0776B"><span class="chip-c" style="background:#F0776B"></span><span class="lab"><span class="nm">Bad</span><span class="hex">#F0776B</span></span></button>
+    </div>
+    <p class="small">In dark mode the accent lightens (<code>#5B41E0 → #A897FF</code>) and status colours brighten so they hold contrast on warm charcoal. No pure white, no pure black.</p>
+
+    <h3>Type — hierarchy by size and weight, not tint</h3>
+    <div class="type-row"><div class="lbl">Display / Fraunces</div><div class="samp ty-d">Business, run <em>beautifully</em></div></div>
+    <div class="type-row"><div class="lbl">Heading / Fraunces</div><div class="samp ty-h">Projects &amp; pipeline</div></div>
+    <div class="type-row"><div class="lbl">Body / IBM Plex Sans</div><div class="samp ty-b">Organise the work and keep the team aligned, without the noise.</div></div>
+    <div class="type-row"><div class="lbl">Data / IBM Plex Mono</div><div class="samp ty-m num">$27,600.00 · 40% · ▲ 78.8%</div></div>
+    <div class="type-row"><div class="lbl">Label / Mono caps</div><div class="samp ty-c">§ Trailing six months</div></div>
+
+    <div class="trio">
+      <div>
+        <h4>Spacing — asymmetric</h4>
+        <div class="scale">
+          <div class="r"><span class="b" style="width:6px"></span><span class="t">--s1 · 6</span></div>
+          <div class="r"><span class="b" style="width:12px"></span><span class="t">--s2 · 12</span></div>
+          <div class="r"><span class="b" style="width:20px"></span><span class="t">--s3 · 20</span></div>
+          <div class="r"><span class="b" style="width:34px"></span><span class="t">--s4 · 34</span></div>
+          <div class="r"><span class="b" style="width:56px"></span><span class="t">--s5 · 56</span></div>
+          <div class="r"><span class="b" style="width:92px"></span><span class="t">--s6 · 92</span></div>
+          <div class="r"><span class="b" style="width:140px"></span><span class="t">--s7 · 140</span></div>
+        </div>
+      </div>
+      <div>
+        <h4>Radius · elevation</h4>
+        <div class="elev"><div class="radbox">3px</div><div class="elevbox">flat</div><div class="elevbox sh">overlay</div></div>
+        <p class="cap">One radius. Only marks (dots, avatars) round. Flat by default; one soft shadow for overlays, windows, the tour card and the toast.</p>
+      </div>
+      <div>
+        <h4>Motion</h4>
+        <ul class="clean">
+          <li>One curve: <code>cubic-bezier(.22, 1, .36, 1)</code>.</li>
+          <li>120ms press · 200ms hover · 250ms transform · 500ms theme.</li>
+          <li>Set-pieces: hero rise 1s · aurora drift 34s · toast 300ms.</li>
+          <li>Static blocks never animate; <code>prefers-reduced-motion</code> is honoured.</li>
+        </ul>
+      </div>
+    </div>
+    <h4>Signature details</h4>
+    <ul class="clean">
+      <li><b>Folio numbers</b> in faint serif open every section (01–12 here).</li>
+      <li><b>§ mono spec-labels</b> in accent-keyed uppercase — the editorial fingerprint.</li>
+      <li><b>5% film grain</b> — a fixed SVG fractal-noise overlay removes the flat “screenshot” feel.</li>
+      <li><b>Accent-tinted thin scrollbars</b>; <code>::selection</code> uses the accent.</li>
+    </ul>
+  </section>
+
+  <!-- 06 · COMPONENTS -->
+  <section class="sec" id="components">
+    <header class="sec-h"><span class="folio">06</span><div><p class="spec"><span class="k">§ Gallery</span><span>Live</span></p><h2 class="sec-t">The component library</h2></div></header>
+    <p class="sec-lede">Every element below uses the shipped Aurora classes — the real vocabulary, not a mockup of it. Hover, press and toggle them.</p>
+
+    <p class="sublab">§ Buttons — one accent, one radius</p>
+    <div class="specimen">
+      <button class="btn primary"><svg><use href="#ic-plus"/></svg> New deal</button>
+      <button class="btn ghost">Cancel</button>
+      <button class="btn quiet">Skip</button>
+      <button class="btn danger">Delete</button>
+      <button class="btn primary sm">Small</button>
+      <button class="btn ghost" disabled>Disabled</button>
+      <a class="link" href="#components">Text action <span>→</span></a>
+    </div>
+
+    <p class="sublab">§ Toggles &amp; selectors</p>
+    <div class="specimen" style="gap:22px 30px">
+      <button class="swt on" role="switch" aria-checked="true" aria-label="Example switch"></button>
+      <span class="seg"><button class="on">Compose</button><button>Analytics</button></span>
+      <span class="seg"><button class="on">EN</button><button>ES</button><button>FR</button></span>
+      <label class="check"><input type="checkbox" checked><span class="box"><svg viewBox="0 0 20 20"><use href="#ic-tick"/></svg></span> Notify team</label>
+      <label class="check"><input type="radio" name="cad"><span class="box round"></span> Weekly</label>
+      <label class="check"><input type="radio" name="cad" checked><span class="box round"></span> Monthly</label>
+      <button class="chip on">LinkedIn</button><button class="chip">Twitter</button>
+    </div>
+
+    <p class="sublab">§ Inputs — hairline-bordered, never filled cards</p>
+    <div class="fields">
+      <div class="field wide"><label>Deal title</label><input class="inp" value="Brand refresh retainer"></div>
+      <div class="field"><label>Stage</label><select class="inp"><option>Proposal</option><option>Lead</option><option>Qualified</option><option>Won</option><option>Lost</option></select></div>
+      <div class="field wide"><label>Notes</label><textarea class="inp">Wants a phased rollout, starting with the logo suite.</textarea></div>
+      <div class="field"><label>Work email</label><input class="inp bad" value="ava@northwind"><p class="field-err">That doesn’t look like a valid email address.</p></div>
+    </div>
+
+    <p class="sublab">§ Indicators</p>
+    <div class="specimen" style="gap:20px 26px">
+      <span class="stat-dot pending">Pending</span><span class="stat-dot progress">In progress</span><span class="stat-dot done">Completed</span>
+      <span class="tag">Lead</span><span class="tag soft">For you</span><span class="tag solid">New</span><span class="preview-badge">Posting simulated</span>
+      <span class="avstack"><span class="av">AL</span><span class="av" style="background:#5FA8FF">RM</span><span class="av" style="background:#34E0C4;color:#211D16">TO</span></span>
+      <span class="bar"><i style="width:40%"></i></span>
+      <span class="tip" data-tip="Closes in 18 days">Timeline</span>
+    </div>
+
+    <p class="sublab">§ Iconography — one hairline set, 24px grid, 1.7px stroke</p>
+    <div class="iconset">
+      <svg viewBox="0 0 24 24"><use href="#ic-grid"/></svg><svg viewBox="0 0 24 24"><use href="#ic-folder"/></svg><svg viewBox="0 0 24 24"><use href="#ic-user"/></svg><svg viewBox="0 0 24 24"><use href="#ic-brief"/></svg><svg viewBox="0 0 24 24"><use href="#ic-chat"/></svg><svg viewBox="0 0 24 24"><use href="#ic-mail"/></svg><svg viewBox="0 0 24 24"><use href="#ic-cal"/></svg><svg viewBox="0 0 24 24"><use href="#ic-bell"/></svg><svg viewBox="0 0 24 24"><use href="#ic-search"/></svg><svg viewBox="0 0 24 24"><use href="#ic-arrow"/></svg>
+    </div>
+
+    <p class="sublab">§ Motion &amp; transitions</p>
+    <div class="specimen" style="gap:24px 30px">
+      <span class="demo-lift">Hover — lift</span>
+      <span class="demo-arrow">Hover — arrow <span>→</span></span>
+      <span class="demo-fill" title="hover to fill"><i></i></span>
+      <button class="btn primary sm">Press me</button>
+    </div>
+
+    <p class="sublab">§ Borderless ledger — the anti-card for data</p>
+    <div class="scroll-x"><table class="ledger">
+      <thead><tr><th>Project</th><th>Status</th><th class="r">Spend</th><th class="r">Trend</th></tr></thead>
+      <tbody>
+        <tr><td><div class="pname">Website relaunch</div><div class="pmeta">3 TASKS · 1 IN PROGRESS · YOU</div></td><td><span class="stat-dot progress">In progress</span></td><td class="r money">$18,400</td>
+          <td class="r"><svg class="spark" viewBox="0 0 88 26"><polyline points="2,22 18,17 35,14 52,10 69,7 86,4" fill="none" stroke="var(--ok)" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round"/></svg></td></tr>
+        <tr><td><div class="pname">Q4 sales push</div><div class="pmeta">2 TASKS · 1 PENDING · YOU</div></td><td><span class="stat-dot pending">Pending</span></td><td class="r money">$9,200</td>
+          <td class="r"><svg class="spark" viewBox="0 0 88 26"><polyline points="2,22 18,20 35,15 52,17 69,9 86,4" fill="none" stroke="var(--accent)" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round"/></svg></td></tr>
+      </tbody>
+    </table></div>
+
+    <p class="sublab">§ Task list — asymmetric two-column</p>
+    <div class="tasks">
+      <div class="aside"><p class="spec">Across two projects,<br>grouped by status.</p></div>
+      <div class="list">
+        <p class="tgrp">In progress</p>
+        <div class="titem"><span class="idx">01</span><span class="nm">Build pricing page</span><span class="dt">IN 5 DAYS</span></div>
+        <p class="tgrp">Pending</p>
+        <div class="titem"><span class="idx">02</span><span class="nm">QA on mobile</span><span class="dt">IN 9 DAYS</span></div>
+        <div class="titem"><span class="idx">03</span><span class="nm">Outbound sequence v2</span><span class="dt">IN 12 DAYS</span></div>
+        <p class="tgrp">Completed</p>
+        <div class="titem" style="opacity:.55"><span class="idx">04</span><span class="nm">Finalise homepage copy</span><span class="dt">DONE</span></div>
+      </div>
+    </div>
+
+    <p class="sublab">§ Studio &amp; onboarding chrome — window, dock, tour card, checklist</p>
+    <div class="specimen" style="align-items:flex-start;gap:28px">
+      <div class="win">
+        <div class="win-bar"><span class="wt">Calculator</span><button class="win-btn" aria-label="Minimise">–</button><button class="win-btn" aria-label="Close">×</button></div>
+        <div class="win-body">
+          <div class="num" style="font-size:26px;text-align:right;padding:8px 6px;border-bottom:1px solid var(--rule)">27,600.00</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:8px"><button class="win-btn" style="width:auto;height:34px">7</button><button class="win-btn" style="width:auto;height:34px">8</button><button class="win-btn" style="width:auto;height:34px">9</button><button class="win-btn" style="width:auto;height:34px;color:var(--accent)">÷</button></div>
+        </div>
+      </div>
+      <div class="coach">
+        <p class="spec"><span class="k">Tour</span><span>04 / 08</span></p>
+        <h6>Click to open, right-click to float</h6>
+        <p>Click a tool to open it as a full page. Right-click it to keep it beside your work in a small window.</p>
+        <div class="dots"><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="dock"><button class="dock-item active">Calculator</button><button class="dock-item">Assistant</button><button class="dock-item">Notes</button></div>
+        <span class="pill"><span class="ring"></span>Get started <span class="num" style="color:var(--muted)">3/12</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 · STUDIO -->
+  <section class="sec" id="studio">
+    <header class="sec-h"><span class="folio">07</span><div><p class="spec"><span class="k">§ Interaction model</span><span>Windowing</span></p><h2 class="sec-t">“Use every feature at once” — Studio</h2></div></header>
+    <p class="sec-lede">A parallel exploration asked how a business owner could run many tools at once. Four prototypes shared the Aurora palette; only the interaction layer differed.</p>
+    <div class="scroll-x"><table class="ledger spec-t">
+      <thead><tr><th>Aspect</th><th>Hybrid</th><th>Canvas</th><th>Panels</th><th>Studio ✓</th></tr></thead>
+      <tbody>
+        <tr><td>Shell</td><td>Sidebar + main</td><td>66px rail + canvas</td><td>Sidebar + main</td><td>Sidebar + main</td></tr>
+        <tr><td>Open trigger</td><td>L-click inline widget / R-click window</td><td>Click = window</td><td>Click = toggle panel</td><td>L-click <b>full page</b> / R-click window</td></tr>
+        <tr><td>Data views windowed?</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
+        <tr><td>Resize / minimise</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td></tr>
+        <tr><td>Dock</td><td>Auto-hide</td><td>Always shown</td><td class="no">None</td><td>Auto-hide when empty</td></tr>
+        <tr class="pick"><td>Verdict</td><td>Right idea, cramped inline</td><td>Too much — loses readable pages</td><td>Too little</td><td>Built</td></tr>
+      </tbody>
+    </table></div>
+    <ul class="clean">
+      <li><b>Left-click a tool</b> → its full-page version opens inline, like Dashboard or Deals, with an <b>“Open in window ↗”</b> button in the top bar.</li>
+      <li><b>Right-click a tool</b> → a floating window with the tool’s <b>compact widget</b>, not the full page — a focused work surface vs a glanceable utility.</li>
+      <li><b>Windows</b> open at a uniform <b>280 × 380</b>, drag by the title bar, resize, minimise and close; focus raises them. On phones they go full-width.</li>
+      <li><b>The dock</b> appears with the first window and disappears with the last. A <b>sidebar dot</b> marks tools with an open window.</li>
+      <li>Workspace and CRM pages stay inline-only — data views need the full page.</li>
+    </ul>
+  </section>
+
+  <!-- 08 · ONBOARDING -->
+  <section class="sec" id="onboarding">
+    <header class="sec-h"><span class="folio">08</span><div><p class="spec"><span class="k">§ First run</span><span>New · demo · returning</span></p><h2 class="sec-t">Onboarding that knows who you are</h2></div></header>
+    <p class="sec-lede">The first minutes decide whether a tool sticks. BizzNex guides people who are new — and gets out of the way of people who aren’t.</p>
+    <div class="flow">
+      <div class="st"><b>The landing page</b><span>The app opens on a short product page that ends in one choice: create an account, explore the demo, or sign in. It links here for the design story.</span></div>
+      <div class="st"><b>Sign up or sign in</b><span>Validation next to each field, a password-strength meter, show/hide, a Caps Lock warning — and a one-click demo.</span></div>
+      <div class="st"><b>Guided first run</b><span>A short setup wizard, a spotlight tour, a self-ticking checklist and a guide on each page’s first visit.</span></div>
+    </div>
+    <div class="scroll-x"><table class="ledger spec-t">
+      <thead><tr><th></th><th>New account</th><th>Demo</th><th>Returning sign-in</th></tr></thead>
+      <tbody>
+        <tr><td>Setup wizard</td><td>6 steps — business, goals, look, sample data</td><td>4 steps — no business or data steps</td><td class="no">None</td></tr>
+        <tr><td>Product tour</td><td>Offered · 8 stops</td><td>Offered · 8 stops</td><td>On request · 7 stops</td></tr>
+        <tr><td>Checklist &amp; page guides</td><td class="yes">Yes — ticks off from real records</td><td class="yes">Yes — counts this visit only</td><td class="no">None</td></tr>
+        <tr><td>Progress saved</td><td>On the account (any device)</td><td>In this browser — the demo is shared</td><td>—</td></tr>
+        <tr class="pick"><td>Help (?) menu</td><td>Tour · page guide · feature guide · checklist · setup · sample data</td><td>Tour · page guide · feature guide · checklist · setup · create your own account</td><td>Tour · page guide · feature guide · sample data</td></tr>
+      </tbody>
+    </table></div>
+    <p class="small">Sample data is a real example business (2 projects, 3 companies, 4 deals, activities, notes, a post, a newsletter, events). Its record ids are remembered, so the checklist never counts it and one click removes it without touching anything the user created.</p>
+  </section>
+
+  <!-- 09 · BUILD -->
+  <section class="sec" id="build">
+    <header class="sec-h"><span class="folio">09</span><div><p class="spec"><span class="k">§ Implementation</span><span>apps/web · apps/api</span></p><h2 class="sec-t">How it ships</h2></div></header>
+    <p class="sec-lede">The design is not a mockup — it is the running app. Here is what implements each decision.</p>
+    <div class="two">
+      <div>
+        <h4>Stack</h4>
+        <ul class="clean">
+          <li><b>Web</b> — React 18, TypeScript, Vite; Redux Toolkit and RTK Query; react-intl; one hand-written <code>aurora.scss</code>; three.js for the dashboard globe.</li>
+          <li><b>API</b> — NestJS, Prisma, PostgreSQL, JWT auth; shared Zod contracts in <code>@bizznex/shared</code>.</li>
+          <li><b>Dropped</b> Fluent UI, MUI, framer-motion and styled-components — they impose the card idiom the brief rejects.</li>
+          <li><b>No outside AI service.</b> Brenda answers from the user’s own records with no API key and no network calls.</li>
+        </ul>
+        <h4>Data model</h4>
+        <ul class="clean">
+          <li><b>Workspace</b> — Project, Task, Note.</li>
+          <li><b>CRM</b> — Company, Contact, Deal (Lead · Qualified · Proposal · Won · Lost), Activity (Call · Email · Meeting · Note · Task).</li>
+          <li><b>Tools</b> — Post, Campaign, Event, Notification. Winning a deal writes a real notification.</li>
+          <li><b>Onboarding</b> — one JSON field on the user, merged by <code>PATCH /onboarding</code>; sample data via <code>POST / DELETE /onboarding/sample</code>.</li>
+        </ul>
+      </div>
+      <div>
+        <h4>App shell</h4>
+        <ul class="clean">
+          <li>248px sticky sidebar with three groups — <b>Workspace · CRM · Tools</b> — and a user footer.</li>
+          <li>Top bar: breadcrumb, search on Projects, Tasks and every CRM page, “Open in window ↗”, EN / ES / FR, theme, and the <b>?</b> Help menu.</li>
+          <li>Window state in <code>layout/useWindows.ts</code>; drag geometry stays inside each window to avoid re-renders.</li>
+          <li>Each tool has a full page (<code>registry.tsx</code>) and a compact widget (<code>widgets.tsx</code>).</li>
+        </ul>
+        <h4>Cross-cutting</h4>
+        <ul class="clean">
+          <li><b>Theming</b> — <code>data-theme</code> on <code>&lt;html&gt;</code> flips the token set, saved per browser.</li>
+          <li><b>i18n</b> — navigation and app chrome in English, Spanish and French; CRM and onboarding copy is English for now.</li>
+          <li><b>Responsive</b> — breakpoints at 900 / 860 / 640 / 480px; the sidebar becomes a drawer, windows go full-width.</li>
+          <li><b>Accessibility</b> — visible focus rings, labelled icon buttons, keyboard-driven tour (← → Esc), dialogs with focus placement.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 · DECISIONS -->
+  <section class="sec">
+    <header class="sec-h"><span class="folio">10</span><div><p class="spec"><span class="k">§ Rationale</span><span>Easy to miss</span></p><h2 class="sec-t">Small decisions log</h2></div></header>
+    <div class="scroll-x"><table class="ledger spec-t">
+      <thead><tr><th>Decision</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Warm paper, no pure white</td><td>White + boxes is the “AI-generated” tell; warm cream reads as considered and calm.</td></tr>
+        <tr><td>Exactly one accent</td><td>Forces hierarchy through type and space, not colour.</td></tr>
+        <tr><td>3px radius everywhere</td><td>Near-sharp reads editorial; only marks go round, so roundness means “this is a mark”.</td></tr>
+        <tr><td>Hairlines over borders</td><td>Two rule alphas (.18 / .09) group content without drawing boxes.</td></tr>
+        <tr><td>Asymmetric spacing</td><td>6 / 12 / 20 / 34 / 56 / 92 / 140 grows non-linearly, so whitespace creates rhythm.</td></tr>
+        <tr><td>Mono for data and labels</td><td>Tabular numerals align; uppercase mono labels are the fingerprint.</td></tr>
+        <tr><td>Aurora used once per screen</td><td>One blurred mesh is a signature; everywhere would be noise.</td></tr>
+        <tr><td>Full page vs compact widget</td><td>Inline = focused work; window = glanceable utility. Same tool, two honest sizes.</td></tr>
+        <tr><td>“Simulated” badges</td><td>Only external delivery is simulated, and it says so where it happens.</td></tr>
+        <tr><td>Onboarding only for the new</td><td>Returning users get a Help menu, not a tour they didn’t ask for.</td></tr>
+        <tr><td>Demo progress stays in the browser</td><td>Everyone shares one demo account; nobody’s progress should leak into anyone else’s visit.</td></tr>
+        <tr><td>Sample data remembered by id</td><td>So the checklist counts only real work, and removal never touches the user’s own records.</td></tr>
+        <tr><td>Clear the cache on account switch</td><td>One account must never see another’s cached data.</td></tr>
+        <tr><td>A local assistant</td><td>Answers from your own data with no keys, no cost and nothing leaving the product.</td></tr>
+        <tr><td>The Skyline logo</td><td>Three towers on one baseline with one lit window, the light that says the business is open. Developed from the founder’s own reference sketch, then drawn with one stroke on a 48-unit grid so it holds from a 16px tab to a sign. <a href="/brand/skyline.html">Full identity →</a></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- 11 · THE LOGO -->
+  <section class="sec" id="logo">
+    <header class="sec-h"><span class="folio">11</span><div><p class="spec"><span class="k">§ Identity</span><span>Decided 16 Oct 2026</span></p><h2 class="sec-t">The logo: Skyline</h2></div></header>
+    <p class="sec-lede">The name stays <b>BizzNex</b>. The logo is <b>Skyline</b>: three towers standing on one baseline with the name, and one lit window, the light that says the business is open.</p>
+
+    <div class="sig-panel" aria-label="The Skyline signature lockup">
+      <svg class="sig-arc" viewBox="0 0 200 100" aria-hidden="true"><path d="M4 100A96 96 0 0 1 196 100" fill="none" stroke="currentColor" stroke-width=".7" opacity=".8"/></svg>
+      <div class="sig-lock">
+        <div class="sig-row"><svg class="sig-mark" viewBox="0 0 48 48" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"><path d="M6 42V25H16"/><path d="M16 42V11L28 6V42"/><path d="M28 18H41V42"/><path d="M32 24.5H37M32 29.5H37M32 34.5H37"/><path d="M10 30V36"/><path d="M3.5 42H44.5"/></g><rect x="20.4" y="15.6" width="3.6" height="4.6" rx=".6" fill="var(--lit, var(--accent))"/></svg><span class="sig-name">Bi<span class="zz">zz</span>Nex</span><span class="sig-rule"></span></div>
+        <span class="sig-tag">Business, run beautifully.</span>
+      </div>
+    </div>
+    <p class="cap">The signature lockup, with the horizon arc and the tagline. In the product the logo appears without the arc: in the sidebar, on sign-in, in the setup wizard, on the landing page and as the browser-tab icon.</p>
+
+    <h3>The decision</h3>
+    <div class="scroll-x"><table class="ledger spec-t">
+      <thead><tr><th>Question</th><th>Decision</th><th>What else was considered</th></tr></thead>
+      <tbody>
+        <tr class="pick"><td>Name</td><td><b>Keep BizzNex.</b> Its “Nex” already carries the Latin <i>nexus</i>, a binding together: the whole business connected.</td><td>Dozens of Latin, Hebrew and “Nex”-family names, each checked against existing companies. Finalists included Statio, Oriens, Limen, Diurna, Innexa and AuxiNex.</td></tr>
+        <tr class="pick"><td>Logo</td><td><b>Skyline</b>, developed from the founder’s own reference drawing.</td><td>Arch and Rise (from the same reference); Lift, Ledger and Bloom (an earlier proposal); and an eight-mark picker.</td></tr>
+        <tr><td>Colour</td><td>BizzNex colours: ink on warm paper, with the window in Aurora violet, so the logo matches the app.</td><td>The reference’s cream on black with an orange window, kept as an alternative.</td></tr>
+        <tr><td>Wordmark</td><td>Outfit Bold, tracked −2%, with the “zz” tightened to −3.5%.</td><td>Fraunces serif, Plex Sans capitals, Plex Mono lowercase.</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="two" style="margin-top:var(--s4)">
+      <div>
+        <h3 style="margin-top:0">From the reference</h3>
+        <figure class="ref-fig"><img data-ref src="image.png" alt="The founder’s reference: a line-drawn skyline beside a bold BizzNex wordmark on black, under a thin arc" onerror="this.closest('figure').style.display='none'"><figcaption class="cap">The founder’s reference image.</figcaption></figure>
+        <ul class="clean">
+          <li><b>Kept:</b> buildings for business, one baseline under the mark and the name, the horizon arc, a heavy geometric name, a spaced-capital tagline.</li>
+          <li><b>Fixed:</b> five or six line weights became one; perspective that blurred below 64px became flat fronts on a grid; the crowded “zz” was re-tracked; the tagline became BizzNex’s own.</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="margin-top:0">Construction</h3>
+        <div class="mark-big"><svg viewBox="-1 -1 50 50" aria-hidden="true"><g stroke="var(--accent)" stroke-width=".1" opacity=".4"><line x1="0" y1="0" x2="0" y2="48"/><line x1="0" y1="0" x2="48" y2="0"/><line x1="4" y1="0" x2="4" y2="48"/><line x1="0" y1="4" x2="48" y2="4"/><line x1="8" y1="0" x2="8" y2="48"/><line x1="0" y1="8" x2="48" y2="8"/><line x1="12" y1="0" x2="12" y2="48"/><line x1="0" y1="12" x2="48" y2="12"/><line x1="16" y1="0" x2="16" y2="48"/><line x1="0" y1="16" x2="48" y2="16"/><line x1="20" y1="0" x2="20" y2="48"/><line x1="0" y1="20" x2="48" y2="20"/><line x1="24" y1="0" x2="24" y2="48"/><line x1="0" y1="24" x2="48" y2="24"/><line x1="28" y1="0" x2="28" y2="48"/><line x1="0" y1="28" x2="48" y2="28"/><line x1="32" y1="0" x2="32" y2="48"/><line x1="0" y1="32" x2="48" y2="32"/><line x1="36" y1="0" x2="36" y2="48"/><line x1="0" y1="36" x2="48" y2="36"/><line x1="40" y1="0" x2="40" y2="48"/><line x1="0" y1="40" x2="48" y2="40"/><line x1="44" y1="0" x2="44" y2="48"/><line x1="0" y1="44" x2="48" y2="44"/><line x1="48" y1="0" x2="48" y2="48"/><line x1="0" y1="48" x2="48" y2="48"/></g><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"><path d="M6 42V25H16"/><path d="M16 42V11L28 6V42"/><path d="M28 18H41V42"/><path d="M32 24.5H37M32 29.5H37M32 34.5H37"/><path d="M10 30V36"/><path d="M3.5 42H44.5"/></g><rect x="20.4" y="15.6" width="3.6" height="4.6" rx=".6" fill="var(--lit, var(--accent))"/></svg></div>
+        <ul class="clean">
+          <li>A 48-unit grid with one stroke of 2.6 units (5.4%) everywhere.</li>
+          <li>Tower heights 17 · 24 · 31: even steps of 7 units.</li>
+          <li>One lit window in the tallest tower, the only colour in the mark.</li>
+          <li>The baseline runs one unit past the towers and continues under the name at the same weight.</li>
+          <li>The 16px favicon drops the window stripes and thickens the stroke; the lit window stays.</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:var(--s3)"><a class="link" data-brand href="design-style-guides/bizznex-identity-skyline.html">The full Skyline identity: colour, clear space, sizes and real uses <span>↗</span></a></p>
+  </section>
+
+  <!-- 12 · KEEP CURRENT -->
+  <section class="sec">
+    <header class="sec-h"><span class="folio">12</span><div><p class="spec"><span class="k">§ Maintenance</span><span>Living document</span></p><h2 class="sec-t">Keeping this current</h2></div></header>
+    <div class="status">
+      <span class="badge">Living document · last updated 2026-10-16</span>
+      <p class="small" style="margin:12px 0 0">This file is the full case study, served by the app at <code>/case-study.html</code>. The app’s opening page (<code>apps/web/src/views/Landing.tsx</code>) tells the product half of the same story and links here. Update both before every production deploy:</p>
+      <ul>
+        <li><span class="bx"></span><span>Re-diff the tokens against <code>apps/web/src/styles/aurora.scss</code> — palette, type, radius, spacing, motion.</span></li>
+        <li><span class="bx"></span><span>Check the page inventory against <code>apps/web/src/nav.ts</code> and each tool in <code>views/tools/*</code>.</span></li>
+        <li><span class="bx"></span><span>Check the onboarding table against <code>docs/onboarding-flow.md</code>.</span></li>
+        <li><span class="bx"></span><span>Confirm what is still simulated (the “simulated” badges) and the i18n coverage.</span></li>
+        <li><span class="bx"></span><span>Bump the date here and in the changelog below.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer class="colophon">
+    <div>
+      <b>BizzNex — Case Study · Aurora Edition 2026.</b><br>
+      Set in Fraunces &amp; IBM Plex · Distilled from Mercury, Linear, Stripe &amp; Anthropic.<br>
+      Source of truth: <b>apps/web/src/styles/aurora.scss</b> · Early directions: <b>design-style-guides/</b>.
+    </div>
+    <div>
+      <b>Changelog</b><br>
+      2026-10-16 — Kept the name BizzNex and adopted the Skyline logo (new section 11): mark, wordmark and favicon across the app; brand pages linked from the landing page and the Help menu.<br>
+      2026-10-15 — Merged the design case study and the Aurora style guide into one document; updated for the CRM, the local assistant, onboarding and the landing page.<br>
+      2026-09-17 — Initial case study: directions, tokens, components, Studio, build.
+    </div>
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="status">Copied</div>
+
+<script>
+(function () {
+  var toast = document.getElementById('toast'), t;
+  function ping(m) { toast.textContent = m; toast.classList.add('show'); clearTimeout(t); t = setTimeout(function () { toast.classList.remove('show'); }, 1300); }
+  document.querySelectorAll('[data-copy]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      var v = el.getAttribute('data-copy');
+      if (navigator.clipboard) navigator.clipboard.writeText(v).then(function () { ping('Copied ' + v); }, function () { ping(v); });
+      else ping(v);
+    });
+  });
+  var root = document.documentElement, b = document.getElementById('tgl'), d = document.getElementById('tgld'), tt = document.getElementById('tglt');
+  b.addEventListener('click', function () {
+    var dark = root.getAttribute('data-theme') === 'dark';
+    root.setAttribute('data-theme', dark ? 'light' : 'dark');
+    d.textContent = dark ? '◑' : '◐'; tt.textContent = dark ? 'Dark' : 'Light';
+  });
+  // served by the app at /case-study.html → links go to the app itself; opened from disk → the local dev server.
+  var app = (location.protocol.indexOf('http') === 0 ? '/' : 'http://localhost:3005/') + '?start=signup'; // opens on Create account
+  document.querySelectorAll('a[data-app]').forEach(function (a) { a.setAttribute('href', app); });
+  if (location.protocol.indexOf('http') === 0) {
+    document.querySelectorAll('a[data-brand]').forEach(function (a) { a.setAttribute('href', '/brand/skyline.html'); });
+    document.querySelectorAll('img[data-ref]').forEach(function (i) { i.setAttribute('src', '/brand/reference.png'); });
+  }
+  document.querySelectorAll('.swt').forEach(function (s) { s.addEventListener('click', function () { s.classList.toggle('on'); s.setAttribute('aria-checked', s.classList.contains('on')); }); });
+  document.querySelectorAll('.seg').forEach(function (g) { g.querySelectorAll('button').forEach(function (btn) { btn.addEventListener('click', function () { g.querySelectorAll('button').forEach(function (x) { x.classList.remove('on'); }); btn.classList.add('on'); }); }); });
+})();
+</script>
+</body>
+</html>
