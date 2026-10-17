@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BizzNex · Meridian — Style Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    /* Brand */
+    --indigo-700: #3730A3;
+    --indigo-600: #4F46E5;
+    --indigo-500: #6366F1;
+    --indigo-50:  #EEF0FF;
+    --teal-500:   #0EA5A4;
+    --teal-50:    #E5F7F6;
+
+    /* Neutrals — slate */
+    --ink: #0F172A;
+    --slate-700: #334155;
+    --slate-500: #64748B;
+    --slate-300: #CBD5E1;
+    --line: #E2E8F0;
+    --bg: #F8FAFC;
+    --surface: #FFFFFF;
+
+    /* Semantic */
+    --success: #16A34A;
+    --warning: #D97706;
+    --danger:  #DC2626;
+    --info:    #2563EB;
+
+    --r-sm: 6px;
+    --r-md: 10px;
+    --r-lg: 14px;
+    --shadow-1: 0 1px 2px rgba(15,23,42,.06), 0 1px 3px rgba(15,23,42,.08);
+    --shadow-2: 0 10px 30px rgba(15,23,42,.10);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg); color: var(--ink);
+    -webkit-font-smoothing: antialiased; line-height: 1.55;
+  }
+  h1,h2,h3,.font-display { font-family: 'Plus Jakarta Sans', sans-serif; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 48px 32px 96px; }
+
+  .badge-brand {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 5px 12px; border-radius: var(--r-sm);
+    background: var(--indigo-50); color: var(--indigo-600);
+    font-weight: 700; font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
+  }
+  h1.title { font-size: 58px; font-weight: 800; letter-spacing: -.03em; margin: 20px 0 8px; }
+  h1.title .dot { color: var(--teal-500); }
+  .tagline { font-size: 19px; color: var(--slate-500); max-width: 640px; margin: 0; }
+  .philosophy {
+    margin-top: 20px; padding: 18px 22px; border-left: 3px solid var(--indigo-600);
+    background: var(--surface); border-radius: var(--r-md); box-shadow: var(--shadow-1);
+    font-size: 15px; color: var(--slate-700); max-width: 720px;
+  }
+
+  section { margin-top: 60px; }
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--teal-500); margin: 0 0 6px; }
+  h2 { font-size: 26px; font-weight: 700; margin: 0 0 20px; letter-spacing: -.02em; }
+
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 12px; }
+  .sw { border-radius: var(--r-md); overflow: hidden; box-shadow: var(--shadow-1); background: var(--surface); border: 1px solid var(--line); }
+  .sw .chip { height: 76px; }
+  .sw .meta { padding: 9px 12px; }
+  .sw .name { font-weight: 600; font-size: 13px; }
+  .sw .hex { font-size: 12px; color: var(--slate-500); font-family: ui-monospace, monospace; }
+
+  .type-row { display: flex; align-items: baseline; gap: 20px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+  .type-row .lbl { width: 140px; color: var(--slate-500); font-size: 13px; font-family: ui-monospace, monospace; flex: none; }
+  .t-mega { font-size: 50px; font-weight: 800; letter-spacing: -.03em; font-family:'Plus Jakarta Sans'; }
+  .t-h1 { font-size: 32px; font-weight: 700; font-family:'Plus Jakarta Sans'; }
+  .t-h2 { font-size: 22px; font-weight: 600; font-family:'Plus Jakarta Sans'; }
+  .t-body { font-size: 16px; }
+  .t-small { font-size: 13px; color: var(--slate-500); }
+
+  .btns { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .btn { font: inherit; font-weight: 600; font-size: 15px; border: none; cursor: pointer;
+    padding: 11px 20px; border-radius: var(--r-sm); transition: all .18s ease; }
+  .btn-primary { background: var(--indigo-600); color: #fff; box-shadow: 0 1px 2px rgba(79,70,229,.4); }
+  .btn-primary:hover { background: var(--indigo-700); }
+  .btn-accent { background: var(--teal-500); color: #fff; }
+  .btn-accent:hover { filter: brightness(.94); }
+  .btn-secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--slate-300); }
+  .btn-secondary:hover { border-color: var(--indigo-500); color: var(--indigo-600); }
+  .btn-danger { background: #fff; color: var(--danger); border: 1px solid #FCA5A5; }
+  .btn-danger:hover { background: #FEF2F2; }
+
+  .pills { display: flex; gap: 10px; flex-wrap: wrap; }
+  .pill { font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: var(--r-sm); display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; }
+  .pill::before { content:''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .pill.pending  { background: #FFF7ED; color: #C2410C; border-color:#FED7AA; }
+  .pill.progress { background: var(--indigo-50); color: var(--indigo-600); border-color:#C7D2FE; }
+  .pill.done     { background: #F0FDF4; color: #15803D; border-color:#BBF7D0; }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--slate-700); }
+  .field input, .field select {
+    width: 100%; font: inherit; font-size: 15px; padding: 10px 13px;
+    border: 1px solid var(--slate-300); border-radius: var(--r-sm); background: var(--surface);
+    transition: border-color .18s, box-shadow .18s;
+  }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--indigo-500); box-shadow: 0 0 0 3px var(--indigo-50); }
+
+  .taskcard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 18px; box-shadow: var(--shadow-1); border-left: 3px solid var(--indigo-500); }
+  .taskcard .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .taskcard .name { font-weight: 700; font-size: 16px; font-family:'Plus Jakarta Sans'; }
+  .taskcard .desc { color: var(--slate-500); font-size: 14px; margin: 0 0 12px; }
+  .taskcard .dates { display: flex; gap: 24px; font-size: 13px; color: var(--slate-700); border-top: 1px solid var(--line); padding-top: 10px; }
+  .taskcard .dates b { display: block; color: var(--slate-500); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 20px; box-shadow: var(--shadow-1); transition: box-shadow .2s, transform .2s; }
+  .card:hover { box-shadow: var(--shadow-2); transform: translateY(-3px); }
+  .card h3 { margin: 0 0 6px; font-size: 17px; }
+  .card p { margin: 0 0 12px; color: var(--slate-500); font-size: 14px; }
+
+  /* KPI tiles — enterprise flavor */
+  .kpis { display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap:16px; }
+  .kpi { background: var(--surface); border:1px solid var(--line); border-radius: var(--r-md); padding:18px; box-shadow: var(--shadow-1); }
+  .kpi .k { font-size: 12px; color: var(--slate-500); font-weight:600; text-transform:uppercase; letter-spacing:.06em; }
+  .kpi .v { font-size: 30px; font-weight: 800; font-family:'Plus Jakarta Sans'; margin-top:4px; }
+  .kpi .d { font-size: 12px; font-weight:600; margin-top:2px; }
+  .kpi .up { color: var(--success); } .kpi .down { color: var(--danger); }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  @media (max-width: 720px) { .two { grid-template-columns: 1fr; } h1.title { font-size: 42px; } }
+  .backlink { display:inline-block; margin-bottom: 8px; color: var(--slate-500); text-decoration: none; font-size: 14px; }
+  .backlink:hover { color: var(--indigo-600); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="backlink" href="index.html">← All style directions</a>
+  <div class="badge-brand">■ Option 2 · Meridian</div>
+  <h1 class="title">Meridian<span class="dot">.</span></h1>
+  <p class="tagline">A confident, enterprise‑grade SaaS system — indigo &amp; teal on cool slate, built for dashboards, tables and dense business data.</p>
+  <div class="philosophy">
+    <strong>Design philosophy.</strong> This direction reads as a serious business tool. Tighter corners, crisp 1px borders and restrained shadows create structure and trust; a strong indigo drives primary actions while teal accents highlight metrics. Best if you want BizzNex to feel like a professional analytics &amp; operations platform.
+  </div>
+
+  <section>
+    <p class="eyebrow">Foundations</p>
+    <h2>Colour palette</h2>
+    <div class="swatches">
+      <div class="sw"><div class="chip" style="background:#4F46E5"></div><div class="meta"><div class="name">Indigo 600 · Primary</div><div class="hex">#4F46E5</div></div></div>
+      <div class="sw"><div class="chip" style="background:#3730A3"></div><div class="meta"><div class="name">Indigo 700</div><div class="hex">#3730A3</div></div></div>
+      <div class="sw"><div class="chip" style="background:#0EA5A4"></div><div class="meta"><div class="name">Teal 500 · Accent</div><div class="hex">#0EA5A4</div></div></div>
+      <div class="sw"><div class="chip" style="background:#0F172A"></div><div class="meta"><div class="name">Ink · Slate 900</div><div class="hex">#0F172A</div></div></div>
+      <div class="sw"><div class="chip" style="background:#64748B"></div><div class="meta"><div class="name">Slate 500</div><div class="hex">#64748B</div></div></div>
+      <div class="sw"><div class="chip" style="background:#E2E8F0"></div><div class="meta"><div class="name">Line · Slate 200</div><div class="hex">#E2E8F0</div></div></div>
+      <div class="sw"><div class="chip" style="background:#F8FAFC;border-bottom:1px solid var(--line)"></div><div class="meta"><div class="name">Background</div><div class="hex">#F8FAFC</div></div></div>
+      <div class="sw"><div class="chip" style="background:#16A34A"></div><div class="meta"><div class="name">Success</div><div class="hex">#16A34A</div></div></div>
+      <div class="sw"><div class="chip" style="background:#D97706"></div><div class="meta"><div class="name">Warning</div><div class="hex">#D97706</div></div></div>
+      <div class="sw"><div class="chip" style="background:#DC2626"></div><div class="meta"><div class="name">Danger</div><div class="hex">#DC2626</div></div></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Foundations</p>
+    <h2>Typography — Jakarta Sans + Inter</h2>
+    <div class="type-row"><div class="lbl">Display / 50</div><div class="t-mega">Run the business</div></div>
+    <div class="type-row"><div class="lbl">Heading / 32</div><div class="t-h1">Projects &amp; Tasks</div></div>
+    <div class="type-row"><div class="lbl">Subhead / 22</div><div class="t-h2">Create a project</div></div>
+    <div class="type-row"><div class="lbl">Body / 16 (Inter)</div><div class="t-body">Track timelines, allocate resources and log hours in one place.</div></div>
+    <div class="type-row"><div class="lbl">Caption / 13</div><div class="t-small">Updated 3 minutes ago · Owner: D. Sharon</div></div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Components</p>
+    <h2>Metrics row</h2>
+    <div class="kpis">
+      <div class="kpi"><div class="k">Active projects</div><div class="v">12</div><div class="d up">▲ 8% vs last month</div></div>
+      <div class="kpi"><div class="k">Open tasks</div><div class="v">47</div><div class="d down">▼ 3 today</div></div>
+      <div class="kpi"><div class="k">Hours logged</div><div class="v">318</div><div class="d up">▲ 24 this week</div></div>
+      <div class="kpi"><div class="k">Completion</div><div class="v">76%</div><div class="d up">▲ on track</div></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Components</p>
+    <h2>Buttons</h2>
+    <div class="btns">
+      <button class="btn btn-primary">Create Project</button>
+      <button class="btn btn-accent">Add Task</button>
+      <button class="btn btn-secondary">Cancel</button>
+      <button class="btn btn-danger">Delete</button>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Components</p>
+    <h2>Status pills</h2>
+    <div class="pills">
+      <span class="pill pending">Pending</span>
+      <span class="pill progress">In Progress</span>
+      <span class="pill done">Completed</span>
+    </div>
+  </section>
+
+  <div class="two">
+    <section style="margin-top:60px">
+      <p class="eyebrow">Components</p>
+      <h2>Form fields</h2>
+      <div class="field"><label>Project name</label><input value="Q4 Marketing Launch" /></div>
+      <div class="field"><label>Status</label><select><option>In Progress</option><option>Pending</option><option>Completed</option></select></div>
+      <div class="field"><label>End date</label><input type="date" /></div>
+    </section>
+
+    <section style="margin-top:60px">
+      <p class="eyebrow">In context</p>
+      <h2>Task card</h2>
+      <div class="taskcard">
+        <div class="head"><span class="name">Finalise campaign brief</span><span class="pill progress">In Progress</span></div>
+        <p class="desc">Draft, review and sign off the creative brief with stakeholders.</p>
+        <div class="dates">
+          <div><b>Start</b>04 Sep 2026</div>
+          <div><b>Due</b>18 Sep 2026</div>
+        </div>
+      </div>
+      <div style="height:16px"></div>
+      <div class="card"><h3>Project card</h3><p>Structured, bordered, and hover‑elevated for scannable lists.</p><span class="pill done">Completed</span></div>
+    </section>
+  </div>
+</div>
+</body>
+</html>

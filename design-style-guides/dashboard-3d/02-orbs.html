@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>3D Option 2 · Aurora Orbs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{ --serif:'Fraunces',Georgia,serif; --sans:'IBM Plex Sans',system-ui,sans-serif; --mono:'IBM Plex Mono',monospace; --radius:3px; }
+  :root[data-theme="light"]{ --paper:#F5F1E9; --paper-2:#EDE7DA; --ink:#211D16; --ink-soft:#4E4A40; --muted:#8B8474; --faint:#C0B9A6; --rule:rgba(33,29,22,.18); --rule-soft:rgba(33,29,22,.09); --accent:#5B41E0; --ok:#2E8F60; }
+  :root[data-theme="dark"]{ --paper:#141210; --paper-2:#1C1915; --ink:#EDE8DD; --ink-soft:#C3BCAD; --muted:#8E877A; --faint:rgba(237,232,221,.34); --rule:rgba(237,232,221,.16); --rule-soft:rgba(237,232,221,.07); --accent:#A897FF; --ok:#46C98A; }
+  *{box-sizing:border-box} html,body{margin:0;height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;transition:background .5s,color .5s}
+  .bar-top{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;border-bottom:1px solid var(--rule-soft)}
+  .crumb{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)} .crumb b{color:var(--ink)}
+  .controls{display:flex;gap:10px}
+  .btn{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:none;border:1px solid var(--rule);border-radius:var(--radius);padding:8px 12px;cursor:pointer}
+  .btn:hover{color:var(--ink);border-color:var(--ink)}
+  .wrap{padding:clamp(20px,4vw,44px);max-width:1180px;margin:0 auto}
+  .spec{font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);display:flex;gap:20px}
+  .spec .k{color:var(--accent)}
+  h1{font-family:var(--serif);font-weight:500;font-size:clamp(2rem,4vw,3rem);letter-spacing:-.03em;margin:10px 0 4px;line-height:1}
+  .sub{color:var(--muted);margin:0 0 8px}
+  .hero{position:relative;height:60vh;min-height:420px;margin-top:22px;border:1px solid var(--rule-soft);border-radius:var(--radius);overflow:hidden}
+  .hero canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block}
+  .overlay{position:absolute;top:22px;left:24px;z-index:2;pointer-events:none}
+  .overlay .big{font-family:var(--serif);font-weight:500;font-size:clamp(2.6rem,6vw,4.4rem);line-height:.9;letter-spacing:-.04em;margin:8px 0 4px}
+  .overlay .delta{font-family:var(--mono);font-size:13px;color:var(--ok)}
+  .kpis{position:absolute;left:24px;bottom:20px;z-index:2;display:flex;gap:28px;flex-wrap:wrap;pointer-events:none}
+  .kpi .l{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .kpi .v{font-family:var(--mono);font-size:22px;font-variant-numeric:tabular-nums;margin-top:3px}
+  .hint{position:absolute;right:16px;bottom:14px;z-index:2;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .cap{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:16px}
+  a.back{color:inherit}
+</style>
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+</script>
+</head>
+<body>
+<div class="bar-top">
+  <span class="crumb">BizzNex / <b>Dashboard · 3D options</b></span>
+  <div class="controls">
+    <a class="btn" href="index.html">← all options</a>
+    <button class="btn" id="themeBtn">◐ Theme</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <p class="spec"><span class="k">Option 02</span><span>Aurora orb field</span></p>
+  <h1>Good evening, Dennis</h1>
+  <p class="sub">An ambient field of soft glowing orbs drifting behind your numbers — move your mouse to parallax.</p>
+
+  <div class="hero">
+    <canvas id="c"></canvas>
+    <div class="overlay">
+      <div class="spec"><span class="k">§ Spend</span><span>Trailing 6 months</span></div>
+      <div class="big">$48.2k</div>
+      <div class="delta">▲ 12.4%&nbsp;&nbsp;vs prior</div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div class="l">Active projects</div><div class="v">6</div></div>
+      <div class="kpi"><div class="l">Open tasks</div><div class="v">14</div></div>
+      <div class="kpi"><div class="l">Completion</div><div class="v">72%</div></div>
+    </div>
+    <div class="hint">ambient · auto-drift · move mouse</div>
+  </div>
+  <p class="cap">Concept 02 of the set — pure Three.js, Aurora accent, themed light/dark. Nothing here touches the app.</p>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+
+const canvas = document.getElementById('c');
+const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+let accent = new THREE.Color(cssVar('--accent'));
+let paper = new THREE.Color(cssVar('--paper'));
+
+// Aurora mesh palette
+const auroraHex = ['#7C6CF5', '#5FA8FF', '#34E0C4', '#FF9EC0'];
+const palette = () => [accent.clone(), ...auroraHex.map((h) => new THREE.Color(h))];
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+camera.position.set(0, 0, 18);
+
+// soft radial-gradient sprite texture for glowing orbs
+function glowTexture() {
+  const s = 128;
+  const cv = document.createElement('canvas'); cv.width = cv.height = s;
+  const ctx = cv.getContext('2d');
+  const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+  g.addColorStop(0.0, 'rgba(255,255,255,1)');
+  g.addColorStop(0.25, 'rgba(255,255,255,0.85)');
+  g.addColorStop(0.55, 'rgba(255,255,255,0.35)');
+  g.addColorStop(1.0, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, s, s);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+const tex = glowTexture();
+
+const group = new THREE.Group(); scene.add(group);
+const COUNT = 40;
+const orbs = [];
+let cols = palette();
+for (let i = 0; i < COUNT; i++) {
+  const mat = new THREE.SpriteMaterial({
+    map: tex,
+    color: cols[i % cols.length].clone(),
+    transparent: true,
+    opacity: 0.55 + Math.random() * 0.35,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  const sp = new THREE.Sprite(mat);
+  const base = new THREE.Vector3(
+    (Math.random() - 0.5) * 26,
+    (Math.random() - 0.5) * 16,
+    (Math.random() - 0.5) * 16 - 2
+  );
+  sp.position.copy(base);
+  const size = 1.4 + Math.random() * 4.2;
+  sp.scale.set(size, size, 1);
+  group.add(sp);
+  orbs.push({
+    sp, base, size,
+    cIndex: i % cols.length,
+    ax: Math.random() * Math.PI * 2,
+    ay: Math.random() * Math.PI * 2,
+    az: Math.random() * Math.PI * 2,
+    sx: 0.12 + Math.random() * 0.22,
+    sy: 0.10 + Math.random() * 0.20,
+    sz: 0.08 + Math.random() * 0.16,
+    dx: 1.2 + Math.random() * 2.4,
+    dy: 1.0 + Math.random() * 2.0,
+    dz: 0.8 + Math.random() * 1.6,
+    pulse: 0.6 + Math.random() * 1.4,
+  });
+}
+
+// mouse parallax
+const mouse = { x: 0, y: 0 };
+window.addEventListener('pointermove', (e) => {
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = (e.clientY / window.innerHeight) * 2 - 1;
+});
+
+function resize() {
+  const r = canvas.getBoundingClientRect();
+  renderer.setSize(r.width, r.height, false);
+  camera.aspect = r.width / r.height; camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize); resize();
+
+let t = 0;
+function animate() {
+  requestAnimationFrame(animate);
+  t += 0.016;
+  orbs.forEach((o) => {
+    o.sp.position.set(
+      o.base.x + Math.sin(t * o.sx + o.ax) * o.dx,
+      o.base.y + Math.cos(t * o.sy + o.ay) * o.dy,
+      o.base.z + Math.sin(t * o.sz + o.az) * o.dz
+    );
+    const s = o.size * (1 + Math.sin(t * o.pulse + o.ax) * 0.06);
+    o.sp.scale.set(s, s, 1);
+  });
+  group.rotation.y += 0.0008;
+  group.rotation.x = Math.sin(t * 0.05) * 0.04;
+  // camera parallax eased toward mouse
+  camera.position.x += (mouse.x * 2.2 - camera.position.x) * 0.03;
+  camera.position.y += (-mouse.y * 1.6 - camera.position.y) * 0.03;
+  camera.lookAt(0, 0, 0);
+  renderer.render(scene, camera);
+}
+animate();
+
+// theme
+document.getElementById('themeBtn').addEventListener('click', () => {
+  const r = document.documentElement;
+  r.setAttribute('data-theme', r.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  accent = new THREE.Color(cssVar('--accent')); paper = new THREE.Color(cssVar('--paper'));
+  cols = palette();
+  orbs.forEach((o) => o.sp.material.color.copy(cols[o.cIndex]));
+});
+</script>
+</body>
+</html>

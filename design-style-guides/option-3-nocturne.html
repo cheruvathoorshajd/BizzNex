@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BizzNex · Nocturne — Style Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    /* Brand */
+    --violet: #8B5CF6;
+    --violet-bright: #A78BFA;
+    --cyan: #22D3EE;
+    --grad: linear-gradient(120deg, #8B5CF6 0%, #22D3EE 100%);
+
+    /* Surfaces (dark) */
+    --bg: #0B0E14;
+    --surface: #141922;
+    --surface-2: #1B2230;
+    --line: #262E3D;
+
+    /* Text */
+    --text: #E6EDF3;
+    --muted: #8B98AC;
+    --dim: #5B6675;
+
+    /* Semantic */
+    --success: #34D399;
+    --warning: #FBBF24;
+    --danger:  #F87171;
+    --info:    #60A5FA;
+
+    --r-sm: 8px;
+    --r-md: 14px;
+    --r-lg: 18px;
+    --glow: 0 0 0 1px rgba(139,92,246,.25), 0 8px 30px rgba(139,92,246,.20);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    background:
+      radial-gradient(900px 500px at 12% -8%, rgba(139,92,246,.16), transparent 60%),
+      radial-gradient(800px 500px at 100% 0%, rgba(34,211,238,.10), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased; line-height: 1.55;
+    min-height: 100vh;
+  }
+  h1,h2,h3,.font-display { font-family: 'Space Grotesk', sans-serif; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 48px 32px 96px; }
+
+  .badge-brand {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px; border-radius: 999px;
+    background: rgba(139,92,246,.12); color: var(--violet-bright);
+    border: 1px solid rgba(139,92,246,.3);
+    font-weight: 600; font-size: 13px; letter-spacing: .03em;
+  }
+  h1.title {
+    font-size: 62px; font-weight: 700; letter-spacing: -.03em; margin: 22px 0 8px;
+    background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .tagline { font-size: 20px; color: var(--muted); max-width: 640px; margin: 0; }
+  .philosophy {
+    margin-top: 20px; padding: 20px 24px; border-radius: var(--r-md);
+    background: var(--surface); border: 1px solid var(--line);
+    font-size: 15px; color: #C4CDDA; max-width: 720px;
+  }
+
+  section { margin-top: 60px; }
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--cyan); margin: 0 0 6px; }
+  h2 { font-size: 27px; font-weight: 700; margin: 0 0 20px; letter-spacing: -.02em; }
+
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 12px; }
+  .sw { border-radius: var(--r-md); overflow: hidden; background: var(--surface); border: 1px solid var(--line); }
+  .sw .chip { height: 80px; }
+  .sw .meta { padding: 10px 12px; }
+  .sw .name { font-weight: 600; font-size: 13px; }
+  .sw .hex { font-size: 12px; color: var(--muted); font-family: ui-monospace, monospace; }
+
+  .type-row { display: flex; align-items: baseline; gap: 20px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+  .type-row .lbl { width: 140px; color: var(--dim); font-size: 13px; font-family: ui-monospace, monospace; flex: none; }
+  .t-mega { font-size: 52px; font-weight: 700; letter-spacing: -.03em; font-family:'Space Grotesk'; }
+  .t-h1 { font-size: 32px; font-weight: 600; font-family:'Space Grotesk'; }
+  .t-h2 { font-size: 22px; font-weight: 500; font-family:'Space Grotesk'; }
+  .t-body { font-size: 16px; color:#C4CDDA; }
+  .t-small { font-size: 13px; color: var(--muted); }
+
+  .btns { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  .btn { font: inherit; font-weight: 600; font-size: 15px; border: none; cursor: pointer;
+    padding: 12px 22px; border-radius: var(--r-sm); transition: all .2s ease; }
+  .btn-primary { background: var(--grad); color: #0B0E14; box-shadow: var(--glow); }
+  .btn-primary:hover { transform: translateY(-2px); filter: brightness(1.08); }
+  .btn-secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--line); }
+  .btn-secondary:hover { border-color: var(--violet); color: var(--violet-bright); }
+  .btn-ghost { background: transparent; color: var(--cyan); border: 1px solid rgba(34,211,238,.4); }
+  .btn-ghost:hover { background: rgba(34,211,238,.08); }
+
+  .pills { display: flex; gap: 10px; flex-wrap: wrap; }
+  .pill { font-size: 12px; font-weight: 600; padding: 5px 13px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; }
+  .pill::before { content:''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
+  .pill.pending  { background: rgba(251,191,36,.12); color: #FBBF24; border-color: rgba(251,191,36,.3); }
+  .pill.progress { background: rgba(96,165,250,.12); color: #60A5FA; border-color: rgba(96,165,250,.3); }
+  .pill.done     { background: rgba(52,211,153,.12); color: #34D399; border-color: rgba(52,211,153,.3); }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #C4CDDA; }
+  .field input, .field select {
+    width: 100%; font: inherit; font-size: 15px; padding: 11px 14px; color: var(--text);
+    border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface-2);
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .field input::placeholder { color: var(--dim); }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--violet); box-shadow: 0 0 0 3px rgba(139,92,246,.2); }
+
+  .taskcard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 18px; position: relative; overflow: hidden; }
+  .taskcard::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background: var(--grad); }
+  .taskcard .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .taskcard .name { font-weight: 600; font-size: 16px; font-family:'Space Grotesk'; }
+  .taskcard .desc { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
+  .taskcard .dates { display: flex; gap: 24px; font-size: 13px; color: #C4CDDA; border-top: 1px solid var(--line); padding-top: 10px; }
+  .taskcard .dates b { display: block; color: var(--dim); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 20px; transition: box-shadow .25s, transform .25s, border-color .25s; }
+  .card:hover { transform: translateY(-4px); border-color: rgba(139,92,246,.5); box-shadow: var(--glow); }
+  .card h3 { margin: 0 0 6px; font-size: 17px; }
+  .card p { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+
+  .kpis { display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap:16px; }
+  .kpi { background: var(--surface); border:1px solid var(--line); border-radius: var(--r-md); padding:18px; }
+  .kpi .k { font-size: 12px; color: var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.06em; }
+  .kpi .v { font-size: 30px; font-weight: 700; font-family:'Space Grotesk'; margin-top:4px; background:var(--grad); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .kpi .d { font-size: 12px; font-weight:600; margin-top:2px; color: var(--success); }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  @media (max-width: 720px) { .two { grid-template-columns: 1fr; } h1.title { font-size: 44px; } }
+  .backlink { display:inline-block; margin-bottom: 8px; color: var(--muted); text-decoration: none; font-size: 14px; }
+  .backlink:hover { color: var(--cyan); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="backlink" href="index.html">← All style directions</a>
+  <div class="badge-brand">● Option 3 · Nocturne</div>
+  <h1 class="title">Nocturne</h1>
+  <p class="tagline">A premium dark‑mode command centre — deep space navy with electric violet‑to‑cyan energy and softly glowing accents.</p>
+  <div class="philosophy">
+    <strong>Design philosophy.</strong> Built for focus and a high‑tech, modern feel. A near‑black canvas makes vibrant data and gradients pop; subtle glows and ambient light give depth without noise. Best if you want BizzNex to feel cutting‑edge — an analytics‑forward dashboard people love spending hours in.
+  </div>
+
+  <section>
+    <p class="eyebrow">Foundations</p>
+    <h2>Colour palette</h2>
+    <div class="swatches">
+      <div class="sw"><div class="chip" style="background:var(--grad)"></div><div class="meta"><div class="name">Signature Gradient</div><div class="hex">#8B5CF6 → #22D3EE</div></div></div>
+      <div class="sw"><div class="chip" style="background:#8B5CF6"></div><div class="meta"><div class="name">Violet · Primary</div><div class="hex">#8B5CF6</div></div></div>
+      <div class="sw"><div class="chip" style="background:#22D3EE"></div><div class="meta"><div class="name">Cyan · Accent</div><div class="hex">#22D3EE</div></div></div>
+      <div class="sw"><div class="chip" style="background:#0B0E14"></div><div class="meta"><div class="name">Canvas</div><div class="hex">#0B0E14</div></div></div>
+      <div class="sw"><div class="chip" style="background:#141922"></div><div class="meta"><div class="name">Surface</div><div class="hex">#141922</div></div></div>
+      <div class="sw"><div class="chip" style="background:#262E3D"></div><div class="meta"><div class="name">Line</div><div class="hex">#262E3D</div></div></div>
+      <div class="sw"><div class="chip" style="background:#8B98AC"></div><div class="meta"><div class="name">Muted text</div><div class="hex">#8B98AC</div></div></div>
+      <div class="sw"><div class="chip" style="background:#34D399"></div><div class="meta"><div class="name">Success</div><div class="hex">#34D399</div></div></div>
+      <div class="sw"><div class="chip" style="background:#FBBF24"></div><div class="meta"><div class="name">Warning</div><div class="hex">#FBBF24</div></div></div>
+      <div class="sw"><div class="chip" style="background:#F87171"></div><div class="meta"><div class="name">Danger</div><div class="hex">#F87171</div></div></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Foundations</p>
+    <h2>Typography — Space Grotesk + Inter</h2>
+    <div class="type-row"><div class="lbl">Display / 52</div><div class="t-mega">Command centre</div></div>
+    <div class="type-row"><div class="lbl">Heading / 32</div><div class="t-h1">Projects &amp; Tasks</div></div>
+    <div class="type-row"><div class="lbl">Subhead / 22</div><div class="t-h2">Create a project</div></div>
+    <div class="type-row"><div class="lbl">Body / 16 (Inter)</div><div class="t-body">Monitor everything in real time from a single, focused view.</div></div>
+    <div class="type-row"><div class="lbl">Caption / 13</div><div class="t-small">Live · synced 2s ago</div></div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Components</p>
+    <h2>Metrics row</h2>
+    <div class="kpis">
+      <div class="kpi"><div class="k">Active projects</div><div class="v">12</div><div class="d">▲ 8% this month</div></div>
+      <div class="kpi"><div class="k">Open tasks</div><div class="v">47</div><div class="d">▲ live</div></div>
+      <div class="kpi"><div class="k">Hours logged</div><div class="v">318</div><div class="d">▲ 24 this week</div></div>
+      <div class="kpi"><div class="k">Completion</div><div class="v">76%</div><div class="d">▲ on track</div></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Components</p>
+    <h2>Buttons</h2>
+    <div class="btns">
+      <button class="btn btn-primary">Create Project</button>
+      <button class="btn btn-secondary">Cancel</button>
+      <button class="btn btn-ghost">+ Add Task</button>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Components</p>
+    <h2>Status pills</h2>
+    <div class="pills">
+      <span class="pill pending">Pending</span>
+      <span class="pill progress">In Progress</span>
+      <span class="pill done">Completed</span>
+    </div>
+  </section>
+
+  <div class="two">
+    <section style="margin-top:60px">
+      <p class="eyebrow">Components</p>
+      <h2>Form fields</h2>
+      <div class="field"><label>Project name</label><input placeholder="Untitled project" value="Product Launch" /></div>
+      <div class="field"><label>Assign to project</label><select><option>Product Launch</option><option>Christmas Decorations</option></select></div>
+      <div class="field"><label>Start date</label><input type="date" /></div>
+    </section>
+
+    <section style="margin-top:60px">
+      <p class="eyebrow">In context</p>
+      <h2>Task card</h2>
+      <div class="taskcard">
+        <div class="head"><span class="name">Ship v2 dashboard</span><span class="pill progress">In Progress</span></div>
+        <p class="desc">Wire the analytics view to the live projects API.</p>
+        <div class="dates">
+          <div><b>Start</b>04 Sep 2026</div>
+          <div><b>End</b>20 Sep 2026</div>
+        </div>
+      </div>
+      <div style="height:16px"></div>
+      <div class="card"><h3>Project card</h3><p>Hover to reveal a violet glow and gentle lift.</p><span class="pill done">Completed</span></div>
+    </section>
+  </div>
+</div>
+</body>
+</html>

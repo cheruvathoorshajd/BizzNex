@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>3D Option 8 · Relationship Globe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{ --serif:'Fraunces',Georgia,serif; --sans:'IBM Plex Sans',system-ui,sans-serif; --mono:'IBM Plex Mono',monospace; --radius:3px; }
+  :root[data-theme="light"]{ --paper:#F5F1E9; --paper-2:#EDE7DA; --ink:#211D16; --ink-soft:#4E4A40; --muted:#8B8474; --faint:#C0B9A6; --rule:rgba(33,29,22,.18); --rule-soft:rgba(33,29,22,.09); --accent:#5B41E0; --ok:#2E8F60; }
+  :root[data-theme="dark"]{ --paper:#141210; --paper-2:#1C1915; --ink:#EDE8DD; --ink-soft:#C3BCAD; --muted:#8E877A; --faint:rgba(237,232,221,.34); --rule:rgba(237,232,221,.16); --rule-soft:rgba(237,232,221,.07); --accent:#A897FF; --ok:#46C98A; }
+  *{box-sizing:border-box} html,body{margin:0;height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;transition:background .5s,color .5s}
+  .bar-top{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;border-bottom:1px solid var(--rule-soft)}
+  .crumb{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)} .crumb b{color:var(--ink)}
+  .controls{display:flex;gap:10px}
+  .btn{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:none;border:1px solid var(--rule);border-radius:var(--radius);padding:8px 12px;cursor:pointer}
+  .btn:hover{color:var(--ink);border-color:var(--ink)}
+  .wrap{padding:clamp(20px,4vw,44px);max-width:1180px;margin:0 auto}
+  .spec{font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);display:flex;gap:20px}
+  .spec .k{color:var(--accent)}
+  h1{font-family:var(--serif);font-weight:500;font-size:clamp(2rem,4vw,3rem);letter-spacing:-.03em;margin:10px 0 4px;line-height:1}
+  .sub{color:var(--muted);margin:0 0 8px;max-width:60ch}
+  .hero{position:relative;height:60vh;min-height:440px;margin-top:22px;border:1px solid var(--rule-soft);border-radius:var(--radius);overflow:hidden}
+  .hero canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block}
+  .overlay{position:absolute;top:22px;left:24px;z-index:2;pointer-events:none}
+  .overlay .big{font-family:var(--serif);font-weight:500;font-size:clamp(2.6rem,6vw,4.4rem);line-height:.9;letter-spacing:-.04em;margin:8px 0 4px}
+  .overlay .delta{font-family:var(--mono);font-size:13px;color:var(--ok)}
+  .kpis{position:absolute;left:24px;bottom:20px;z-index:2;display:flex;gap:28px;flex-wrap:wrap;pointer-events:none}
+  .kpi .l{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .kpi .v{font-family:var(--mono);font-size:22px;font-variant-numeric:tabular-nums;margin-top:3px}
+  .legend{position:absolute;right:20px;top:20px;z-index:2;display:flex;flex-direction:column;gap:8px;pointer-events:none;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;vertical-align:middle}
+  .hint{position:absolute;right:16px;bottom:14px;z-index:2;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .purpose{margin-top:18px;border-left:2px solid var(--accent);padding:2px 0 2px 16px;max-width:70ch}
+  .purpose b{font-family:var(--serif);font-weight:500;font-style:normal}
+  .cap{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:16px}
+  a.back{color:inherit}
+</style>
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+</script>
+</head>
+<body>
+<div class="bar-top">
+  <span class="crumb">BizzNex / <b>Dashboard · 3D options</b></span>
+  <div class="controls">
+    <a class="btn" href="index.html">← all options</a>
+    <button class="btn" id="themeBtn">◐ Theme</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <p class="spec"><span class="k">Option 08</span><span>Relationship Globe · globe + network</span></p>
+  <h1>Good evening, Dennis</h1>
+  <p class="sub">Your companies and contacts as a living network on the globe — arcs are deals, pulses are recent activity. Drag to explore.</p>
+
+  <div class="hero">
+    <canvas id="c"></canvas>
+    <div class="overlay">
+      <div class="spec"><span class="k">§ Pipeline</span><span>Open deals · live</span></div>
+      <div class="big">$18.9k</div>
+      <div class="delta">▲ 3 new this week</div>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--accent)"></i>Company / contact</span>
+      <span><i style="background:var(--ok)"></i>Won deal</span>
+      <span><i style="background:var(--accent);opacity:.5"></i>Relationship / deal</span>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div class="l">Contacts</div><div class="v">128</div></div>
+      <div class="kpi"><div class="l">Companies</div><div class="v">32</div></div>
+      <div class="kpi"><div class="l">Open deals</div><div class="v">9</div></div>
+    </div>
+    <div class="hint">drag to orbit · scroll to zoom</div>
+  </div>
+
+  <div class="purpose">
+    <p style="margin:0"><b>The Relationship Globe.</b> BizzNex is a CRM at heart, so the dashboard hero is a live map of your business network: each glowing node is a company or contact, the arcs are your deals and relationships, and the pulses of light are recent activity. It fuses reach (the globe) with connection (the constellation) so you feel the shape and momentum of your book of business at a glance.</p>
+  </div>
+  <p class="cap">Concept 08 of the set — pure Three.js, Aurora accent, themed light/dark. Nothing here touches the app.</p>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const canvas = document.getElementById('c');
+const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+let accent = new THREE.Color(cssVar('--accent'));
+let ok = new THREE.Color(cssVar('--ok'));
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+camera.position.set(0, 1.6, 9);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.enablePan = false; controls.minDistance = 6; controls.maxDistance = 16;
+
+const group = new THREE.Group(); scene.add(group);
+const R = 3;
+
+// ── soft radial glow texture (tinted per material color) ──
+function glowTexture() {
+  const s = 64, cv = document.createElement('canvas'); cv.width = cv.height = s;
+  const g = cv.getContext('2d');
+  const grd = g.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+  grd.addColorStop(0, 'rgba(255,255,255,1)');
+  grd.addColorStop(0.4, 'rgba(255,255,255,0.55)');
+  grd.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, s, s);
+  return new THREE.CanvasTexture(cv);
+}
+const GLOW = glowTexture();
+
+const accentMats = [];  // recolor from --accent on theme change
+const okMats = [];      // recolor from --ok
+
+// ── globe: field of faint points (the "world") ──
+const GP = 1600, gpos = new Float32Array(GP * 3);
+for (let i = 0; i < GP; i++) {
+  const y = 1 - (i / (GP - 1)) * 2;
+  const rr = Math.sqrt(1 - y * y);
+  const th = i * 2.399963229;
+  gpos[i * 3] = Math.cos(th) * rr * R;
+  gpos[i * 3 + 1] = y * R;
+  gpos[i * 3 + 2] = Math.sin(th) * rr * R;
+}
+const gGeo = new THREE.BufferGeometry();
+gGeo.setAttribute('position', new THREE.BufferAttribute(gpos, 3));
+const gMat = new THREE.PointsMaterial({ color: accent, size: 0.045, transparent: true, opacity: 0.45, depthWrite: false });
+accentMats.push(gMat);
+group.add(new THREE.Points(gGeo, gMat));
+
+// faint wireframe sphere under the points
+const wire = new THREE.Mesh(
+  new THREE.SphereGeometry(R * 0.995, 24, 18),
+  new THREE.MeshBasicMaterial({ color: accent, wireframe: true, transparent: true, opacity: 0.06 }),
+);
+accentMats.push(wire.material);
+group.add(wire);
+
+// ── hub nodes: companies / contacts on the surface ──
+function randSurface() {
+  return new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize().multiplyScalar(R * 1.004);
+}
+const NODES = 16, nodes = [];
+for (let i = 0; i < NODES; i++) {
+  const pos = randSurface();
+  const won = i % 5 === 0;               // a few "won deal" nodes in green
+  const col = won ? ok.clone() : accent.clone();
+  // core
+  const core = new THREE.Mesh(new THREE.SphereGeometry(0.055, 12, 12), new THREE.MeshBasicMaterial({ color: col }));
+  core.position.copy(pos); group.add(core);
+  // glow
+  const spr = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW, color: col, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+  spr.position.copy(pos); spr.scale.setScalar(0.55); group.add(spr);
+  (won ? okMats : accentMats).push(core.material, spr.material);
+  nodes.push(pos);
+}
+
+// ── arcs: relationships / deals bowing above the surface ──
+const arcs = [];
+function addArc(a, b) {
+  const mid = a.clone().add(b).multiplyScalar(0.5);
+  const d = a.distanceTo(b);
+  const ctrl = mid.setLength(R + d * 0.55 + 0.3);
+  const curve = new THREE.QuadraticBezierCurve3(a.clone(), ctrl, b.clone());
+  const geo = new THREE.TubeGeometry(curve, 44, 0.012, 6, false);
+  const mat = new THREE.MeshBasicMaterial({ color: accent, transparent: true, opacity: 0.5 });
+  accentMats.push(mat);
+  group.add(new THREE.Mesh(geo, mat));
+  arcs.push(curve);
+}
+for (let i = 0; i < NODES; i++) {
+  addArc(nodes[i], nodes[(i + 3) % NODES]);          // a ring of links
+  if (i % 2 === 0) addArc(nodes[i], nodes[(i + 7) % NODES]); // a few cross-links
+}
+
+// ── pulses: recent activity travelling along arcs ──
+const pulses = [];
+for (let i = 0; i < 8; i++) {
+  const curve = arcs[Math.floor(Math.random() * arcs.length)];
+  const mat = new THREE.SpriteMaterial({ map: GLOW, color: accent, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
+  accentMats.push(mat);
+  const spr = new THREE.Sprite(mat); spr.scale.setScalar(0.28); group.add(spr);
+  pulses.push({ curve, spr, t: Math.random(), speed: 0.0035 + Math.random() * 0.004 });
+}
+
+function resize() {
+  const r = canvas.getBoundingClientRect();
+  renderer.setSize(r.width, r.height, false);
+  camera.aspect = r.width / r.height; camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize); resize();
+
+let t = 0;
+function animate() {
+  requestAnimationFrame(animate);
+  t += 0.016;
+  group.rotation.y += 0.0016;
+  group.rotation.x = Math.sin(t * 0.1) * 0.06;
+  pulses.forEach((p) => {
+    p.t = (p.t + p.speed) % 1;
+    p.spr.position.copy(p.curve.getPointAt(p.t));
+    p.spr.scale.setScalar(0.22 + Math.sin(p.t * Math.PI) * 0.14);
+  });
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+document.getElementById('themeBtn').addEventListener('click', () => {
+  const r = document.documentElement;
+  r.setAttribute('data-theme', r.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  accent = new THREE.Color(cssVar('--accent'));
+  ok = new THREE.Color(cssVar('--ok'));
+  accentMats.forEach((m) => m.color.copy(accent));
+  okMats.forEach((m) => m.color.copy(ok));
+});
+</script>
+</body>
+</html>
