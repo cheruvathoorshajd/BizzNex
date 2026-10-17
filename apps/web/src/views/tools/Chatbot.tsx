@@ -38,7 +38,7 @@ export default function Chatbot() {
   return (
     <div>
       <div className="view-head">
-        <p className="spec"><span className="k">§ Tool</span><span>Brenda · AI assistant</span></p>
+        <p className="spec"><span className="k">§ Tool</span><span>Brenda · local assistant</span></p>
         <h1 className="view-title">Assistant</h1>
       </div>
       <p className="cap" style={{ margin: '2px 0 18px' }}>

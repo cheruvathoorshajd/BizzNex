@@ -1,5 +1,5 @@
 // Local-only convenience: boots a self-contained PostgreSQL (no Docker, no cloud)
-// on port 5433 for previewing the app. Not part of the app; installed with --no-save.
+// on port 5433 for previewing the app. Not part of the app; a root devDependency.
 import EmbeddedPostgres from 'embedded-postgres';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

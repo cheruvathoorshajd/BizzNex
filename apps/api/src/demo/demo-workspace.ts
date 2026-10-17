@@ -25,7 +25,7 @@ async function wipe(tx: Prisma.TransactionClient, userId: string) {
 async function fill(tx: Prisma.TransactionClient, userId: string) {
   await tx.project.create({
     data: {
-      userId: userId, name: 'Thanksgiving Gifts', owner: 'You', spend: 2410, trend: [400, 300, 375, 200, 250, 100, 150],
+      userId: userId, name: 'Thanksgiving Gifts', owner: 'You', spend: 2410, trend: [300, 320, 340, 360, 380, 395, 410],
       tasks: {
         create: [
           { name: 'Buy gift wrappers & cardboard', description: 'Pick up wrappers and cardboard before the weekend.', startDate: d('2026-01-01'), endDate: d('2026-01-10'), status: 'In Progress' },
@@ -37,7 +37,7 @@ async function fill(tx: Prisma.TransactionClient, userId: string) {
 
   await tx.project.create({
     data: {
-      userId: userId, name: 'Christmas Decorations', owner: 'R. Patel', spend: 1180, trend: [96, 120, 84, 144, 132, 180, 168],
+      userId: userId, name: 'Christmas Decorations', owner: 'R. Patel', spend: 1180, trend: [120, 130, 140, 150, 160, 170, 180],
       tasks: {
         create: [
           { name: 'Buy Christmas lights & ornaments', description: 'Lights and ornaments for the tree.', startDate: d('2026-12-01'), endDate: d('2026-12-10'), status: 'Pending' },
@@ -49,7 +49,7 @@ async function fill(tx: Prisma.TransactionClient, userId: string) {
 
   await tx.project.create({
     data: {
-      userId: userId, name: 'Q4 Newsletter', owner: 'A. Khan', spend: 540, trend: [80, 75, 55, 60, 35, 30, 20],
+      userId: userId, name: 'Q4 Newsletter', owner: 'A. Khan', spend: 540, trend: [50, 55, 60, 65, 70, 75, 80],
       tasks: {
         create: [
           { name: 'Draft the holiday newsletter', description: 'Holiday campaign email.', startDate: d('2026-08-12'), endDate: d('2026-08-30'), status: 'Pending' },
