@@ -1,0 +1,18 @@
+**/node_modules
+**/dist
+**/.git
+**/.env
+**/.env.*
+**/coverage
+**/*.tsbuildinfo
+.github
+docs
+scripts
+# design explorations stay out of images; the web build ships only the documents it links to
+design-style-guides/*
+!design-style-guides/bizznex-identity-skyline.html
+!design-style-guides/bizznex-identity.html
+!design-style-guides/bizznex-logo-options.html
+*.html
+!bizznex-case-study.html
+*.md
