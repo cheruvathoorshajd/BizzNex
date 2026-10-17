@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: bizznex
+          POSTGRES_PASSWORD: bizznex
+          POSTGRES_DB: bizznex
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bizznex"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://bizznex:bizznex@localhost:5432/bizznex?schema=public
+      JWT_SECRET: ci-secret
+      CORS_ORIGIN: http://localhost:3005
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build shared + generate Prisma client
+        run: |
+          npm run build -w @bizznex/shared
+          npm run prisma:generate -w @bizznex/api
+
+      - name: Apply migrations to the test database
+        run: npm run prisma:migrate -w @bizznex/api
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Build all
+        run: npm run build
+
+      - name: E2E (API)
+        run: npm run test:e2e -w @bizznex/api
