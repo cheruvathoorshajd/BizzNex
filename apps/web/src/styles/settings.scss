@@ -1,0 +1,80 @@
+/* ============================================================
+   BizzNex · Settings (views/Settings.tsx)
+   Left section navigation + one column of cards, in Aurora tokens.
+   ============================================================ */
+
+.st-layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: clamp(20px, 3vw, 40px); align-items: start; }
+.st-nav { position: sticky; top: 92px; display: flex; flex-direction: column; gap: 2px; }
+.st-nav-i { display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%; padding: 10px 12px; border: 0; border-left: 2px solid transparent; background: none; cursor: pointer; color: var(--ink-soft); font: inherit; border-radius: 0 var(--radius) var(--radius) 0; transition: background .15s, color .15s, border-color .15s; }
+.st-nav-i:hover { background: var(--hover); color: var(--ink); }
+.st-nav-i.on { border-left-color: var(--accent); background: var(--accent-tint); color: var(--ink); }
+.st-nav-i svg { margin-top: 2px; flex: none; color: var(--muted); }
+.st-nav-i.on svg { color: var(--accent); }
+.st-nav-i b { display: block; font-size: 14px; font-weight: 500; }
+.st-nav-i small { display: block; font-size: 12px; color: var(--muted); }
+.st-nav-i.warn b { color: var(--bad); }
+
+.st-body { display: flex; flex-direction: column; gap: 16px; min-width: 0; animation: obIn .3s var(--ease); }
+.st-card { border: 1px solid var(--rule-soft); border-radius: var(--radius); background: var(--paper); }
+.st-card.danger { border-color: color-mix(in srgb, var(--bad) 45%, transparent); }
+.st-card-h { padding: 18px 20px 0; }
+.st-card-h h3 { font-family: var(--serif); font-weight: 500; font-size: 1.3rem; letter-spacing: -.02em; margin: 0; }
+.st-card.danger .st-card-h h3 { color: var(--bad); }
+.st-card-h p { margin: 4px 0 0; color: var(--muted); font-size: 13.5px; }
+.st-card-b { padding: 16px 20px 18px; }
+.st-card-f { display: flex; align-items: center; justify-content: flex-end; gap: 14px; flex-wrap: wrap; padding: 12px 20px; border-top: 1px solid var(--rule-soft); background: var(--paper-2); border-radius: 0 0 var(--radius) var(--radius); }
+.st-card-f .field-err { margin: 0 auto 0 0; }
+
+.st-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.st-fields .field.full { grid-column: 1 / -1; }
+@media (max-width: 640px) { .st-fields { grid-template-columns: minmax(0, 1fr); } }
+.st-fields .field label { margin-bottom: 7px; }
+.st-help { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; }
+.st-label { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
+.st-label:first-child { margin-top: 0; }
+
+.st-avatar { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.st-avatar .av.big { width: 56px; height: 56px; font-size: 18px; }
+.st-avatar > div b { display: block; font-size: 15px; }
+.st-avatar > div span { display: block; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+.st-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 12px 0; border-top: 1px solid var(--rule-soft); flex-wrap: wrap; }
+.st-row:first-child { border-top: 0; padding-top: 0; }
+.st-row:last-child { padding-bottom: 0; }
+.st-row-t { flex: 1; min-width: 220px; }
+.st-row-t b, .st-row-t label { display: block; font-size: 14px; font-weight: 500; color: var(--ink); text-transform: none; letter-spacing: 0; font-family: var(--sans); margin: 0; }
+.st-row-t span { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.st-select { width: auto; min-width: 200px; }
+.sw[disabled] { opacity: .45; cursor: not-allowed; }
+
+.st-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 640px) { .st-links { grid-template-columns: minmax(0, 1fr); } }
+.st-link { display: flex; gap: 12px; align-items: flex-start; text-align: left; padding: 12px; border: 1px solid var(--rule-soft); border-radius: var(--radius); background: none; cursor: pointer; color: var(--ink); font: inherit; transition: border-color .15s, background .15s; }
+.st-link:hover { border-color: var(--rule); background: var(--hover); }
+.st-link svg { color: var(--accent); flex: none; margin-top: 2px; }
+.st-link b { display: block; font-size: 14px; font-weight: 500; }
+.st-link small { display: block; font-size: 12px; color: var(--muted); }
+.st-keys { list-style: none; padding: 0; margin: 0; }
+.st-keys li { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 10px 0; border-top: 1px solid var(--rule-soft); font-size: 14px; }
+.st-keys li:first-child { border-top: 0; padding-top: 0; }
+.st-mouse { font-size: 12.5px; color: var(--muted); }
+
+.st-demo { display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap; padding: 12px 16px; margin-bottom: var(--s4); border: 1px dashed var(--rule); border-radius: var(--radius); font-size: 13.5px; color: var(--ink-soft); }
+.st-demo > span:nth-child(2) { flex: 1; min-width: 220px; }
+
+.btn.danger-solid { background: var(--bad); color: var(--paper); border-color: var(--bad); }
+.btn.danger-solid:hover { filter: brightness(1.06); }
+
+/* sidebar: the user block opens Settings */
+.user-link { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; padding: 4px 6px; margin: -4px -6px; border: 0; background: none; border-radius: var(--radius); cursor: pointer; text-align: left; color: inherit; font: inherit; transition: background .15s; }
+.user-link:hover, .user-link.on { background: var(--hover); }
+.user-link .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-link .em { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 860px) {
+  .st-layout { grid-template-columns: minmax(0, 1fr); }
+  .st-nav { position: static; flex-direction: row; overflow-x: auto; gap: 6px; padding-bottom: 6px; }
+  .st-nav-i { flex: none; width: auto; border-left: 0; border-bottom: 2px solid transparent; border-radius: var(--radius) var(--radius) 0 0; padding: 8px 12px; }
+  .st-nav-i.on { border-bottom-color: var(--accent); }
+  .st-nav-i small { display: none; }
+}
