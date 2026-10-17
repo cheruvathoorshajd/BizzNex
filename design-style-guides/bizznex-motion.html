@@ -1,0 +1,843 @@
+<title>BizzNex Motion</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: a header with the three motion directions as the main choice, then a two-column
+   bench of live moments from the app, each replayable and individually overridable. */
+:root {
+  --paper: #F5F1E9;
+  --paper-2: #ECE6DA;
+  --ink: #211D16;
+  --ink-soft: #4A443A;
+  --muted: #827A6B;
+  --rule: #D8D0C1;
+  --rule-soft: #E5DED1;
+  --accent: #5B41E0;
+  --on-accent: #FFFFFF;
+  --accent-tint: rgba(91, 65, 224, .11);
+  --ok: #2F7D4F;
+  --bad: #B8463A;
+  --scrim: rgba(18, 14, 8, .38);
+  --shadow: 0 18px 40px -18px rgba(33, 29, 22, .38);
+  --serif: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --sans: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Menlo, monospace;
+  --radius: 3px;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #1B1814; --paper-2: #23201A; --ink: #EFE9DD; --ink-soft: #CEC6B7; --muted: #918979;
+    --rule: #3B352D; --rule-soft: #2D2822; --accent: #A897FF; --on-accent: #17131F;
+    --accent-tint: rgba(168, 151, 255, .14); --ok: #6BC48C; --bad: #E0786B; --scrim: rgba(0, 0, 0, .5);
+    --shadow: 0 18px 40px -16px rgba(0, 0, 0, .7);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #1B1814; --paper-2: #23201A; --ink: #EFE9DD; --ink-soft: #CEC6B7; --muted: #918979;
+  --rule: #3B352D; --rule-soft: #2D2822; --accent: #A897FF; --on-accent: #17131F;
+  --accent-tint: rgba(168, 151, 255, .14); --ok: #6BC48C; --bad: #E0786B; --scrim: rgba(0, 0, 0, .5);
+  --shadow: 0 18px 40px -16px rgba(0, 0, 0, .7);
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: clamp(28px, 5vw, 64px) 120px; display: flex; flex-direction: column; gap: clamp(28px, 4vw, 48px); }
+button, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── header ── */
+.eyebrow { font-family: var(--mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; display: flex; gap: 12px; }
+.eyebrow b { color: var(--accent); font-weight: 500; }
+h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(2.6rem, 6.5vw, 4.6rem); letter-spacing: -.035em; line-height: .95; margin: 14px 0 0; text-wrap: balance; }
+.lead { max-width: 62ch; color: var(--ink-soft); margin: 18px 0 0; font-size: 16.5px; }
+.today { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 18px 0 0; padding: 12px 0 0; border-top: 1px solid var(--rule-soft); font-size: 13.5px; color: var(--muted); max-width: 900px; }
+.today b { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); font-weight: 500; }
+
+/* ── direction choice ── */
+.dirs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 860px) { .dirs { grid-template-columns: minmax(0, 1fr); } }
+.dir {
+  position: relative; text-align: left; display: flex; flex-direction: column; gap: 10px; padding: 18px 18px 16px;
+  border: 1px solid var(--rule); border-radius: var(--radius); background: transparent; cursor: pointer;
+  transition: border-color .2s var(--ease), background .2s var(--ease);
+}
+.dir:hover { border-color: var(--ink-soft); }
+.dir[aria-checked="true"] { border-color: var(--accent); background: var(--accent-tint); }
+.dir-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.dir-h strong { font-family: var(--serif); font-weight: 500; font-size: 1.55rem; letter-spacing: -.02em; }
+.tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; padding: 3px 7px; border: 1px solid var(--accent); color: var(--accent); border-radius: 999px; white-space: nowrap; }
+.dir p { margin: 0; color: var(--ink-soft); font-size: 14px; }
+.dir .nums { font-family: var(--mono); font-size: 11.5px; color: var(--muted); letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; font-size: 13.5px; color: var(--ink-soft); }
+.tgl { display: inline-flex; align-items: center; gap: 9px; cursor: pointer; }
+.tgl input { appearance: none; width: 34px; height: 20px; border: 1px solid var(--rule); border-radius: 999px; background: var(--rule-soft); position: relative; cursor: pointer; margin: 0; transition: background .2s var(--ease), border-color .2s; }
+.tgl input::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--paper); box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .2s var(--ease); }
+.tgl input:checked { background: var(--accent); border-color: var(--accent); }
+.tgl input:checked::after { transform: translateX(14px); }
+.replay-all { margin-left: auto; }
+
+/* ── buttons (Aurora) ── */
+.btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border: 1px solid var(--rule); border-radius: var(--radius); background: transparent; cursor: pointer; font-size: 13.5px; font-weight: 500; transition: border-color .15s, background .15s, color .15s; white-space: nowrap; }
+.btn:hover { border-color: var(--ink-soft); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.danger { background: var(--bad); border-color: var(--bad); color: #fff; }
+.btn.ghost { border-color: transparent; }
+.btn.ghost:hover { background: var(--paper-2); }
+.btn.sm { padding: 5px 10px; font-size: 12.5px; }
+.btn svg { width: 14px; height: 14px; }
+
+/* ── the bench ── */
+.bench { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 900px) { .bench { grid-template-columns: minmax(0, 1fr); } }
+.demo { display: flex; flex-direction: column; border-top: 1px solid var(--ink); padding-top: 14px; gap: 12px; min-width: 0; }
+.demo-h { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.demo-h h2 { font-family: var(--serif); font-weight: 500; font-size: 1.45rem; letter-spacing: -.02em; margin: 0; line-height: 1.15; }
+.demo-h .where { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+.pickwrap { display: flex; align-items: center; gap: 8px; flex: none; }
+.pickwrap label { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.pickwrap select { font-size: 13px; padding: 6px 28px 6px 10px; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--paper); cursor: pointer; }
+.stage { position: relative; height: 260px; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--paper-2); overflow: hidden; }
+.demo-f { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.spec { margin: 0; font-size: 13.5px; color: var(--ink-soft); max-width: 52ch; }
+.spec .k { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; color: var(--accent); text-transform: uppercase; margin-right: 6px; }
+
+/* mini-app primitives shared by the stages */
+.m-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.av { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-family: var(--mono); font-size: 10px; display: grid; place-items: center; flex: none; }
+
+/* 1 · page switch */
+.app { position: absolute; inset: 0; display: grid; grid-template-columns: 138px minmax(0, 1fr); }
+.rail { border-right: 1px solid var(--rule); padding: 14px 8px; display: flex; flex-direction: column; gap: 2px; background: var(--paper); }
+.rail .brand { font-weight: 600; font-size: 14px; letter-spacing: -.02em; padding: 0 8px 12px; }
+.rail button { text-align: left; border: 0; background: none; padding: 7px 8px; border-radius: var(--radius); font-size: 13px; color: var(--ink-soft); cursor: pointer; border-left: 2px solid transparent; }
+.rail button:hover { background: var(--rule-soft); }
+.rail button[aria-current="page"] { color: var(--ink); background: var(--accent-tint); border-left-color: var(--accent); }
+.view { position: relative; overflow: hidden; }
+.pane { position: absolute; inset: 0; padding: 18px 20px; }
+.pane h3 { font-family: var(--serif); font-weight: 500; font-size: 1.7rem; letter-spacing: -.03em; margin: 6px 0 12px; line-height: 1.05; }
+.pane ul { list-style: none; margin: 0; padding: 0; }
+.pane li { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid var(--rule); font-size: 13.5px; }
+.pane li span:last-child { font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
+
+/* 2 · confirm dialog */
+.deal-row { position: absolute; inset: 0; padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+.deal-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.deal-line b { font-weight: 500; }
+.deal-line small { display: block; font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+.m-overlay { position: absolute; inset: 0; background: var(--scrim); backdrop-filter: blur(3px); display: grid; place-items: center; padding: 16px; z-index: 5; }
+.m-dialog { width: min(330px, 100%); background: var(--paper); border: 1px solid var(--rule); border-radius: var(--radius); box-shadow: var(--shadow); }
+.m-dialog h4 { font-family: var(--serif); font-weight: 500; font-size: 1.15rem; letter-spacing: -.02em; margin: 0; padding: 16px 18px 10px; border-bottom: 1px solid var(--rule-soft); }
+.m-dialog p { margin: 0; padding: 12px 18px 0; font-size: 13.5px; color: var(--ink-soft); }
+.m-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 18px 16px; }
+
+/* 3 · toast */
+.form-mini { position: absolute; inset: 0; padding: 22px; display: flex; flex-direction: column; gap: 10px; }
+.form-mini label { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.form-mini .inp { border: 1px solid var(--rule); border-radius: var(--radius); padding: 9px 11px; background: var(--paper); font-size: 14px; }
+.form-mini .row { display: flex; gap: 8px; margin-top: 4px; }
+.toast-host { position: absolute; left: 0; right: 0; bottom: 16px; display: flex; flex-direction: column-reverse; align-items: center; gap: 8px; pointer-events: none; z-index: 4; }
+.m-toast { background: var(--ink); color: var(--paper); padding: 9px 16px; border-radius: var(--radius); font-family: var(--mono); font-size: 12px; letter-spacing: .04em; box-shadow: var(--shadow); }
+
+/* 4 · list */
+.list-wrap { position: absolute; inset: 0; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+.list-top { display: flex; align-items: center; justify-content: space-between; }
+.list-ul { list-style: none; margin: 0; padding: 0; position: relative; }
+.m-li { display: flex; align-items: center; gap: 10px; padding: 7px 4px; border-top: 1px solid var(--rule); overflow: hidden; background: transparent; }
+.m-li .nm { flex: 1; font-size: 13.5px; line-height: 1.25; }
+.m-li .nm small { display: block; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.m-li .x { border: 0; background: none; cursor: pointer; color: var(--muted); font-size: 17px; line-height: 1; width: 26px; height: 26px; border-radius: var(--radius); }
+.m-li .x:hover { color: var(--bad); background: var(--rule-soft); }
+
+/* 5 · pipeline */
+.pipe { position: absolute; inset: 0; padding: 14px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.col { border-top: 2px solid var(--rule); padding-top: 8px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.col.won { border-top-color: var(--ok); }
+.col h5 { margin: 0; font-family: var(--mono); font-weight: 500; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; }
+.col h5 b { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+.cards { display: flex; flex-direction: column; gap: 8px; }
+.dcard { position: relative; background: var(--paper); border: 1px solid var(--rule); border-radius: var(--radius); padding: 9px 10px; font-size: 12.5px; line-height: 1.3; }
+.dcard small { display: block; font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-top: 3px; font-variant-numeric: tabular-nums; }
+.dcard.hero { border-color: var(--accent); z-index: 3; }
+.dcard.hero.is-won { border-color: var(--ok); }
+.pipe-act { position: absolute; right: 14px; bottom: 14px; z-index: 4; }
+
+/* 6 · metrics */
+.metrics { position: absolute; inset: 0; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.kpi { border-top: 1px solid var(--rule); padding-top: 8px; min-width: 0; }
+.kpi .l { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: block; }
+.kpi b { display: block; font-family: var(--serif); font-weight: 500; font-size: clamp(1.3rem, 3vw, 1.75rem); letter-spacing: -.03em; font-variant-numeric: tabular-nums; margin-top: 2px; white-space: nowrap; }
+.spark { width: 100%; height: auto; display: block; overflow: visible; }
+.spark .grid line { stroke: var(--rule); stroke-width: 1; }
+.spark .grid text, .spark .months text { fill: var(--muted); font-family: var(--mono); font-size: 9px; }
+.spark .area { fill: var(--accent-tint); }
+.spark .line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.spark .end { fill: var(--accent); }
+.spark .endlabel { fill: var(--ink); font-family: var(--mono); font-size: 10px; }
+
+/* 7 · theme */
+.theme-stage { position: absolute; inset: 0; padding: 16px; }
+.theme-mini { position: absolute; inset: 16px; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--paper); color: var(--ink); padding: 14px 16px; overflow: hidden; }
+.theme-mini, .theme-mini * { transition: background-color var(--tt, 500ms) var(--ease), color var(--tt, 500ms) var(--ease), border-color var(--tt, 500ms) var(--ease); }
+.mini-light { --paper: #F5F1E9; --paper-2: #ECE6DA; --ink: #211D16; --ink-soft: #4A443A; --muted: #827A6B; --rule: #D8D0C1; --rule-soft: #E5DED1; --accent: #5B41E0; --on-accent: #fff; --accent-tint: rgba(91,65,224,.11); --ok: #2F7D4F; }
+.mini-dark { --paper: #1B1814; --paper-2: #23201A; --ink: #EFE9DD; --ink-soft: #CEC6B7; --muted: #918979; --rule: #3B352D; --rule-soft: #2D2822; --accent: #A897FF; --on-accent: #17131F; --accent-tint: rgba(168,151,255,.14); --ok: #6BC48C; }
+.tm-top { display: flex; align-items: center; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid var(--rule); }
+.tm-brand { font-weight: 600; letter-spacing: -.02em; font-size: 14px; }
+.tm-tg { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; border: 1px solid var(--rule); border-radius: var(--radius); padding: 5px 10px; background: transparent; cursor: pointer; color: var(--ink-soft); }
+.tm-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: end; padding-top: 12px; }
+.tm-big { display: block; font-family: var(--serif); font-weight: 500; font-size: 2.2rem; letter-spacing: -.04em; line-height: 1; margin-top: 6px; font-variant-numeric: tabular-nums; }
+.tm-delta { font-family: var(--mono); font-size: 11.5px; color: var(--ok); }
+.tm-bars { display: flex; align-items: flex-end; gap: 6px; height: 92px; border-bottom: 1px solid var(--rule); }
+.tm-bars i { flex: 1; background: var(--accent); opacity: .85; border-radius: 1px 1px 0 0; }
+.tm-bars i:nth-child(odd) { background: var(--rule); opacity: 1; }
+.tm-clone { pointer-events: none; z-index: 2; }
+
+/* 8 · studio window */
+.studio { position: absolute; inset: 0; display: grid; grid-template-columns: 130px minmax(0, 1fr); }
+.st-rail { border-right: 1px solid var(--rule); background: var(--paper); padding: 14px 8px; display: flex; flex-direction: column; gap: 3px; }
+.st-rail .m-eyebrow { padding: 0 8px 6px; }
+.st-item { display: flex; justify-content: space-between; text-align: left; border: 0; background: none; font-size: 13px; padding: 7px 8px; border-radius: var(--radius); color: var(--ink); cursor: pointer; }
+.st-item:hover { background: var(--rule-soft); }
+.st-item.dim { color: var(--muted); cursor: default; }
+.st-item.dim:hover { background: none; }
+.st-item span { color: var(--accent); }
+.st-main { padding: 18px 20px 50px; display: flex; flex-direction: column; gap: 10px; }
+.ph { height: 9px; border-radius: 2px; background: var(--rule); }
+.ph.h { height: 18px; width: 46%; background: var(--rule); margin-bottom: 6px; }
+.st-win { position: absolute; top: 14px; right: 14px; width: min(220px, 52%); background: var(--paper); border: 1px solid var(--rule); border-radius: var(--radius); box-shadow: var(--shadow); z-index: 3; transform-origin: top left; }
+.st-wh { display: flex; align-items: center; justify-content: space-between; padding: 7px 8px 7px 12px; border-bottom: 1px solid var(--rule-soft); font-size: 12.5px; }
+.st-wh b { font-weight: 600; }
+.st-wh button { width: 22px; height: 22px; border: 1px solid var(--rule); border-radius: 3px; background: none; color: var(--muted); cursor: pointer; line-height: 1; }
+.st-wh button + button { margin-left: 4px; }
+.st-calc { padding: 10px 12px 12px; }
+.scr { font-family: var(--mono); font-size: 20px; text-align: right; padding: 4px 2px 8px; border-bottom: 1px solid var(--rule); font-variant-numeric: tabular-nums; }
+.keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 8px; }
+.keys i { height: 18px; border: 1px solid var(--rule); border-radius: 2px; }
+.keys i:last-child { background: var(--accent); border-color: var(--accent); }
+.st-dock { position: absolute; left: 130px; right: 0; bottom: 0; height: 38px; border-top: 1px solid var(--rule); background: var(--paper); display: flex; align-items: center; gap: 8px; padding: 0 12px; z-index: 2; }
+.st-dock .dk { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.chip { font-family: var(--mono); font-size: 11px; padding: 4px 10px; border: 1px solid var(--accent); color: var(--accent); background: var(--accent-tint); border-radius: 999px; cursor: pointer; }
+
+/* ── picks bar ── */
+.picks {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--paper); border-top: 1px solid var(--ink);
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+}
+.picks-in { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; }
+.picks-in > b { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+.pick-list { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; min-width: 0; }
+.pchip { font-size: 12px; padding: 3px 9px; border: 1px solid var(--rule); border-radius: 999px; color: var(--ink-soft); white-space: nowrap; }
+.pchip i { font-style: normal; color: var(--accent); font-weight: 500; }
+.pchip.own { border-color: var(--accent); }
+#copy-status { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+
+@media (max-width: 560px) {
+  .app, .studio { grid-template-columns: 104px minmax(0, 1fr); }
+  .st-dock { left: 104px; }
+  .stage { height: 280px; }
+  .replay-all { margin-left: 0; }
+  .pick-list { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .dir, .tgl input, .tgl input::after { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow"><b>BizzNex</b><span>Aurora · motion study</span><span>16 Oct 2026</span></p>
+    <h1>How BizzNex moves</h1>
+    <p class="lead">Three motion directions for the moments that happen all day in BizzNex: switching pages, confirming a delete, saving, adding to a list, moving a deal, loading numbers, changing theme and using Studio windows. Pick a direction, replay any moment, and override single moments if one direction doesn’t suit them.</p>
+    <p class="today"><b>Adopted 16 Oct 2026</b><span>Spatial for every moment</span><span>All durations ×1.5 (one token: MOTION_SCALE / --m)</span><span>Reduced motion: instant</span></p>
+  </header>
+
+  <section aria-labelledby="dir-label" style="display:flex;flex-direction:column;gap:14px">
+    <p class="eyebrow" id="dir-label"><b>§ 1</b><span>Choose a direction for the whole app</span></p>
+    <div class="dirs" role="radiogroup" aria-labelledby="dir-label">
+      <button class="dir" role="radio" aria-checked="false" data-dir="quiet" id="dir-quiet">
+        <span class="dir-h"><strong>Quiet</strong></span>
+        <p>Fades only, all under 200 ms. Nothing moves, so the interface never draws attention to itself. Closest to a classic business tool.</p>
+        <span class="nums">90–180 ms · standard ease · opacity only</span>
+      </button>
+      <button class="dir" role="radio" aria-checked="false" data-dir="editorial" id="dir-editorial">
+        <span class="dir-h"><strong>Editorial</strong></span>
+        <p>Content settles into place: a short rise and fade, rows arriving one after another, exits that are quicker than entrances. Uses Aurora’s existing ease, so it matches the type.</p>
+        <span class="nums">200–400 ms · ease-out-quint · opacity, 6–12 px rise</span>
+      </button>
+      <button class="dir" role="radio" aria-checked="true" data-dir="spatial" id="dir-spatial">
+        <span class="dir-h"><strong>Spatial</strong><span class="tag">Adopted · ×1.5</span></span>
+        <p>Things travel to and from where they belong: views slide the way you navigate, windows grow out of the sidebar and shrink into the dock, dark mode spreads from its switch.</p>
+        <span class="nums">300–560 ms · ease-out and spring · position, scale, clip</span>
+      </button>
+    </div>
+    <div class="controls">
+      <label class="tgl" for="slow"><input type="checkbox" id="slow"> Slow motion ×3</label>
+      <label class="tgl" for="reduced"><input type="checkbox" id="reduced"> Reduce motion <span style="color:var(--muted)">(what users with the OS setting get)</span></label>
+      <button class="btn replay-all" id="replay-all" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M13 8a5 5 0 1 1-1.5-3.6M13 2.5v3h-3"/></svg>Replay all</button>
+    </div>
+  </section>
+
+  <section aria-labelledby="bench-label" style="display:flex;flex-direction:column;gap:14px">
+    <p class="eyebrow" id="bench-label"><b>§ 2</b><span>Every moment, live. Click inside the frames too.</span></p>
+    <div class="bench">
+
+      <article class="demo" data-demo="page">
+        <div class="demo-h"><h2>Page switch<span class="where">Sidebar → any view</span></h2>
+          <div class="pickwrap"><label for="pick-page">Use</label><select id="pick-page" data-demo="page"></select></div></div>
+        <div class="stage"><div class="app">
+          <nav class="rail" aria-label="Demo navigation"><span class="brand">BizzNex</span>
+            <button type="button" data-view="0" aria-current="page">Dashboard</button>
+            <button type="button" data-view="1">Deals</button>
+            <button type="button" data-view="2">Contacts</button>
+          </nav>
+          <div class="view" id="page-view"></div>
+        </div></div>
+        <div class="demo-f"><p class="spec" id="spec-page"></p><button class="btn sm" type="button" data-replay="page">Replay</button></div>
+      </article>
+
+      <article class="demo" data-demo="modal">
+        <div class="demo-h"><h2>Confirm dialog<span class="where">Every delete</span></h2>
+          <div class="pickwrap"><label for="pick-modal">Use</label><select id="pick-modal" data-demo="modal"></select></div></div>
+        <div class="stage" id="modal-stage"><div class="deal-row">
+          <p class="m-eyebrow">§ Deals · Proposal</p>
+          <div class="deal-line" id="modal-row"><span><b>Winter gift bundle</b><small>$4,200 · Maria Gomez · closes 15 Nov</small></span>
+            <button class="btn sm" type="button" id="modal-open">Delete deal</button></div>
+        </div></div>
+        <div class="demo-f"><p class="spec" id="spec-modal"></p><button class="btn sm" type="button" data-replay="modal">Replay</button></div>
+      </article>
+
+      <article class="demo" data-demo="toast">
+        <div class="demo-h"><h2>Saved message<span class="where">Toast after any save</span></h2>
+          <div class="pickwrap"><label for="pick-toast">Use</label><select id="pick-toast" data-demo="toast"></select></div></div>
+        <div class="stage"><div class="form-mini">
+          <label for="toast-name">Name</label><input class="inp" id="toast-name" value="Dana Whitfield" readonly>
+          <label for="toast-email">Email</label><input class="inp" id="toast-email" value="dana@harbourgoods.example" readonly>
+          <div class="row"><button class="btn primary sm" type="button" id="toast-save">Save profile</button></div>
+        </div><div class="toast-host" id="toast-host" role="status" aria-live="polite"></div></div>
+        <div class="demo-f"><p class="spec" id="spec-toast"></p><button class="btn sm" type="button" data-replay="toast">Replay</button></div>
+      </article>
+
+      <article class="demo" data-demo="list">
+        <div class="demo-h"><h2>Add and remove rows<span class="where">Contacts, notes, activities</span></h2>
+          <div class="pickwrap"><label for="pick-list">Use</label><select id="pick-list" data-demo="list"></select></div></div>
+        <div class="stage"><div class="list-wrap">
+          <div class="list-top"><p class="m-eyebrow">§ Contacts</p><button class="btn primary sm" type="button" id="list-add">Add contact</button></div>
+          <ul class="list-ul" id="list-ul"></ul>
+        </div></div>
+        <div class="demo-f"><p class="spec" id="spec-list"></p><button class="btn sm" type="button" data-replay="list">Replay</button></div>
+      </article>
+
+      <article class="demo" data-demo="pipe">
+        <div class="demo-h"><h2>Move a deal<span class="where">Deals pipeline board</span></h2>
+          <div class="pickwrap"><label for="pick-pipe">Use</label><select id="pick-pipe" data-demo="pipe"></select></div></div>
+        <div class="stage"><div class="pipe" id="pipe">
+          <div class="col" data-stage="Qualified"><h5>Qualified <b>1</b></h5><div class="cards"><div class="dcard">Holiday event catering<small>$8,800 · John Park</small></div></div></div>
+          <div class="col" data-stage="Proposal"><h5>Proposal <b>1</b></h5><div class="cards"><div class="dcard hero" id="pipe-card">Winter gift bundle<small>$4,200 · Maria Gomez</small></div></div></div>
+          <div class="col won" data-stage="Won"><h5>Won <b>1</b></h5><div class="cards"><div class="dcard">Newsletter sponsorship<small>$1,500 · Acme Retail</small></div></div></div>
+        </div><button class="btn primary sm pipe-act" type="button" id="pipe-move">Mark as won</button></div>
+        <div class="demo-f"><p class="spec" id="spec-pipe"></p><button class="btn sm" type="button" data-replay="pipe">Replay</button></div>
+      </article>
+
+      <article class="demo" data-demo="metrics">
+        <div class="demo-h"><h2>Numbers arriving<span class="where">Dashboard on load</span></h2>
+          <div class="pickwrap"><label for="pick-metrics">Use</label><select id="pick-metrics" data-demo="metrics"></select></div></div>
+        <div class="stage"><div class="metrics">
+          <div class="kpis" id="kpis">
+            <div class="kpi"><span class="l">Open pipeline</span><b data-to="14500" data-fmt="money">$14,500</b></div>
+            <div class="kpi"><span class="l">Open deals</span><b data-to="3">3</b></div>
+            <div class="kpi"><span class="l">Win rate</span><b data-to="25" data-fmt="pct">25%</b></div>
+          </div>
+          <div id="spark-host" aria-label="Monthly spend, May to October 2026: rising from $2,100 to $3,900"></div>
+        </div></div>
+        <div class="demo-f"><p class="spec" id="spec-metrics"></p><button class="btn sm" type="button" data-replay="metrics">Replay</button></div>
+      </article>
+
+      <article class="demo" data-demo="theme">
+        <div class="demo-h"><h2>Light and dark<span class="where">Topbar theme switch</span></h2>
+          <div class="pickwrap"><label for="pick-theme">Use</label><select id="pick-theme" data-demo="theme"></select></div></div>
+        <div class="stage"><div class="theme-stage" id="theme-stage">
+          <div class="theme-mini mini-light" id="theme-mini">
+            <div class="tm-top"><span class="tm-brand">BizzNex</span><button class="tm-tg" type="button" id="tm-toggle">Dark</button></div>
+            <div class="tm-body">
+              <div><p class="m-eyebrow">§ Spend · Q4</p><b class="tm-big">$27,600</b><span class="tm-delta">▲ 18.4% vs Q3</span></div>
+              <div class="tm-bars" aria-hidden="true"><i style="height:38%"></i><i style="height:52%"></i><i style="height:46%"></i><i style="height:64%"></i><i style="height:58%"></i><i style="height:82%"></i></div>
+            </div>
+          </div>
+        </div></div>
+        <div class="demo-f"><p class="spec" id="spec-theme"></p><button class="btn sm" type="button" data-replay="theme">Replay</button></div>
+      </article>
+
+      <article class="demo" data-demo="win">
+        <div class="demo-h"><h2>Studio window<span class="where">Open a tool beside your work</span></h2>
+          <div class="pickwrap"><label for="pick-win">Use</label><select id="pick-win" data-demo="win"></select></div></div>
+        <div class="stage"><div class="studio" id="studio">
+          <aside class="st-rail"><span class="m-eyebrow">Tools</span>
+            <button class="st-item" type="button" id="win-src">Calculator <span aria-hidden="true">↗</span></button>
+            <span class="st-item dim">Notes</span><span class="st-item dim">Events</span></aside>
+          <div class="st-main"><div class="ph h"></div><div class="ph" style="width:82%"></div><div class="ph" style="width:64%"></div><div class="ph" style="width:74%"></div><div class="ph" style="width:40%"></div></div>
+          <div class="st-win" id="win" hidden>
+            <div class="st-wh"><b>Calculator</b><span><button type="button" id="win-min" aria-label="Minimize to dock">–</button><button type="button" id="win-close" aria-label="Close window">×</button></span></div>
+            <div class="st-calc"><div class="scr">1,284.50</div><div class="keys"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+          </div>
+          <div class="st-dock" id="dock"><span class="dk">Dock</span></div>
+        </div></div>
+        <div class="demo-f"><p class="spec" id="spec-win"></p><button class="btn sm" type="button" data-replay="win">Replay</button></div>
+      </article>
+
+    </div>
+  </section>
+</div>
+
+<div class="picks" role="region" aria-label="Your picks">
+  <div class="picks-in">
+    <b>Your picks</b>
+    <div class="pick-list" id="picks-chips"></div>
+    <span id="copy-status" aria-live="polite"></span>
+    <button class="btn primary sm" type="button" id="copy">Copy picks</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const NAMES = { quiet: 'Quiet', editorial: 'Editorial', spatial: 'Spatial' };
+  const MOMENTS = { page: 'Page switch', modal: 'Confirm dialog', toast: 'Saved message', list: 'Rows', pipe: 'Move a deal', metrics: 'Numbers', theme: 'Light/dark', win: 'Studio window' };
+  const EASE = { quiet: 'cubic-bezier(.4, 0, .2, 1)', editorial: 'cubic-bezier(.22, 1, .36, 1)', spatial: 'cubic-bezier(.2, .8, .2, 1)' };
+  const SPRING = 'cubic-bezier(.34, 1.56, .64, 1)';
+
+  const state = { global: 'spatial', picks: {}, slow: false, reduced: matchMedia('(prefers-reduced-motion: reduce)').matches };
+  $('#reduced').checked = state.reduced;
+  const dirOf = (id) => state.picks[id] || state.global;
+  const ms = (n) => n * (state.slow ? 3 : 1);
+  const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+  /** One door for every animation: slow motion and reduced motion are applied here. */
+  function play(el, frames, d, { easing = 'linear', delay = 0 } = {}) {
+    if (state.reduced) {
+      // reduced motion keeps only opacity, short; anything that moved simply appears in place
+      frames = frames.map((f) => ({ opacity: f.opacity ?? 1 }));
+      d = Math.min(d, 120); delay = 0;
+    }
+    const a = el.animate(frames, { duration: ms(d), delay: ms(delay), easing, fill: 'both' });
+    a.finished.then(() => a.cancel()).catch(() => {});
+    return a;
+  }
+  const later = (fn, d) => setTimeout(fn, ms(d));
+
+  /* ── specs: what each direction does, in plain words ── */
+  const SPEC = {
+    page: {
+      quiet: 'The old view fades out in 90 ms, the new one fades in over 160 ms.',
+      editorial: 'The new view fades in over 200 ms. Its title rises 10 px over 320 ms and rows follow 45 ms apart.',
+      spatial: 'Views slide 28 px in the direction you navigate, 340 ms. Going back slides the other way.',
+    },
+    modal: {
+      quiet: 'Backdrop and dialog fade in together, 150 ms. Closing fades out in 120 ms.',
+      editorial: 'The dialog rises 12 px as it fades in, 280 ms. Closing sinks 6 px, 170 ms, so leaving feels quicker than arriving.',
+      spatial: 'The dialog grows out of the button you pressed, 340 ms, and shrinks back into it when cancelled.',
+    },
+    toast: {
+      quiet: 'Fades in and out, 160 ms each.',
+      editorial: 'Rises 16 px into place, 300 ms. Fades and drops 8 px when it leaves.',
+      spatial: 'Slides up from below the frame with a slight overshoot, 440 ms.',
+    },
+    list: {
+      quiet: 'New rows fade in over 160 ms. Removed rows fade out and the list closes the gap at once.',
+      editorial: 'New rows open their space and fade in, 280 ms, with a brief highlight. Removed rows fade and close up, 240 ms.',
+      spatial: 'New rows slide in from the left. Removed rows slide out to the right and the rest glide into place, 320 ms.',
+    },
+    pipe: {
+      quiet: 'The card fades out of one column and into the other, 280 ms in total.',
+      editorial: 'The card glides to its new column, 400 ms. Cards below it shift to make room.',
+      spatial: 'The card lifts, arcs across and settles, 480 ms, with a shadow while it travels.',
+    },
+    metrics: {
+      quiet: 'Numbers and chart fade in together, 200 ms. Values never count.',
+      editorial: 'Values count up over 800 ms, slowing at the end. The line draws itself across 900 ms.',
+      spatial: 'Tiles rise one after another, values count up over 1 s, the line draws and its end point pops in.',
+    },
+    theme: {
+      quiet: 'Colours cross-fade in 180 ms.',
+      editorial: 'Colours cross-fade in 500 ms. This is what BizzNex does today.',
+      spatial: 'The new theme spreads in a circle from the switch, 560 ms.',
+    },
+    win: {
+      quiet: 'The window fades in, 160 ms. Minimizing fades it out and the dock chip fades in.',
+      editorial: 'The window rises into place, 280 ms. Minimizing lowers and fades it while the dock chip rises.',
+      spatial: 'The window grows out of its sidebar item, 380 ms, and shrinks into the dock when minimized.',
+    },
+  };
+
+  /* ── direction choice, per-moment overrides, picks bar ── */
+  function refresh() {
+    $$('.dir').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.dir === state.global)));
+    $$('select[data-demo]').forEach((s) => {
+      const id = s.dataset.demo, cur = state.picks[id] || '';
+      s.innerHTML = `<option value="">${NAMES[state.global]} (all)</option>` +
+        Object.keys(NAMES).map((k) => `<option value="${k}">${NAMES[k]}</option>`).join('');
+      s.value = cur;
+      $('#spec-' + id).innerHTML = `<span class="k">${NAMES[dirOf(id)]}</span>${SPEC[id][dirOf(id)]}`;
+    });
+    $("#picks-chips").innerHTML = Object.keys(MOMENTS).map((id) =>
+      `<span class="pchip${state.picks[id] ? ' own' : ''}">${MOMENTS[id]} <i>${NAMES[dirOf(id)]}</i></span>`).join('');
+  }
+  $$('.dir').forEach((b) => b.addEventListener('click', () => { state.global = b.dataset.dir; refresh(); replayAll(); }));
+  $('.dirs').addEventListener('keydown', (e) => {
+    if (!['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp'].includes(e.key)) return;
+    e.preventDefault();
+    const keys = Object.keys(NAMES), i = keys.indexOf(state.global);
+    state.global = keys[(i + (e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : keys.length - 1)) % keys.length];
+    refresh(); $('#dir-' + state.global).focus();
+  });
+  document.addEventListener('change', (e) => {
+    const s = e.target.closest('select[data-demo]');
+    if (!s) return;
+    if (s.value) state.picks[s.dataset.demo] = s.value; else delete state.picks[s.dataset.demo];
+    refresh(); REPLAY[s.dataset.demo]();
+  });
+  $('#slow').addEventListener('change', (e) => { state.slow = e.target.checked; });
+  $('#reduced').addEventListener('change', (e) => { state.reduced = e.target.checked; });
+
+  function picksText() {
+    const lines = Object.keys(MOMENTS).map((id) => `${MOMENTS[id]}: ${NAMES[dirOf(id)]}`);
+    return `BizzNex motion picks (base: ${NAMES[state.global]})\n` + lines.join('\n');
+  }
+  $('#copy').addEventListener('click', async () => {
+    const status = $('#copy-status');
+    try { await navigator.clipboard.writeText(picksText()); status.textContent = 'Copied. Paste it to Claude.'; }
+    catch { status.textContent = 'Copying is blocked here. Tell Claude the picks shown.'; }
+    later(() => { status.textContent = ''; }, 3000);
+  });
+
+  /* ── 1 · page switch ── */
+  const VIEWS = [
+    { name: 'Dashboard', title: 'Good morning, Dana', rows: [['Open pipeline', '$14,500'], ['Tasks due this week', '7'], ['Won in October', '$1,500']] },
+    { name: 'Deals', title: 'Deals', rows: [['Winter gift bundle', 'Proposal · $4,200'], ['Holiday event catering', 'Qualified · $8,800'], ['Booth rental upsell', 'Lead · $900']] },
+    { name: 'Contacts', title: 'Contacts', rows: [['Maria Gomez', 'Buyer · Acme Retail'], ['John Park', 'Event lead · Globex'], ['Priya Nair', 'Owner']] },
+  ];
+  const page = { cur: 0 };
+  const makePane = (v) => {
+    const p = document.createElement('div'); p.className = 'pane';
+    p.innerHTML = `<p class="m-eyebrow">§ ${v.name}</p><h3>${v.title}</h3><ul>${v.rows.map((r) => `<li><span>${r[0]}</span><span>${r[1]}</span></li>`).join('')}</ul>`;
+    return p;
+  };
+  $('#page-view').append(makePane(VIEWS[0]));
+  function pageGo(i) {
+    const host = $('#page-view'), dir = dirOf('page');
+    const back = i < page.cur, old = host.querySelector('.pane:not(.leaving)');
+    page.cur = i;
+    $$('.rail button').forEach((b) => b.removeAttribute('aria-current'));
+    $$('.rail button')[i].setAttribute('aria-current', 'page');
+    const pane = makePane(VIEWS[i]); host.append(pane);
+    if (old) {
+      old.classList.add('leaving');
+      const out = dir === 'spatial'
+        ? play(old, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${back ? 24 : -24}px)` }], 220, { easing: EASE.spatial })
+        : play(old, [{ opacity: 1 }, { opacity: 0 }], dir === 'quiet' ? 90 : 110, { easing: EASE[dir] });
+      out.finished.then(() => old.remove()).catch(() => old.remove());
+    }
+    if (dir === 'quiet') play(pane, [{ opacity: 0 }, { opacity: 1 }], 160, { easing: EASE.quiet, delay: 60 });
+    else if (dir === 'editorial') {
+      play(pane, [{ opacity: 0 }, { opacity: 1 }], 200, { easing: EASE.editorial, delay: 80 });
+      play($('h3', pane), [{ transform: 'translateY(10px)' }, { transform: 'none' }], 320, { easing: EASE.editorial, delay: 80 });
+      $$('li', pane).forEach((li, k) => play(li, [{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], 300, { easing: EASE.editorial, delay: 140 + k * 45 }));
+    } else play(pane, [{ opacity: 0, transform: `translateX(${back ? -28 : 28}px)` }, { opacity: 1, transform: 'none' }], 340, { easing: EASE.spatial, delay: 40 });
+  }
+  $$('.rail button').forEach((b) => b.addEventListener('click', () => { const i = Number(b.dataset.view); if (i !== page.cur) pageGo(i); }));
+
+  /* ── 2 · confirm dialog ── */
+  const modal = { el: null };
+  function modalOpen() {
+    if (modal.el) return;
+    const dir = dirOf('modal'), stage = $('#modal-stage'), btn = $('#modal-open');
+    const ov = document.createElement('div'); ov.className = 'm-overlay';
+    ov.innerHTML = `<div class="m-dialog" role="dialog" aria-modal="true" aria-labelledby="m-title"><h4 id="m-title">Delete “Winter gift bundle”?</h4><p>Its activities stay, without the deal link. This can’t be undone.</p><div class="m-foot"><button class="btn ghost sm" type="button" data-act="cancel">Cancel</button><button class="btn danger sm" type="button" data-act="delete">Delete deal</button></div></div>`;
+    stage.append(ov); modal.el = ov;
+    const dlg = ov.firstElementChild;
+    ov.addEventListener('click', (e) => { const act = e.target.closest('[data-act]')?.dataset.act; if (act || e.target === ov) modalClose(act === 'delete'); });
+    dlg.querySelector('[data-act="cancel"]').focus({ preventScroll: true });
+    if (dir === 'spatial') {
+      const b = btn.getBoundingClientRect(), d = dlg.getBoundingClientRect();
+      dlg.style.transformOrigin = `${b.left + b.width / 2 - d.left}px ${b.top + b.height / 2 - d.top}px`;
+    }
+    play(ov, [{ opacity: 0 }, { opacity: 1 }], { quiet: 150, editorial: 220, spatial: 200 }[dir], { easing: EASE[dir] });
+    if (dir === 'quiet') play(dlg, [{ opacity: 0 }, { opacity: 1 }], 150, { easing: EASE.quiet });
+    else if (dir === 'editorial') play(dlg, [{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }], 280, { easing: EASE.editorial });
+    else play(dlg, [{ opacity: 0, transform: 'scale(.5)' }, { opacity: 1, transform: 'scale(1)' }], 340, { easing: EASE.spatial });
+  }
+  async function modalClose(deleted) {
+    const ov = modal.el; if (!ov || ov.dataset.closing) return;
+    ov.dataset.closing = '1';
+    const dir = dirOf('modal'), dlg = ov.firstElementChild;
+    const out = dir === 'quiet' ? play(dlg, [{ opacity: 1 }, { opacity: 0 }], 120, { easing: EASE.quiet })
+      : dir === 'editorial' ? play(dlg, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(6px)' }], 170, { easing: EASE.editorial })
+      : play(dlg, [{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(.5)' }], 240, { easing: EASE.spatial });
+    play(ov, [{ opacity: 1 }, { opacity: 0 }], dir === 'quiet' ? 120 : 200, { easing: EASE[dir] });
+    await out.finished.catch(() => {});
+    ov.remove(); modal.el = null;
+    $('#modal-open').focus({ preventScroll: true });
+    if (deleted) {
+      const row = $('#modal-row');
+      await play(row, [{ opacity: 1 }, { opacity: 0 }], 200, { easing: EASE[dir] }).finished.catch(() => {});
+      row.style.visibility = 'hidden';
+      later(() => { row.style.visibility = ''; play(row, [{ opacity: 0 }, { opacity: 1 }], 240, { easing: EASE[dir] }); }, 900);
+    }
+  }
+  $('#modal-open').addEventListener('click', modalOpen);
+  $('#modal-stage').addEventListener('keydown', (e) => { if (e.key === 'Escape') modalClose(false); });
+
+  /* ── 3 · toast ── */
+  function toast() {
+    const dir = dirOf('toast'), t = document.createElement('div');
+    t.className = 'm-toast'; t.textContent = 'Profile saved'; $('#toast-host').append(t);
+    const IN = { quiet: [[{ opacity: 0 }, { opacity: 1 }], 160, EASE.quiet],
+      editorial: [[{ opacity: 0, transform: 'translateY(16px)' }, { opacity: 1, transform: 'none' }], 300, EASE.editorial],
+      spatial: [[{ opacity: 0, transform: 'translateY(160%)' }, { opacity: 1, transform: 'none' }], 440, SPRING] }[dir];
+    play(t, IN[0], IN[1], { easing: IN[2] });
+    later(async () => {
+      const OUT = { quiet: [[{ opacity: 1 }, { opacity: 0 }], 160, EASE.quiet],
+        editorial: [[{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(8px)' }], 200, EASE.editorial],
+        spatial: [[{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(160%)' }], 260, EASE.spatial] }[dir];
+      await play(t, OUT[0], OUT[1], { easing: OUT[2] }).finished.catch(() => {});
+      t.remove();
+    }, 1700);
+  }
+  $('#toast-save').addEventListener('click', toast);
+
+  /* ── 4 · rows ── */
+  const PEOPLE = [['Maria Gomez', 'Buyer · Acme Retail'], ['John Park', 'Event lead · Globex'], ['Priya Nair', 'Owner']];
+  const POOL = [['Lena Ortiz', 'Office manager · Ortiz & Co'], ['Sam Okafor', 'Founder · Lagos Roast'], ['Hiro Tanaka', 'Buyer · Kumo Stores'], ['Ava Brennan', 'Events · Harbour Hall'], ['Noah Lindqvist', 'Owner · Nordlys']];
+  let poolAt = 0;
+  const initials = (n) => n.split(' ').map((w) => w[0]).join('').slice(0, 2);
+  const makeLi = ([n, r]) => {
+    const li = document.createElement('li'); li.className = 'm-li';
+    li.innerHTML = `<span class="av">${initials(n)}</span><span class="nm">${n}<small>${r}</small></span><button class="x" type="button" aria-label="Remove ${n}">×</button>`;
+    return li;
+  };
+  PEOPLE.forEach((p) => $('#list-ul').append(makeLi(p)));
+  function flip(container, mutate, skip = []) {
+    const first = new Map([...container.children].map((e) => [e, e.getBoundingClientRect().top]));
+    mutate();
+    for (const e of container.children) {
+      if (skip.includes(e) || !first.has(e)) continue;
+      const dy = first.get(e) - e.getBoundingClientRect().top;
+      if (dy) play(e, [{ transform: `translateY(${dy}px)` }, { transform: 'none' }], 320, { easing: EASE.spatial });
+    }
+  }
+  function listAdd() {
+    const ul = $('#list-ul'), dir = dirOf('list');
+    const live = [...ul.children].filter((li) => !li.dataset.leaving);
+    if (live.length >= 5) listRemove(live[live.length - 1]);
+    const li = makeLi(POOL[poolAt++ % POOL.length]);
+    if (dir === 'spatial') flip(ul, () => ul.prepend(li), [li]); else ul.prepend(li);
+    if (dir === 'quiet') play(li, [{ opacity: 0 }, { opacity: 1 }], 160, { easing: EASE.quiet });
+    else if (dir === 'editorial') {
+      const h = li.offsetHeight, cs = getComputedStyle(li);
+      play(li, [{ opacity: 0, height: '0px', paddingTop: '0px', paddingBottom: '0px' }, { opacity: 1, height: h + 'px', paddingTop: cs.paddingTop, paddingBottom: cs.paddingBottom }], 280, { easing: EASE.editorial });
+      play(li, [{ backgroundColor: cssVar('--accent-tint') }, { backgroundColor: 'rgba(0,0,0,0)' }], 1400, { easing: 'ease-out', delay: 200 });
+    } else play(li, [{ opacity: 0, transform: 'translateX(-18px)' }, { opacity: 1, transform: 'none' }], 320, { easing: EASE.spatial });
+  }
+  async function listRemove(li) {
+    if (!li || li.dataset.leaving) return;
+    li.dataset.leaving = '1';
+    const dir = dirOf('list'), ul = li.parentElement;
+    if (dir === 'quiet') { await play(li, [{ opacity: 1 }, { opacity: 0 }], 120, { easing: EASE.quiet }).finished.catch(() => {}); li.remove(); }
+    else if (dir === 'editorial') {
+      const h = li.offsetHeight, cs = getComputedStyle(li);
+      await play(li, [{ opacity: 1, height: h + 'px', paddingTop: cs.paddingTop, paddingBottom: cs.paddingBottom }, { opacity: 0, height: '0px', paddingTop: '0px', paddingBottom: '0px' }], 240, { easing: EASE.editorial }).finished.catch(() => {});
+      li.remove();
+    } else {
+      await play(li, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateX(24px)' }], 200, { easing: EASE.spatial }).finished.catch(() => {});
+      flip(ul, () => li.remove());
+    }
+  }
+  $('#list-add').addEventListener('click', listAdd);
+  $('#list-ul').addEventListener('click', (e) => { const x = e.target.closest('.x'); if (x) listRemove(x.closest('li')); });
+
+  /* ── 5 · pipeline ── */
+  function counts() {
+    $$('#pipe .col').forEach((c) => {
+      const b = $('h5 b', c), n = String($$('.dcard', c).length);
+      if (b.textContent !== n) { b.textContent = n; play(b, [{ opacity: .2 }, { opacity: 1 }], 300, { easing: 'ease-out' }); }
+    });
+  }
+  async function pipeMove() {
+    const card = $('#pipe-card'); if (card.dataset.moving) return;
+    card.dataset.moving = '1';
+    const dir = dirOf('pipe'), toWon = card.closest('.col').dataset.stage === 'Proposal';
+    const target = $(`#pipe .col[data-stage="${toWon ? 'Won' : 'Proposal'}"] .cards`);
+    const move = () => { target.prepend(card); card.classList.toggle('is-won', toWon); counts(); };
+    if (dir === 'quiet') {
+      await play(card, [{ opacity: 1 }, { opacity: 0 }], 120, { easing: EASE.quiet }).finished.catch(() => {});
+      move();
+      await play(card, [{ opacity: 0 }, { opacity: 1 }], 160, { easing: EASE.quiet }).finished.catch(() => {});
+    } else {
+      const others = $$('#pipe .dcard').filter((c) => c !== card);
+      const before = new Map(others.map((o) => [o, o.getBoundingClientRect()]));
+      const f = card.getBoundingClientRect();
+      move();
+      const l = card.getBoundingClientRect(), dx = f.left - l.left, dy = f.top - l.top;
+      others.forEach((o) => {
+        const a = before.get(o), b = o.getBoundingClientRect();
+        if (a.left !== b.left || a.top !== b.top) play(o, [{ transform: `translate(${a.left - b.left}px, ${a.top - b.top}px)` }, { transform: 'none' }], 360, { easing: EASE[dir] });
+      });
+      const anim = dir === 'editorial'
+        ? play(card, [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], 400, { easing: EASE.editorial })
+        : play(card, [
+            { transform: `translate(${dx}px, ${dy}px) scale(1)`, boxShadow: '0 0 0 rgba(0,0,0,0)' },
+            { transform: `translate(${dx / 2}px, ${dy / 2 - 18}px) scale(1.06)`, boxShadow: '0 16px 30px -12px rgba(20,16,10,.45)', offset: .5 },
+            { transform: 'none', boxShadow: '0 0 0 rgba(0,0,0,0)' }], 480, { easing: EASE.spatial });
+      await anim.finished.catch(() => {});
+    }
+    $('#pipe-move').textContent = toWon ? 'Move back to Proposal' : 'Mark as won';
+    delete card.dataset.moving;
+  }
+  $('#pipe-move').addEventListener('click', pipeMove);
+
+  /* ── 6 · numbers and the spend line, drawn to scale ── */
+  const SPEND = [2100, 2600, 2900, 3300, 3600, 3900], MONTHS = ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'];
+  (function drawSpark() {
+    const W = 420, H = 104, L = 34, R = 44, T = 8, B = 20, lo = 2000, hi = 4000;
+    const x = (i) => L + (i * (W - L - R)) / (SPEND.length - 1);
+    const y = (v) => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+    const pts = SPEND.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+    const grid = [2000, 3000, 4000].map((v) => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 3}" text-anchor="end">$${v / 1000}k</text>`).join('');
+    const months = MONTHS.map((m, i) => `<text x="${x(i)}" y="${H - 4}" text-anchor="middle">${m}</text>`).join('');
+    const ex = x(SPEND.length - 1), ey = y(SPEND[SPEND.length - 1]);
+    $('#spark-host').innerHTML = `<svg class="spark" viewBox="0 0 ${W} ${H}" role="img" aria-label="Monthly spend, May to October 2026">
+      <g class="grid">${grid}</g>
+      <polygon class="area" points="${x(0)},${y(lo)} ${pts} ${ex},${y(lo)}"/>
+      <polyline class="line" points="${pts}"/>
+      <circle class="end" cx="${ex}" cy="${ey}" r="3.5"/>
+      <text class="endlabel" x="${ex + 8}" y="${ey + 3.5}">$3,900</text>
+      <g class="months">${months}</g></svg>`;
+  })();
+  const fmt = (b, v) => b.dataset.fmt === 'money' ? '$' + Math.round(v).toLocaleString('en-US') : b.dataset.fmt === 'pct' ? Math.round(v) + '%' : String(Math.round(v));
+  function countUp(b, d) {
+    const to = Number(b.dataset.to);
+    if (state.reduced) { b.textContent = fmt(b, to); return; }
+    const t0 = performance.now(), D = ms(d);
+    const step = (now) => {
+      const t = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - t, 5);
+      b.textContent = fmt(b, to * e);
+      if (t < 1) requestAnimationFrame(step);
+    };
+    b.textContent = fmt(b, 0); requestAnimationFrame(step);
+  }
+  function metrics() {
+    const dir = dirOf('metrics'), kpis = $$('#kpis .kpi'), line = $('#spark-host .line'), area = $('#spark-host .area');
+    const end = [$('#spark-host .end'), $('#spark-host .endlabel')];
+    const len = line.getTotalLength();
+    if (dir === 'quiet') { play($('#kpis'), [{ opacity: 0 }, { opacity: 1 }], 200, { easing: EASE.quiet }); play($('#spark-host'), [{ opacity: 0 }, { opacity: 1 }], 200, { easing: EASE.quiet }); return; }
+    if (dir === 'spatial') kpis.forEach((k, i) => play(k, [{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }], 360, { easing: EASE.spatial, delay: i * 70 }));
+    kpis.forEach((k) => countUp($('b', k), dir === 'editorial' ? 800 : 1000));
+    line.style.strokeDasharray = String(len);
+    play(line, [{ strokeDashoffset: len }, { strokeDashoffset: 0 }], 900, { easing: EASE.editorial, delay: dir === 'spatial' ? 150 : 0 })
+      .finished.then(() => { line.style.strokeDasharray = ''; }).catch(() => {});
+    play(area, [{ opacity: 0 }, { opacity: 1 }], 600, { easing: 'ease-out', delay: 400 });
+    end.forEach((n) => dir === 'spatial'
+      ? play(n, [{ opacity: 0, transform: 'scale(0)', transformOrigin: 'center', transformBox: 'fill-box' }, { opacity: 1, transform: 'scale(1)', transformOrigin: 'center', transformBox: 'fill-box' }], 360, { easing: SPRING, delay: 950 })
+      : play(n, [{ opacity: 0 }, { opacity: 1 }], 240, { easing: 'ease-out', delay: 850 }));
+  }
+
+  /* ── 7 · light and dark ── */
+  async function themeToggle() {
+    const mini = $('#theme-mini'), toDark = mini.classList.contains('mini-light'), dir = dirOf('theme');
+    const apply = (el) => { el.classList.toggle('mini-light', !toDark); el.classList.toggle('mini-dark', toDark); const tg = el.querySelector('.tm-tg'); tg.textContent = toDark ? 'Light' : 'Dark'; };
+    if (dir === 'spatial' && !state.reduced) {
+      if (mini.dataset.busy) return; mini.dataset.busy = '1';
+      const clone = mini.cloneNode(true);
+      clone.removeAttribute('id'); clone.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'));
+      clone.classList.add('tm-clone'); clone.style.setProperty('--tt', '0ms'); apply(clone);
+      const tg = $('#tm-toggle').getBoundingClientRect(), m = mini.getBoundingClientRect();
+      const cx = tg.left + tg.width / 2 - m.left, cy = tg.top + tg.height / 2 - m.top;
+      const r = Math.hypot(Math.max(cx, m.width - cx), Math.max(cy, m.height - cy));
+      $('#theme-stage').append(clone);
+      await play(clone, [{ clipPath: `circle(0px at ${cx}px ${cy}px)` }, { clipPath: `circle(${r}px at ${cx}px ${cy}px)` }], 560, { easing: EASE.spatial }).finished.catch(() => {});
+      mini.style.setProperty('--tt', '0ms'); apply(mini);
+      requestAnimationFrame(() => requestAnimationFrame(() => { clone.remove(); mini.style.removeProperty('--tt'); delete mini.dataset.busy; }));
+    } else {
+      const d = state.reduced ? 0 : ms(dir === 'quiet' ? 180 : 500);
+      mini.style.setProperty('--tt', d + 'ms'); apply(mini);
+    }
+  }
+  $('#tm-toggle').addEventListener('click', themeToggle);
+
+  /* ── 8 · Studio window ── */
+  const win = $('#win'), dock = $('#dock');
+  const winState = { busy: false };
+  const chip = () => $('#dock .chip');
+  async function winOpen() {
+    if (!win.hidden || winState.busy) return;
+    winState.busy = true;
+    const dir = dirOf('win'), from = chip() || $('#win-src');
+    const src = from.getBoundingClientRect();
+    win.hidden = false;
+    const w = win.getBoundingClientRect();
+    if (chip()) { const c = chip(); play(c, [{ opacity: 1 }, { opacity: 0 }], 140).finished.then(() => c.remove()).catch(() => c.remove()); }
+    let a;
+    if (dir === 'quiet') a = play(win, [{ opacity: 0 }, { opacity: 1 }], 160, { easing: EASE.quiet });
+    else if (dir === 'editorial') a = play(win, [{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }], 280, { easing: EASE.editorial });
+    else a = play(win, [{ opacity: .3, transform: `translate(${src.left - w.left}px, ${src.top - w.top}px) scale(${src.width / w.width}, ${src.height / w.height})` }, { opacity: 1, transform: 'none' }], 380, { easing: EASE.spatial });
+    await a.finished.catch(() => {});
+    winState.busy = false;
+  }
+  async function winMin() {
+    if (win.hidden || winState.busy) return;
+    winState.busy = true;
+    const dir = dirOf('win');
+    const c = document.createElement('button'); c.type = 'button'; c.className = 'chip'; c.textContent = 'Calculator'; c.setAttribute('aria-label', 'Restore Calculator');
+    c.style.visibility = 'hidden'; dock.append(c);
+    const t = c.getBoundingClientRect(), w = win.getBoundingClientRect();
+    let a;
+    if (dir === 'quiet') a = play(win, [{ opacity: 1 }, { opacity: 0 }], 140, { easing: EASE.quiet });
+    else if (dir === 'editorial') a = play(win, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(10px) scale(.98)' }], 200, { easing: EASE.editorial });
+    else a = play(win, [{ opacity: 1, transform: 'none' }, { opacity: .2, transform: `translate(${t.left - w.left}px, ${t.top - w.top}px) scale(${t.width / w.width}, ${t.height / w.height})` }], 320, { easing: EASE.spatial });
+    await a.finished.catch(() => {});
+    win.hidden = true; c.style.visibility = '';
+    if (dir === 'quiet') play(c, [{ opacity: 0 }, { opacity: 1 }], 160, { easing: EASE.quiet });
+    else if (dir === 'editorial') play(c, [{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], 220, { easing: EASE.editorial });
+    else play(c, [{ transform: 'scale(.6)' }, { transform: 'scale(1)' }], 300, { easing: SPRING });
+    winState.busy = false;
+  }
+  async function winClose() {
+    if (win.hidden || winState.busy) return;
+    await play(win, [{ opacity: 1 }, { opacity: 0 }], 140, { easing: EASE[dirOf('win')] }).finished.catch(() => {});
+    win.hidden = true;
+  }
+  $('#win-src').addEventListener('click', () => (win.hidden ? winOpen() : winMin()));
+  $('#win-min').addEventListener('click', winMin);
+  $('#win-close').addEventListener('click', winClose);
+  dock.addEventListener('click', (e) => { if (e.target.closest('.chip')) winOpen(); });
+
+  /* ── replays ── */
+  const REPLAY = {
+    page: () => pageGo((page.cur + 1) % VIEWS.length),
+    modal: () => { if (modal.el) return; modalOpen(); later(() => modalClose(false), 1400); },
+    toast,
+    list: () => { listAdd(); later(() => { const live = $$('#list-ul li').filter((li) => !li.dataset.leaving); listRemove(live[2] || live[live.length - 1]); }, 1100); },
+    pipe: () => { pipeMove(); later(pipeMove, 1300); },
+    metrics,
+    theme: () => { themeToggle(); later(themeToggle, 1300); },
+    win: async () => {
+      if (!win.hidden) { await winMin(); later(winOpen, 900); return; }
+      if (chip()) { await winOpen(); return; }
+      await winOpen(); later(winMin, 1200);
+    },
+  };
+  $$('[data-replay]').forEach((b) => b.addEventListener('click', () => REPLAY[b.dataset.replay]()));
+  function replayAll() { Object.keys(REPLAY).forEach((k, i) => setTimeout(() => REPLAY[k](), i * 90)); }
+  $('#replay-all').addEventListener('click', replayAll);
+
+  refresh();
+})();
+</script>
