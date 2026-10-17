@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BizzNex · Windows — Option 1 · Hybrid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --serif:'Fraunces',Georgia,serif; --sans:'IBM Plex Sans',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --radius:3px; --ease:cubic-bezier(.22,1,.36,1);
+  }
+  :root[data-theme="light"]{
+    --paper:#F5F1E9; --paper-2:#EDE7DA; --ink:#211D16; --ink-soft:#4E4A40; --muted:#8B8474; --faint:#C0B9A6;
+    --rule:rgba(33,29,22,.18); --rule-soft:rgba(33,29,22,.09); --accent:#5B41E0; --accent-tint:rgba(91,65,224,.10);
+    --ok:#2E8F60; --warn:#B67A16; --bad:#C24A3E; --hover:rgba(33,29,22,.045);
+    --e1:0 1px 2px rgba(40,30,12,.10),0 6px 18px rgba(40,30,12,.08); --e2:0 12px 34px rgba(40,30,12,.16); --e3:0 26px 60px rgba(40,30,12,.24); --grain:.05;
+  }
+  :root[data-theme="dark"]{
+    --paper:#141210; --paper-2:#1C1915; --ink:#EDE8DD; --ink-soft:#C3BCAD; --muted:#8E877A; --faint:rgba(237,232,221,.34);
+    --rule:rgba(237,232,221,.16); --rule-soft:rgba(237,232,221,.07); --accent:#A897FF; --accent-tint:rgba(168,151,255,.14);
+    --ok:#46C98A; --warn:#E7B24E; --bad:#F0776B; --hover:rgba(237,232,221,.05);
+    --e1:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.35); --e2:0 16px 40px rgba(0,0,0,.5); --e3:0 30px 70px rgba(0,0,0,.6); --grain:.05;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;height:100vh;overflow:hidden;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;letter-spacing:-.006em;-webkit-font-smoothing:antialiased;transition:background .5s var(--ease),color .5s var(--ease);}
+  body::after{content:'';position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:var(--grain);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+  ::selection{background:var(--accent);color:var(--paper);}
+  *{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--accent) 55%,transparent) transparent;}
+  ::-webkit-scrollbar{width:6px;height:6px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--accent) 55%,transparent);border-radius:999px;border:2px solid transparent;background-clip:content-box;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--accent);background-clip:content-box;}
+  ::-webkit-scrollbar-corner{background:transparent;}
+  .mono{font-family:var(--mono);} .num{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em;}
+  .spec{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:0;}
+  .spec .k{color:var(--accent);}
+  .sublab{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin:26px 0 12px;}
+  .cap{font-family:var(--mono);font-size:11px;color:var(--muted);}
+
+  /* shell */
+  .app{display:grid;grid-template-columns:230px 1fr;height:100vh;}
+  .sidebar{border-right:1px solid var(--rule-soft);padding:20px 12px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;background:var(--paper);}
+  .brand{font-family:var(--serif);font-weight:600;font-size:19px;letter-spacing:-.02em;padding:6px 10px 16px;display:flex;align-items:center;gap:9px;}
+  .brand b{color:var(--accent);} .brand .mk{width:24px;height:24px;border-radius:var(--radius);background:var(--accent);}
+  .grp{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:14px 10px 6px;}
+  .nav{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:var(--radius);color:var(--ink-soft);font-size:14px;font-weight:500;cursor:pointer;border:0;background:none;width:100%;text-align:left;transition:background .18s,color .18s;}
+  .nav:hover{background:var(--hover);color:var(--ink);} .nav.active{color:var(--ink);} .nav.active .ic{color:var(--accent);}
+  .nav .ic{width:16px;height:16px;flex:none;color:var(--muted);} .nav .dotmark{margin-left:auto;width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:0;} .nav.open .dotmark{opacity:1;}
+  .main{min-width:0;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 26px;border-bottom:1px solid var(--rule-soft);background:var(--paper);}
+  .crumb{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);} .crumb b{color:var(--ink);font-weight:500;}
+  .tgl{background:none;border:0;cursor:pointer;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:inline-flex;gap:7px;align-items:center;} .tgl:hover{color:var(--ink);}
+  .view{padding:30px 32px;overflow:auto;flex:1;}
+  .view-title{font-family:var(--serif);font-weight:500;font-size:clamp(1.8rem,3.4vw,2.6rem);letter-spacing:-.03em;margin:6px 0 4px;}
+
+  .btn{font-family:var(--sans);font-size:14px;font-weight:500;padding:10px 18px;border-radius:var(--radius);border:1px solid transparent;cursor:pointer;background:none;color:var(--ink);display:inline-flex;gap:8px;align-items:center;transition:all .18s var(--ease);}
+  .btn.primary{background:var(--accent);color:var(--paper);} .btn.primary:hover{filter:brightness(1.08);}
+  .btn.ghost{border-color:var(--rule);} .btn.ghost:hover{border-color:var(--ink);} .btn.sm{padding:7px 13px;font-size:13px;}
+  .inp{font-family:var(--sans);font-size:14px;padding:10px 12px;background:transparent;border:1px solid var(--rule);border-radius:var(--radius);color:var(--ink);width:100%;}
+  .inp:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint);}
+  label.fl{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+  .field{margin-bottom:14px;}
+  .dot{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);} .dot::before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor;}
+  .dot.pending{color:var(--warn);} .dot.progress{color:var(--accent);} .dot.done{color:var(--ok);}
+  .tag{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:2px;border:1px solid var(--rule);color:var(--ink-soft);}
+
+  table.ledger{width:100%;border-collapse:collapse;} table.ledger th{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);text-align:left;padding:0 14px 12px 0;border-bottom:1px solid var(--rule);} table.ledger th.r,table.ledger td.r{text-align:right;padding-right:0;} table.ledger td{padding:15px 14px 15px 0;border-bottom:1px solid var(--rule-soft);} .pname{font-weight:500;} .pmeta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px;}
+  .metrics{display:flex;gap:44px;flex-wrap:wrap;align-items:flex-end;}
+  .metric .big{font-family:var(--serif);font-weight:500;font-size:clamp(2.4rem,5vw,3.6rem);line-height:.9;letter-spacing:-.03em;} .metric .l{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+  .titem{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--rule-soft);} .titem .idx{font-family:var(--mono);font-size:12px;color:var(--faint);width:24px;} .titem .nm{flex:1;font-weight:500;} .titem .nm .d{font-size:12px;color:var(--muted);} .titem .dt{font-family:var(--mono);font-size:12px;color:var(--muted);}
+
+  /* ── window manager ── */
+  #winlayer{position:absolute;inset:0;pointer-events:none;z-index:400;}
+  .win{position:absolute;pointer-events:auto;background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);box-shadow:var(--e1);display:flex;flex-direction:column;overflow:hidden;min-width:240px;min-height:150px;}
+  .win.focused{box-shadow:var(--e3);}
+  .win-bar{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 14px;border-bottom:1px solid var(--rule-soft);cursor:grab;user-select:none;background:var(--paper-2);}
+  .win-bar .wt{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .win-btns{display:flex;gap:6px;}
+  .win-btn{width:22px;height:22px;border:1px solid var(--rule);border-radius:3px;background:none;display:grid;place-items:center;cursor:pointer;color:var(--muted);font-size:13px;line-height:1;}
+  .win-btn:hover{color:var(--ink);border-color:var(--ink);}
+  .win-body{padding:16px;overflow:auto;flex:1;}
+  .win-rz{position:absolute;right:0;bottom:0;width:18px;height:18px;cursor:nwse-resize;}
+  .win-rz::after{content:'';position:absolute;right:3px;bottom:3px;width:7px;height:7px;border-right:2px solid var(--faint);border-bottom:2px solid var(--faint);}
+
+  .dock{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:6px;padding:7px;background:color-mix(in srgb,var(--paper) 78%,transparent);backdrop-filter:blur(14px);border:1px solid var(--rule);border-radius:999px;box-shadow:var(--e2);z-index:600;max-width:92vw;overflow:auto;}
+  .dock-item{display:flex;align-items:center;gap:8px;padding:8px 15px;border-radius:999px;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;color:var(--muted);border:1px solid transparent;white-space:nowrap;background:none;}
+  .dock-item.active{color:var(--ink);background:var(--paper-2);border-color:var(--rule-soft);}
+  .dock-item:hover{color:var(--ink);}
+  .dock-empty{font-family:var(--mono);font-size:11px;color:var(--faint);padding:8px 14px;}
+
+  .toast{position:fixed;bottom:74px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:11px 20px;border-radius:var(--radius);font-family:var(--mono);font-size:12px;letter-spacing:.04em;box-shadow:var(--e3);z-index:900;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
+
+  /* tool bits */
+  .calc-screen{font-family:var(--mono);font-size:30px;text-align:right;padding:12px 4px;border-bottom:1px solid var(--rule);min-height:56px;overflow:hidden;}
+  .calc-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px;}
+  .key{font-family:var(--mono);font-size:16px;padding:14px 0;border:1px solid var(--rule);border-radius:var(--radius);background:none;color:var(--ink);cursor:pointer;} .key:hover{background:var(--hover);} .key.op{color:var(--accent);} .key.eq{background:var(--accent);color:var(--paper);border-color:var(--accent);}
+  .chat-log{display:flex;flex-direction:column;gap:9px;max-height:calc(100% - 60px);overflow:auto;margin-bottom:12px;} .msg{max-width:80%;padding:9px 12px;border-radius:var(--radius);font-size:13px;} .msg.bot{align-self:flex-start;background:var(--paper-2);border:1px solid var(--rule-soft);} .msg.user{align-self:flex-end;background:var(--accent);color:var(--paper);}
+  .chat-in{display:flex;gap:8px;}
+  .check{display:flex;align-items:center;gap:9px;font-size:13px;cursor:pointer;margin-bottom:8px;} .check input{accent-color:var(--accent);}
+  .notelist .titem{padding:10px 0;} .badge{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+  /* inline tool host — a tool opened in the main area (left-click), kept at the standard tool width */
+  .tool-inline{max-width:300px;border:1px solid var(--rule);border-radius:var(--radius);padding:16px;background:var(--paper);box-shadow:var(--e1);}
+
+  .hint{position:fixed;top:14px;right:20px;z-index:700;font-family:var(--mono);font-size:11px;color:var(--muted);background:color-mix(in srgb,var(--paper) 80%,transparent);backdrop-filter:blur(10px);border:1px solid var(--rule-soft);border-radius:999px;padding:7px 14px;}
+  .backlink{position:fixed;top:14px;left:20px;z-index:700;font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;background:color-mix(in srgb,var(--paper) 80%,transparent);backdrop-filter:blur(10px);border:1px solid var(--rule-soft);border-radius:999px;padding:7px 14px;} .backlink:hover{color:var(--accent);}
+
+  @media (max-width:860px){
+    .app{grid-template-columns:1fr;} .sidebar{position:fixed;z-index:650;width:230px;transform:translateX(-100%);transition:transform .3s var(--ease);box-shadow:var(--e2);} .sidebar.open{transform:none;}
+    .win{position:fixed !important;left:0 !important;top:52px !important;width:100vw !important;height:calc(100vh - 120px) !important;border-radius:0;border-left:0;border-right:0;} .win-rz{display:none;}
+  }
+</style>
+</head>
+<body>
+  <a class="backlink" href="index.html">← all prototypes</a>
+  <div class="hint">Option 1 · <b style="color:var(--accent)">Hybrid</b> — left-click a Tool to open it here · right-click to pop a window · drag / resize / minimise</div>
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><span class="mk"></span> Bizz<b>Nex</b></div>
+      <div class="grp">Workspace</div>
+      <button class="nav active" data-view="dashboard"><span class="ic">▦</span> Dashboard</button>
+      <button class="nav" data-view="projects"><span class="ic">▤</span> Projects</button>
+      <button class="nav" data-view="tasks"><span class="ic">☑</span> Tasks</button>
+      <div class="grp">Tools — click opens here · right-click = window</div>
+      <button class="nav tool" data-tool="calculator"><span class="ic">🖩</span> Calculator<span class="dotmark"></span></button>
+      <button class="nav tool" data-tool="chatbot"><span class="ic">✦</span> Assistant<span class="dotmark"></span></button>
+      <button class="nav tool" data-tool="notes"><span class="ic">▭</span> Notes<span class="dotmark"></span></button>
+      <button class="nav tool" data-tool="publisher"><span class="ic">▲</span> Publisher<span class="dotmark"></span></button>
+      <button class="nav tool" data-tool="notifications"><span class="ic">◔</span> Notifications<span class="dotmark"></span></button>
+      <button class="nav tool" data-tool="newsletter"><span class="ic">✉</span> Newsletter<span class="dotmark"></span></button>
+      <button class="nav tool" data-tool="events"><span class="ic">◈</span> Events<span class="dotmark"></span></button>
+    </aside>
+
+    <div class="main">
+      <div class="topbar">
+        <span class="crumb">BizzNex / <b id="crumb">Dashboard</b></span>
+        <button class="tgl" id="tgl">◐ Theme</button>
+      </div>
+      <div class="view" id="view"></div>
+      <div id="winlayer"></div>
+    </div>
+  </div>
+
+  <div class="dock" id="dock"></div>
+  <div class="toast" id="toast"></div>
+
+<script>
+/* ---------- shared: seed + views + tools + window manager ---------- */
+const $ = (s,r=document)=>r.querySelector(s);
+const toastEl=$('#toast'); let tt;
+function toast(m){toastEl.textContent=m;toastEl.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>toastEl.classList.remove('show'),1600);}
+$('#tgl').onclick=()=>{const d=document.documentElement;d.setAttribute('data-theme',d.getAttribute('data-theme')==='dark'?'light':'dark');};
+
+const projects=[
+  {name:'Thanksgiving Gifts',owner:'You',spend:2410,st:'progress',tasks:[['Buy gift wrappers','progress','Jan 10'],['Buy chocolates','done','Jan 20']]},
+  {name:'Christmas Decorations',owner:'R. Patel',spend:1180,st:'pending',tasks:[['Buy lights & ornaments','pending','Dec 01'],['Set up the tree','progress','Dec 11']]},
+  {name:'Q4 Newsletter',owner:'A. Khan',spend:540,st:'pending',tasks:[['Draft the newsletter','pending','Aug 30']]},
+];
+const stName={pending:'Pending',progress:'In progress',done:'Completed'};
+
+const VIEWS={
+  dashboard(){return `
+    <p class="spec"><span class="k">BizzNex — Business Suite</span> · Aurora</p>
+    <h1 class="view-title">Good evening, Dennis</h1>
+    <div class="metrics" style="margin-top:26px">
+      <div class="metric"><div class="l">Spend · 6mo</div><div class="big num">$4,130</div></div>
+      <div class="metric"><div class="l">Active projects</div><div class="big num">3</div></div>
+      <div class="metric"><div class="l">Open tasks</div><div class="big num">4</div></div>
+      <div class="metric"><div class="l">Completion</div><div class="big num">20%</div></div>
+    </div>
+    <svg viewBox="0 0 1000 160" preserveAspectRatio="none" style="width:100%;height:120px;margin-top:26px;overflow:visible">
+      <path d="M0,150 C120,120 200,130 320,90 C440,55 520,100 660,60 C800,25 880,44 1000,20" fill="none" stroke="var(--accent)" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+    </svg>
+    <div class="sublab">§ Recent projects</div>
+    <table class="ledger"><thead><tr><th>Project</th><th>Status</th><th class="r">Spend</th></tr></thead><tbody>
+      ${projects.map(p=>`<tr><td><div class="pname">${p.name}</div><div class="pmeta">${p.tasks.length} TASKS · ${p.owner.toUpperCase()}</div></td><td><span class="dot ${p.st}">${stName[p.st]}</span></td><td class="r num">$${p.spend.toLocaleString()}</td></tr>`).join('')}
+    </tbody></table>`;
+  },
+  projects(){return `<h1 class="view-title">Projects</h1>${projects.map(p=>`
+    <div style="margin-top:26px"><div style="display:flex;justify-content:space-between;align-items:baseline"><h2 class="mono" style="font-family:var(--serif);font-weight:500;font-size:22px;margin:0">${p.name}</h2><span class="badge">${p.owner}</span></div>
+    ${p.tasks.map((t,i)=>`<div class="titem"><span class="idx">${String(i+1).padStart(2,'0')}</span><span class="nm">${t[0]}</span><span class="dot ${t[1]}">${stName[t[1]]}</span><span class="dt">${t[2]}</span></div>`).join('')}</div>`).join('')}`;
+  },
+  tasks(){const all=projects.flatMap(p=>p.tasks.map(t=>({n:t[0],s:t[1],d:t[2],p:p.name})));
+    return `<h1 class="view-title">Tasks</h1>${['progress','pending','done'].map(s=>{const it=all.filter(x=>x.s===s);if(!it.length)return '';return `<div class="sublab">§ ${stName[s]} · ${it.length}</div>${it.map((x,i)=>`<div class="titem"><span class="idx">${String(i+1).padStart(2,'0')}</span><span class="nm">${x.n}<div class="d">${x.p}</div></span><span class="dt">${x.d}</span></div>`).join('')}`;}).join('')}`;
+  }
+};
+
+let curView='dashboard';
+function clearNavActive(){document.querySelectorAll('.nav').forEach(b=>b.classList.remove('active'));}
+function setView(v){curView=v;$('#view').innerHTML=VIEWS[v]();$('#crumb').textContent=v[0].toUpperCase()+v.slice(1);
+  clearNavActive();document.querySelector('.nav[data-view="'+v+'"]').classList.add('active');}
+
+/* left-click a tool → render it inline in the main area (constrained to the standard tool card) */
+function openInline(id){const def=TOOLS[id]&&TOOLS[id]();if(!def)return;curView=null;
+  const view=$('#view');
+  view.innerHTML=`<div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap">`
+    +`<h1 class="view-title">${def.title}</h1>`
+    +`<button class="btn ghost sm to-window">Open in window ↗</button></div>`
+    +`<p class="cap" style="margin:2px 0 20px">Open here · right-click the sidebar item to pop a floating window instead.</p>`
+    +`<div class="tool-inline"></div>`;
+  const ti=view.querySelector('.tool-inline');ti.innerHTML=def.html;if(def.init)def.init(ti);
+  view.querySelector('.to-window').onclick=()=>WM.open(id);
+  $('#crumb').textContent=def.title;
+  clearNavActive();document.querySelector('.nav[data-tool="'+id+'"]').classList.add('active');}
+
+/* ---------- tools ---------- */
+const TOOLS={
+  calculator:()=>({title:'Calculator',w:280,h:380,html:`<div class="calc-screen">0</div><div class="calc-keys">
+    ${['C','⌫','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','='].map(k=>`<button class="key ${'÷×−+%'.includes(k)?'op':''} ${k==='='?'eq':''}" data-k="${k}">${k}</button>`).join('')}</div>`,
+    init(b){let e='';const sc=b.querySelector('.calc-screen');b.querySelectorAll('.key').forEach(k=>k.onclick=()=>{const v=k.dataset.k;
+      if(v==='C')e='';else if(v==='⌫')e=e==='Error'?'':e.slice(0,-1);else if(v==='='){try{e=String(Function('return('+e.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-')+')')());}catch{e='Error';}}else e=(e==='Error'?'':e)+v;sc.textContent=e||'0';});}}),
+  chatbot:()=>({title:'Assistant',w:360,h:400,html:`<div class="chat-log"><div class="msg bot">வணக்கம்! I'm Brenda — what would you like to look up?</div></div><div class="chat-in"><input class="inp" placeholder="Type a search…"/><button class="btn primary sm chat-send">Go</button></div>`,
+    init(b){const log=b.querySelector('.chat-log'),inp=b.querySelector('input');const add=(t,u)=>{const d=document.createElement('div');d.className='msg '+(u?'user':'bot');d.textContent=t;log.appendChild(d);log.scrollTop=1e6;};const send=()=>{const q=inp.value.trim();if(!q)return;add(q,1);inp.value='';setTimeout(()=>add('Searching for “'+q+'” across Google, YouTube & Reddit…',0),300);};b.querySelector('.chat-send').onclick=send;inp.onkeydown=e=>{if(e.key==='Enter')send();};}}),
+  notes:()=>({title:'Notes',w:340,h:360,html:`<div class="field"><input class="inp note-inp" placeholder="Write a note…"/></div><button class="btn primary sm note-add">Add note</button><div class="notelist" style="margin-top:14px"><div class="titem"><span class="nm">Vendor shortlist<div class="d">Central Park</div></span></div></div>`,
+    init(b){const list=b.querySelector('.notelist');b.querySelector('.note-add').onclick=()=>{const i=b.querySelector('.note-inp');if(!i.value.trim())return;const d=document.createElement('div');d.className='titem';d.innerHTML='<span class="nm">'+i.value.replace(/</g,'&lt;')+'</span>';list.prepend(d);i.value='';toast('Note added');};}}),
+  publisher:()=>({title:'Publisher',w:360,h:380,html:`<div class="field"><label class="fl">Title</label><input class="inp"/></div><div class="field"><label class="fl">Description</label><input class="inp"/></div><label class="fl">Platforms</label>${['Facebook','Instagram','Twitter','LinkedIn'].map(p=>`<label class="check"><input type="checkbox"/> ${p}</label>`).join('')}<button class="btn primary sm pub" style="margin-top:8px">Publish</button>`,
+    init(b){b.querySelector('.pub').onclick=()=>toast('Published ✓');}}),
+  notifications:()=>({title:'Notifications',w:320,h:300,html:['Facebook · New friend request','Twitter · Your post got 100 likes','Instagram · New comment'].map(n=>`<div class="titem"><span class="tag">${n.split(' · ')[0]}</span><span class="nm">${n.split(' · ')[1]}</span></div>`).join('')}),
+  newsletter:()=>({title:'Newsletter',w:380,h:380,html:`<div class="field"><label class="fl">Subject</label><input class="inp"/></div><div class="field"><label class="fl">Content</label><textarea class="inp" rows="5"></textarea></div><button class="btn primary sm send">Send now</button>`,
+    init(b){b.querySelector('.send').onclick=()=>toast('Campaign sent ✓');}}),
+  events:()=>({title:'Events',w:360,h:320,html:['Local Food Festival · Central Park · 2.3 mi','Business Mixer · Convention Center · 3.5 mi','Indie Live Night · The Warehouse · 1.8 mi'].map(e=>{const [n,l,d]=e.split(' · ');return `<div class="titem"><span class="nm">${n}<div class="d">${l}</div></span><span class="dt">${d}</span></div>`;}).join('')})
+};
+
+/* ---------- window manager ---------- */
+const WM=(()=>{
+  const layer=$('#winlayer'),dock=$('#dock');const wins=new Map();let z=10,casc=0;
+  function focus(id){const w=wins.get(id);if(!w)return;z++;w.el.style.zIndex=z;document.querySelectorAll('.win').forEach(e=>e.classList.remove('focused'));w.el.classList.add('focused');renderDock();markNav();}
+  function markNav(){document.querySelectorAll('.nav.tool').forEach(b=>b.classList.toggle('open',wins.has(b.dataset.tool)));}
+  function open(id){const def=TOOLS[id]&&TOOLS[id]();if(!def)return;
+    if(wins.has(id)){const w=wins.get(id);w.min=false;w.el.style.display='flex';focus(id);return;}
+    const el=document.createElement('div');el.className='win';const x=90+(casc%6)*34,y=70+(casc%6)*30;casc++;
+    /* every tool opens at the standard Calculator size; the user can then resize (body scrolls when it overflows) */
+    const STD_W=280,STD_H=380;el.style.cssText=`left:${x}px;top:${y}px;width:${STD_W}px;height:${STD_H}px`;
+    el.innerHTML=`<div class="win-bar"><span class="wt">§ ${def.title}</span><div class="win-btns"><button class="win-btn wmin">–</button><button class="win-btn wclose">×</button></div></div><div class="win-body"></div><div class="win-rz"></div>`;
+    el.querySelector('.win-body').innerHTML=def.html;layer.appendChild(el);
+    wins.set(id,{el,min:false,title:def.title});
+    drag(el,el.querySelector('.win-bar'),id);resize(el,el.querySelector('.win-rz'),id);
+    el.addEventListener('pointerdown',()=>focus(id));
+    el.querySelector('.wclose').onclick=e=>{e.stopPropagation();close(id);};
+    el.querySelector('.wmin').onclick=e=>{e.stopPropagation();minimize(id);};
+    if(def.init)def.init(el.querySelector('.win-body'));
+    focus(id);
+  }
+  function close(id){const w=wins.get(id);if(!w)return;w.el.remove();wins.delete(id);renderDock();markNav();}
+  function minimize(id){const w=wins.get(id);if(!w)return;w.min=true;w.el.style.display='none';renderDock();}
+  function toggle(id){const w=wins.get(id);if(!w){open(id);return;}if(w.min){w.min=false;w.el.style.display='flex';focus(id);}else minimize(id);}
+  function renderDock(){if(!wins.size){dock.style.display='none';dock.innerHTML='';return;}dock.style.display='flex';dock.innerHTML='';wins.forEach((w,id)=>{const b=document.createElement('button');b.className='dock-item'+(w.min?'':' active');b.textContent=w.title;b.onclick=()=>toggle(id);dock.appendChild(b);});}
+  function drag(el,handle,id){let sx,sy,ox,oy,on=false;handle.addEventListener('pointerdown',e=>{if(e.target.closest('.win-btn'))return;on=true;handle.setPointerCapture(e.pointerId);sx=e.clientX;sy=e.clientY;ox=el.offsetLeft;oy=el.offsetTop;handle.style.cursor='grabbing';});
+    handle.addEventListener('pointermove',e=>{if(!on)return;let nx=ox+e.clientX-sx,ny=oy+e.clientY-sy;const p=el.parentElement.getBoundingClientRect();nx=Math.max(0,Math.min(nx,p.width-60));ny=Math.max(0,Math.min(ny,p.height-38));el.style.left=nx+'px';el.style.top=ny+'px';});
+    handle.addEventListener('pointerup',()=>{on=false;handle.style.cursor='grab';});}
+  function resize(el,h,id){let sx,sy,ow,oh,on=false;h.addEventListener('pointerdown',e=>{e.stopPropagation();on=true;h.setPointerCapture(e.pointerId);sx=e.clientX;sy=e.clientY;ow=el.offsetWidth;oh=el.offsetHeight;});
+    h.addEventListener('pointermove',e=>{if(!on)return;el.style.width=Math.max(240,ow+e.clientX-sx)+'px';el.style.height=Math.max(150,oh+e.clientY-sy)+'px';});
+    h.addEventListener('pointerup',()=>on=false);}
+  renderDock();
+  return {open,toggle};
+})();
+
+/* wire */
+document.querySelectorAll('.nav[data-view]').forEach(b=>b.onclick=()=>setView(b.dataset.view));
+document.querySelectorAll('.nav[data-tool]').forEach(b=>{
+  b.onclick=()=>openInline(b.dataset.tool);                       /* left-click → inline in the main area */
+  b.oncontextmenu=e=>{e.preventDefault();WM.open(b.dataset.tool);}; /* right-click → floating window     */
+});
+/* land on the Dashboard with no tools open — the dock stays hidden until a tool window is opened */
+setView('dashboard');
+</script>
+</body>
+</html>

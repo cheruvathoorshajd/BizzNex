@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BizzNex — Design Case Study</title>
+<meta name="description" content="How the BizzNex business suite was designed: the container-less Aurora design system, the rejected directions, the Studio windowing model, and how it all ships in apps/web." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   BizzNex · Design Case Study
+   Rendered IN the Aurora system it documents.
+   Tokens mirror apps/web/src/styles/aurora.scss (the shipped source of truth).
+   ============================================================ */
+:root {
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --radius: 3px;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --s1: 6px; --s2: 12px; --s3: 20px; --s4: 34px; --s5: 56px; --s6: 92px; --s7: 140px;
+}
+:root[data-theme="light"] {
+  --paper: #F5F1E9; --paper-2: #EDE7DA; --paper-3: #E7E0D0;
+  --ink: #211D16; --ink-soft: #4E4A40; --muted: #8B8474; --faint: #C0B9A6;
+  --rule: rgba(33, 29, 22, .18); --rule-soft: rgba(33, 29, 22, .09);
+  --accent: #5B41E0; --accent-tint: rgba(91, 65, 224, .10);
+  --ok: #2E8F60; --warn: #B67A16; --bad: #C24A3E;
+  --bloom-op: .40; --grain-op: .05; --hover: rgba(33, 29, 22, .045);
+  --shadow: 0 12px 34px rgba(40, 30, 12, .16);
+}
+:root[data-theme="dark"] {
+  --paper: #141210; --paper-2: #1C1915; --paper-3: #23201A;
+  --ink: #EDE8DD; --ink-soft: #C3BCAD; --muted: #8E877A; --faint: rgba(237, 232, 221, .34);
+  --rule: rgba(237, 232, 221, .16); --rule-soft: rgba(237, 232, 221, .07);
+  --accent: #A897FF; --accent-tint: rgba(168, 151, 255, .14);
+  --ok: #46C98A; --warn: #E7B24E; --bad: #F0776B;
+  --bloom-op: .55; --grain-op: .05; --hover: rgba(237, 232, 221, .05);
+  --shadow: 0 16px 44px rgba(0, 0, 0, .5);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: var(--sans); font-size: 15px; line-height: 1.6; letter-spacing: -.006em;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  transition: background .5s var(--ease), color .5s var(--ease); overflow-x: hidden;
+}
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: 9999; pointer-events: none; opacity: var(--grain-op);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+::selection { background: var(--accent); color: var(--paper); }
+* { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--accent) 55%, transparent) transparent; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--accent) 55%, transparent); border-radius: 999px; border: 2px solid transparent; background-clip: content-box; }
+a { color: inherit; }
+button { font-family: inherit; }
+img, svg { max-width: 100%; }
+
+/* ── page scaffold ── */
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(20px, 5vw, 64px); }
+section { padding: var(--s6) 0; border-top: 1px solid var(--rule-soft); position: relative; }
+section:first-of-type { border-top: 0; }
+.folio-h { display: flex; align-items: baseline; gap: clamp(14px, 3vw, 40px); margin: 0 0 var(--s4); }
+.folio { font-family: var(--serif); font-weight: 500; font-size: clamp(2rem, 5vw, 3.4rem); line-height: .7; color: var(--faint); flex: none; }
+.sublab { font-family: var(--mono); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); margin: 0 0 10px; }
+h2.sec-t { font-family: var(--serif); font-weight: 500; font-size: clamp(1.7rem, 3.4vw, 2.6rem); letter-spacing: -.02em; margin: 0 0 8px; line-height: 1.05; }
+.sec-lede { font-size: clamp(1.02rem, 1.6vw, 1.2rem); color: var(--ink-soft); max-width: 62ch; margin: 0; }
+h3 { font-family: var(--serif); font-weight: 500; font-size: 1.4rem; letter-spacing: -.02em; margin: var(--s5) 0 var(--s2); }
+h4 { font-family: var(--mono); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin: var(--s4) 0 var(--s2); }
+p { max-width: 68ch; }
+p.small { font-size: 13.5px; color: var(--muted); }
+strong, b { font-weight: 600; }
+code { font-family: var(--mono); font-size: .88em; background: var(--accent-tint); color: var(--accent); padding: 1px 6px; border-radius: 2px; }
+ul.clean { list-style: none; padding: 0; margin: var(--s2) 0; max-width: 72ch; }
+ul.clean li { padding: 9px 0 9px 22px; border-bottom: 1px solid var(--rule-soft); position: relative; }
+ul.clean li::before { content: '—'; position: absolute; left: 0; color: var(--accent); }
+.rule { height: 1px; background: var(--rule); border: 0; margin: var(--s4) 0; }
+.mono { font-family: var(--mono); }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(20px, 4vw, 56px); align-items: start; }
+@media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+
+/* ── hero ── */
+.hero { padding: clamp(72px, 12vh, 150px) 0 var(--s6); position: relative; overflow: hidden; }
+.hero .bloom {
+  position: absolute; z-index: 0; top: -34%; right: -12%; width: 66vw; height: 74vh; pointer-events: none; filter: blur(64px); opacity: var(--bloom-op);
+  background:
+    radial-gradient(38% 48% at 66% 30%, #7C6CF5 0, transparent 62%),
+    radial-gradient(34% 44% at 90% 18%, #5FA8FF 0, transparent 62%),
+    radial-gradient(40% 42% at 58% 62%, #34E0C4 0, transparent 62%),
+    radial-gradient(34% 40% at 88% 72%, #FF9EC0 0, transparent 62%);
+}
+.hero-inner { position: relative; z-index: 1; }
+.kicker { font-family: var(--mono); font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: var(--accent); }
+.hero h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(2.8rem, 9vw, 7rem); line-height: .92; letter-spacing: -.045em; margin: 18px 0 20px; max-width: 15ch; }
+.hero h1 em { font-style: italic; font-weight: 500; }
+.hero .lede { font-size: clamp(1.1rem, 2vw, 1.5rem); color: var(--ink-soft); max-width: 46ch; }
+.hero .meta { display: flex; flex-wrap: wrap; gap: 8px 26px; margin-top: var(--s4); font-family: var(--mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.hero .meta b { color: var(--ink); font-weight: 500; }
+
+/* ── sticky theme control ── */
+.controls { position: fixed; top: 16px; right: 16px; z-index: 500; display: flex; gap: 8px; }
+.tgl { background: var(--paper); border: 1px solid var(--rule); border-radius: var(--radius); cursor: pointer; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); display: inline-flex; gap: 7px; align-items: center; padding: 8px 12px; transition: color .2s, border-color .2s; }
+.tgl:hover { color: var(--ink); border-color: var(--ink); }
+
+/* ── status banner (living doc / pre-deploy) ── */
+.status { border: 1px solid var(--accent); border-left-width: 3px; border-radius: var(--radius); padding: 20px 22px; background: var(--accent-tint); margin: var(--s5) 0 0; }
+.status .st-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 12px; }
+.status .badge { font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; background: var(--accent); color: var(--paper); padding: 4px 10px; border-radius: 2px; }
+.status .st-meta { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; color: var(--ink-soft); }
+.status ul { margin: 6px 0 0; padding: 0; list-style: none; }
+.status li { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; font-size: 14px; }
+.status li .bx { width: 16px; height: 16px; border: 1.5px solid var(--accent); border-radius: 2px; flex: none; margin-top: 2px; }
+
+/* ── swatches ── */
+.sw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin: var(--s3) 0; }
+.sw { border: 1px solid var(--rule-soft); border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: border-color .2s, transform .15s; background: var(--paper); }
+.sw:hover { border-color: var(--accent); transform: translateY(-2px); }
+.sw .chip { height: 56px; }
+.sw .lab { padding: 8px 10px; }
+.sw .nm { font-size: 13px; font-weight: 500; }
+.sw .hex { font-family: var(--mono); font-size: 10.5px; color: var(--muted); text-transform: uppercase; }
+
+/* ── spec / compare tables ── */
+table.ledger { width: 100%; border-collapse: collapse; margin: var(--s3) 0; }
+table.ledger thead th { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 0 14px 12px 0; border-bottom: 1px solid var(--rule); vertical-align: bottom; }
+table.ledger tbody td { padding: 13px 14px 13px 0; border-bottom: 1px solid var(--rule-soft); vertical-align: top; font-size: 14px; }
+table.ledger tbody td:first-child { font-weight: 500; white-space: nowrap; }
+table.ledger tbody tr:hover td { background: var(--hover); }
+table.ledger td .mono, table.ledger td code { white-space: nowrap; }
+.scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.scroll-x table.ledger { min-width: 640px; }
+td.win-yes { color: var(--ok); } td.win-no { color: var(--bad); }
+tr.pick td { background: var(--accent-tint) !important; }
+tr.pick td:first-child { color: var(--accent); }
+
+/* ── direction cards ── */
+.dirs { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin: var(--s3) 0; }
+.dir { border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
+.dir.win { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-tint); }
+.dir .prev { height: 92px; display: flex; align-items: flex-end; padding: 12px; gap: 6px; }
+.dir .prev span { width: 20px; height: 20px; border-radius: 5px; border: 1px solid rgba(255,255,255,.4); }
+.dir .db { padding: 16px; }
+.dir .db h5 { margin: 0 0 6px; font-family: var(--serif); font-weight: 500; font-size: 1.25rem; letter-spacing: -.01em; }
+.dir .db .verdict { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; }
+.dir .db p { font-size: 13.5px; color: var(--ink-soft); margin: 8px 0 0; }
+.dir .db .stack { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 12px; letter-spacing: .04em; }
+.tag-pick { color: var(--accent); } .tag-no { color: var(--bad); } .tag-rec { color: var(--ok); }
+
+/* ── demo surface ── */
+.demo { border: 1px dashed var(--rule); border-radius: var(--radius); padding: 24px; margin: var(--s2) 0 var(--s4); display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+.demo.col { flex-direction: column; align-items: stretch; }
+.demo-lab { font-family: var(--mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); width: 100%; margin-bottom: 4px; }
+
+/* ── real Aurora components (mirrored from aurora.scss for live demos) ── */
+.btn { font-family: var(--sans); font-size: 14px; font-weight: 500; letter-spacing: -.01em; padding: 11px 20px; border-radius: var(--radius); border: 1px solid transparent; cursor: pointer; background: none; color: var(--ink); display: inline-flex; align-items: center; gap: 8px; transition: transform .16s var(--ease), background .2s, border-color .2s, filter .2s, opacity .2s; }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--accent); color: var(--paper); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.ghost { border-color: var(--rule); } .btn.ghost:hover { border-color: var(--ink); }
+.btn.quiet { color: var(--muted); padding-inline: 8px; } .btn.quiet:hover { color: var(--ink); }
+.btn.danger { color: var(--bad); } .btn.danger:hover { background: color-mix(in srgb, var(--bad) 12%, transparent); }
+.btn.sm { padding: 7px 13px; font-size: 13px; }
+.btn[disabled] { opacity: .36; cursor: not-allowed; }
+.link { font-family: var(--mono); font-size: 13px; letter-spacing: .04em; text-transform: uppercase; text-decoration: none; color: var(--ink); border: 0; border-bottom: 1.5px solid var(--accent); padding-bottom: 3px; cursor: pointer; background: none; transition: color .2s; }
+.link:hover { color: var(--accent); }
+.sw-t { width: 46px; height: 26px; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--rule-soft); position: relative; cursor: pointer; transition: background .25s var(--ease), border-color .25s; flex: none; }
+.sw-t::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 2px; background: var(--paper); box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: left .25s var(--ease); }
+.sw-t.on { background: var(--accent); border-color: var(--accent); } .sw-t.on::after { left: 22px; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; }
+.seg button { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; border: 0; border-left: 1px solid var(--rule); background: none; color: var(--muted); padding: 9px 15px; cursor: pointer; transition: background .2s, color .2s; }
+.seg button:first-child { border-left: 0; } .seg button.on { background: var(--accent); color: var(--paper); }
+.check { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; user-select: none; }
+.check .box { width: 18px; height: 18px; border: 1px solid var(--rule); border-radius: 2px; display: inline-grid; place-items: center; flex: none; }
+.check.on .box { background: var(--accent); border-color: var(--accent); }
+.check .box svg { width: 11px; height: 11px; stroke: var(--paper); fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+.check.on .box svg { opacity: 1; }
+.field label { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.inp { font-family: var(--sans); font-size: 15px; padding: 11px 13px; background: transparent; border: 1px solid var(--rule); border-radius: var(--radius); color: var(--ink); width: 100%; transition: border-color .2s, box-shadow .2s; }
+.inp::placeholder { color: var(--faint); }
+.inp:focus { outline: 0; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
+.tag { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding: 3px 9px; border-radius: 2px; border: 1px solid var(--rule); color: var(--ink-soft); }
+.tag.solid { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.tag.soft { background: var(--accent-tint); color: var(--accent); border-color: transparent; }
+.stat-dot { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-soft); }
+.stat-dot::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+.stat-dot.pending { color: var(--warn); } .stat-dot.progress { color: var(--accent); } .stat-dot.done { color: var(--ok); }
+.av { width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: var(--paper); font-family: var(--mono); font-size: 12px; display: grid; place-items: center; flex: none; }
+.avstack { display: flex; } .avstack .av { margin-left: -9px; border: 2px solid var(--paper); } .avstack .av:first-child { margin-left: 0; }
+.bar { height: 4px; width: 160px; background: var(--rule); border-radius: 2px; overflow: hidden; display: inline-block; } .bar > i { display: block; height: 100%; background: var(--accent); }
+.chip { font-family: var(--mono); font-size: 11px; letter-spacing: .04em; padding: 7px 12px; border: 1px solid var(--rule); border-radius: 999px; background: none; color: var(--ink-soft); cursor: pointer; }
+.chip.on { background: var(--accent-tint); border-color: var(--accent); color: var(--accent); }
+.pullquote { font-family: var(--serif); font-weight: 400; font-style: italic; font-size: clamp(1.4rem, 3vw, 2rem); line-height: 1.3; letter-spacing: -.02em; margin: var(--s3) 0 0; max-width: 32ch; text-indent: -.4em; }
+.pullquote::before { content: '“'; color: var(--accent); } .pullquote b { font-style: normal; font-weight: 600; }
+.metric .l { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.metric .big { display: block; font-family: var(--serif); font-weight: 500; font-size: clamp(2.4rem, 5vw, 3.4rem); line-height: .9; letter-spacing: -.03em; }
+.metric .delta { font-family: var(--mono); font-size: 12px; color: var(--ok); }
+
+/* mini window chrome demo */
+.win { width: 280px; background: var(--paper); border: 1px solid var(--rule); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+.win-bar { display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 14px; background: var(--paper-2); border-bottom: 1px solid var(--rule-soft); }
+.win-bar .wt { flex: 1; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.win-btn { width: 24px; height: 24px; display: grid; place-items: center; border: 1px solid var(--rule); border-radius: 3px; background: none; color: var(--muted); cursor: pointer; }
+.win-body { padding: 16px; }
+.dock { display: inline-flex; gap: 6px; padding: 7px; background: color-mix(in srgb, var(--paper) 82%, transparent); backdrop-filter: blur(14px); border: 1px solid var(--rule); border-radius: 999px; box-shadow: var(--shadow); }
+.dock-item { display: flex; align-items: center; gap: 8px; padding: 8px 15px; border-radius: 999px; border: 1px solid transparent; background: none; cursor: pointer; color: var(--muted); font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.dock-item.active { color: var(--ink); background: var(--paper-2); border-color: var(--rule-soft); }
+
+/* type specimen */
+.ty-row { border-top: 1px solid var(--rule-soft); padding: 16px 0; display: grid; grid-template-columns: 90px 1fr; gap: 20px; align-items: baseline; }
+.ty-row .tk { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.ty-d { font-family: var(--serif); font-weight: 500; font-size: clamp(2rem, 4.5vw, 3.2rem); letter-spacing: -.03em; line-height: 1; }
+.ty-h { font-family: var(--serif); font-weight: 500; font-size: 1.7rem; letter-spacing: -.02em; }
+.ty-b { font-size: 1.05rem; }
+.ty-m { font-family: var(--mono); font-size: 1rem; font-variant-numeric: tabular-nums; }
+.ty-c { font-family: var(--mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+
+/* spacing scale bars */
+.space-row { display: flex; align-items: center; gap: 16px; padding: 6px 0; }
+.space-row .sk { font-family: var(--mono); font-size: 11px; color: var(--muted); width: 74px; flex: none; }
+.space-row .sbar { height: 12px; background: var(--accent); border-radius: 1px; }
+
+.copyhint { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 600; background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 12px; letter-spacing: .04em; padding: 10px 18px; border-radius: var(--radius); box-shadow: var(--shadow); opacity: 0; transition: opacity .25s; pointer-events: none; }
+.copyhint.show { opacity: 1; }
+footer { padding: var(--s6) 0 var(--s7); border-top: 1px solid var(--rule); }
+footer .colophon { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--muted); line-height: 2; }
+footer .colophon b { color: var(--ink); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <button class="tgl" id="themeBtn">◐ Theme</button>
+</div>
+<div class="copyhint" id="copyhint">Copied</div>
+
+<!-- ══ HERO ══ -->
+<header class="hero">
+  <div class="bloom"></div>
+  <div class="wrap hero-inner">
+    <div class="kicker">BizzNex · Design Case Study</div>
+    <h1>Business, run <em>beautifully.</em></h1>
+    <p class="lede">How a generic business-suite UI was redrawn as one quiet, container-less surface — and how every pixel of that decision ships in <code>apps/web</code>.</p>
+    <div class="meta">
+      <span>Set in <b>Fraunces</b> &amp; <b>IBM Plex</b></span>
+      <span>System <b>Aurora · v4</b></span>
+      <span>Layout <b>Studio</b></span>
+      <span>Distilled from <b>Mercury · Linear · Stripe · Anthropic</b></span>
+    </div>
+
+    <!-- Living-document / pre-deploy status -->
+    <div class="status" id="status">
+      <div class="st-head">
+        <span class="badge">Living document · Draft</span>
+        <span class="st-meta">Last updated <b id="lastUpd">2026-09-17</b> · Must be refreshed before the final production deploy</span>
+      </div>
+      <p class="small" style="margin:0 0 6px">This case study is source-controlled alongside the app. Whenever the design system or the app changes, update it here <em>before</em> shipping. Pre-deploy checklist:</p>
+      <ul>
+        <li><span class="bx"></span><span>Re-diff against <code>apps/web/src/styles/aurora.scss</code> — palette, type, radius, spacing, motion tokens still match.</span></li>
+        <li><span class="bx"></span><span>Confirm the component gallery matches the shipped components (buttons, fields, ledger, windows, dock).</span></li>
+        <li><span class="bx"></span><span>Confirm the tool inventory &amp; each tool's page description still reflect <code>apps/web/src/views/tools/*</code>.</span></li>
+        <li><span class="bx"></span><span>Verify i18n locale set (en / es / fr) and the Studio interaction model are still accurate.</span></li>
+        <li><span class="bx"></span><span>Update the "Last updated" date and the changelog in the colophon, then link it from the landing page.</span></li>
+      </ul>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- ══ 01 · THE PROBLEM ══ -->
+<section id="problem">
+  <div class="folio-h"><span class="folio">01</span><div>
+    <div class="sublab">The problem</div>
+    <h2 class="sec-t">Why the default looks AI-generated</h2>
+  </div></div>
+  <p>The original BizzNex frontend was assembled from stock component libraries (Fluent UI, MUI) with drop-in cards, gradients and rounded boxes. It worked — and looked like every other tool built the same way. The root cause is <strong>distributional convergence</strong>: the industry defaults (Tailwind / shadcn) share one habit — <strong>containerization</strong>. Every element becomes a bordered, shadowed, rounded card, so screens collapse into a grid of near-identical boxes.</p>
+  <p>The design brief was therefore not "pick nicer colors" but <strong>change the grouping mechanism</strong>. The thesis that carried through every later decision:</p>
+  <p class="pullquote">Group with space, type and hairlines — never boxes. <b>Delete every border and the structure should still read.</b></p>
+</section>
+
+<!-- ══ 02 · RESEARCH ══ -->
+<section id="research">
+  <div class="folio-h"><span class="folio">02</span><div>
+    <div class="sublab">Inputs</div>
+    <h2 class="sec-t">Research &amp; north stars</h2>
+  </div></div>
+  <div class="two">
+    <div>
+      <h4>Three research passes</h4>
+      <ul class="clean">
+        <li><b>Why AI UIs look generic</b> — the containerization habit above; the fix is editorial grouping.</li>
+        <li><b>Container-less / editorial layout</b> — named-line grids, whitespace (Gestalt proximity), hairline rules, asymmetric splits, bleed &amp; overlap; data in borderless tables with tabular numerals.</li>
+        <li><b>Systems audit</b> — how restrained products carry density without boxes.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>North stars</h4>
+      <ul class="clean">
+        <li><b>Mercury, Linear, Attio, Stripe, Anthropic</b> — data-dense but human.</li>
+        <li><b>AREA 17, RoAndCo</b> — editorial studios, for type &amp; grid discipline.</li>
+        <li>Colophon credit, verbatim: <span class="mono">"Distilled from Mercury, Linear, Stripe &amp; Anthropic."</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 03 · VISUAL LANGUAGE EXPLORATION ══ -->
+<section id="directions">
+  <div class="folio-h"><span class="folio">03</span><div>
+    <div class="sublab">Exploration</div>
+    <h2 class="sec-t">Three visual directions</h2>
+  </div></div>
+  <p class="sec-lede">Three standalone, browser-openable style guides were built to argue for competing identities. Only one satisfied the thesis. Click any swatch below to copy its hex.</p>
+
+  <div class="dirs">
+    <div class="dir win">
+      <div class="prev" style="background:linear-gradient(120deg,#F5F1E9,#EDE7DA 60%,#E4DCC9)">
+        <span style="background:#5B41E0"></span><span style="background:#211D16"></span><span style="background:#EDE7DA"></span>
+      </div>
+      <div class="db">
+        <h5>1 · Aurora <span class="verdict tag-pick">✓ adopted · v4 editorial</span></h5>
+        <p>Container-less &amp; editorial. Warm paper, one accent, a single aurora mesh, asymmetric grid with bleed, hairline rules instead of cards, a borderless ledger table. No boxes.</p>
+        <div class="stack">Fraunces × IBM Plex · asymmetric · type-led</div>
+      </div>
+    </div>
+    <div class="dir">
+      <div class="prev" style="background:#F8FAFC">
+        <span style="background:#4F46E5"></span><span style="background:#0EA5A4"></span><span style="background:#0F172A"></span>
+      </div>
+      <div class="db">
+        <h5>2 · Meridian <span class="verdict tag-no">✕ rejected</span></h5>
+        <p>Enterprise SaaS — indigo &amp; teal on cool slate, crisp 1px borders, elevated KPI tiles, hover-lift cards. Serious, but the exact card grid the brief set out to escape.</p>
+        <div class="stack">Plus Jakarta Sans · structured · data-dense</div>
+      </div>
+    </div>
+    <div class="dir">
+      <div class="prev" style="background:radial-gradient(600px 300px at 20% 0%, rgba(139,92,246,.5), transparent 60%),radial-gradient(500px 300px at 100% 0%, rgba(34,211,238,.35), transparent 55%),#0B0E14">
+        <span style="background:#8B5CF6"></span><span style="background:#22D3EE"></span><span style="background:#141922"></span>
+      </div>
+      <div class="db">
+        <h5>3 · Nocturne <span class="verdict tag-no">✕ rejected</span></h5>
+        <p>Premium dark command centre — near-black canvas, electric violet→cyan gradient, glowing accents. Striking, but loud and gimmicky for an all-day business tool; still box-based.</p>
+        <div class="stack">Space Grotesk · dark · vibrant · glow</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Why Aurora won — direction by direction</h3>
+  <div class="scroll-x">
+  <table class="ledger">
+    <thead><tr><th>Dimension</th><th>Aurora — adopted</th><th>Meridian — rejected</th><th>Nocturne — rejected</th></tr></thead>
+    <tbody>
+      <tr class="pick"><td>Grouping</td><td>Whitespace + hairlines · <b>no boxes</b></td><td>Bordered, shadowed cards</td><td>Glowing bordered cards</td></tr>
+      <tr><td>Display font</td><td>Fraunces (serif, editorial voice)</td><td>Plus Jakarta Sans (geometric 800)</td><td>Space Grotesk (gradient clip-text)</td></tr>
+      <tr><td>Surface</td><td>Warm paper <code>#F5F1E9</code> · no white</td><td>Cool <code>#F8FAFC</code> + true-white cards</td><td>Near-black <code>#0B0E14</code></td></tr>
+      <tr><td>Accent</td><td>One flat <code>#5B41E0</code></td><td>Indigo <code>#4F46E5</code> + teal <code>#0EA5A4</code></td><td>Violet→cyan gradient</td></tr>
+      <tr><td>Radius</td><td>Single <code>3px</code> (near-sharp)</td><td>6 / 10 / 14px</td><td>8 / 14 / 18 / 999px</td></tr>
+      <tr><td>Elevation</td><td>Flat · one soft shadow</td><td>Two shadow ramps, hover-lift</td><td>Violet glow (ring + bloom)</td></tr>
+      <tr><td>Theming</td><td class="win-yes">Light + dark</td><td class="win-no">Light only</td><td class="win-no">Dark only</td></tr>
+      <tr><td>Ambient</td><td>Aurora bloom + 5% film grain</td><td>None</td><td>Baked-in radial glow</td></tr>
+      <tr><td>Verdict</td><td class="win-yes">Satisfies the thesis</td><td class="win-no">Is the box grid we're escaping</td><td class="win-no">Loud; competes with data</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="small">Meridian's own philosophy copy sold it as "a serious business tool… structured, bordered, and hover-elevated" — precisely the containerization the brief rejects. Nocturne leaned on a signature gradient + glow as identity, where Aurora deliberately uses one flat accent and one soft shadow.</p>
+
+  <h3>The iteration history behind Aurora</h3>
+  <p>Aurora itself is the fourth iteration of the visual language — each version answered a specific critique.</p>
+  <div class="scroll-x">
+  <table class="ledger">
+    <thead><tr><th>Iteration</th><th>Direction</th><th>Introduced</th><th>Why it changed</th></tr></thead>
+    <tbody>
+      <tr><td>v1 · Aurora (early)</td><td>Light, Apple-style</td><td>One gradient, glassy rounded cards</td><td>Baseline; still flat</td></tr>
+      <tr><td>v2 · Living</td><td>Animated &amp; editorial</td><td>Breathing aurora bg, Fraunces display, dark toggle, click-to-copy</td><td>Wanted more character</td></tr>
+      <tr><td>v3 · Command Center</td><td>2026 SaaS</td><td>Dark-first bento, Stripe-grade table, AI card, ⌘K palette</td><td>Researched Linear/Stripe/Vercel</td></tr>
+      <tr class="pick"><td>v4 · Editorial ✓</td><td>Container-less</td><td><b>Killed the boxes</b> — asymmetric grid, hairlines, warm paper, one accent, ledger table</td><td>Fixed the "everything is a box / AI-generated" feel</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ══ 04 · THE AURORA SYSTEM ══ -->
+<section id="system">
+  <div class="folio-h"><span class="folio">04</span><div>
+    <div class="sublab">The system</div>
+    <h2 class="sec-t">Aurora — the token reference</h2>
+  </div></div>
+  <p class="sec-lede">Every value below is the shipped source of truth in <code>apps/web/src/styles/aurora.scss</code>. The document you're reading is rendered with these same tokens — toggle the theme (top-right) to see both modes.</p>
+
+  <h3>Palette · Light</h3>
+  <div class="sw-grid" data-mode="light">
+    <div class="sw" data-hex="#F5F1E9"><div class="chip" style="background:#F5F1E9;border-bottom:1px solid rgba(0,0,0,.08)"></div><div class="lab"><div class="nm">Paper</div><div class="hex">#F5F1E9</div></div></div>
+    <div class="sw" data-hex="#EDE7DA"><div class="chip" style="background:#EDE7DA"></div><div class="lab"><div class="nm">Paper-2</div><div class="hex">#EDE7DA</div></div></div>
+    <div class="sw" data-hex="#E7E0D0"><div class="chip" style="background:#E7E0D0"></div><div class="lab"><div class="nm">Paper-3</div><div class="hex">#E7E0D0</div></div></div>
+    <div class="sw" data-hex="#211D16"><div class="chip" style="background:#211D16"></div><div class="lab"><div class="nm">Ink</div><div class="hex">#211D16</div></div></div>
+    <div class="sw" data-hex="#4E4A40"><div class="chip" style="background:#4E4A40"></div><div class="lab"><div class="nm">Ink-soft</div><div class="hex">#4E4A40</div></div></div>
+    <div class="sw" data-hex="#8B8474"><div class="chip" style="background:#8B8474"></div><div class="lab"><div class="nm">Muted</div><div class="hex">#8B8474</div></div></div>
+    <div class="sw" data-hex="#C0B9A6"><div class="chip" style="background:#C0B9A6"></div><div class="lab"><div class="nm">Faint</div><div class="hex">#C0B9A6</div></div></div>
+    <div class="sw" data-hex="#5B41E0"><div class="chip" style="background:#5B41E0"></div><div class="lab"><div class="nm">Accent</div><div class="hex">#5B41E0</div></div></div>
+    <div class="sw" data-hex="#2E8F60"><div class="chip" style="background:#2E8F60"></div><div class="lab"><div class="nm">OK</div><div class="hex">#2E8F60</div></div></div>
+    <div class="sw" data-hex="#B67A16"><div class="chip" style="background:#B67A16"></div><div class="lab"><div class="nm">Warn</div><div class="hex">#B67A16</div></div></div>
+    <div class="sw" data-hex="#C24A3E"><div class="chip" style="background:#C24A3E"></div><div class="lab"><div class="nm">Bad</div><div class="hex">#C24A3E</div></div></div>
+  </div>
+
+  <h3>Palette · Dark</h3>
+  <div class="sw-grid">
+    <div class="sw" data-hex="#141210"><div class="chip" style="background:#141210"></div><div class="lab"><div class="nm">Paper</div><div class="hex">#141210</div></div></div>
+    <div class="sw" data-hex="#1C1915"><div class="chip" style="background:#1C1915"></div><div class="lab"><div class="nm">Paper-2</div><div class="hex">#1C1915</div></div></div>
+    <div class="sw" data-hex="#23201A"><div class="chip" style="background:#23201A"></div><div class="lab"><div class="nm">Paper-3</div><div class="hex">#23201A</div></div></div>
+    <div class="sw" data-hex="#EDE8DD"><div class="chip" style="background:#EDE8DD"></div><div class="lab"><div class="nm">Ink</div><div class="hex">#EDE8DD</div></div></div>
+    <div class="sw" data-hex="#C3BCAD"><div class="chip" style="background:#C3BCAD"></div><div class="lab"><div class="nm">Ink-soft</div><div class="hex">#C3BCAD</div></div></div>
+    <div class="sw" data-hex="#8E877A"><div class="chip" style="background:#8E877A"></div><div class="lab"><div class="nm">Muted</div><div class="hex">#8E877A</div></div></div>
+    <div class="sw" data-hex="#A897FF"><div class="chip" style="background:#A897FF"></div><div class="lab"><div class="nm">Accent</div><div class="hex">#A897FF</div></div></div>
+    <div class="sw" data-hex="#46C98A"><div class="chip" style="background:#46C98A"></div><div class="lab"><div class="nm">OK</div><div class="hex">#46C98A</div></div></div>
+    <div class="sw" data-hex="#E7B24E"><div class="chip" style="background:#E7B24E"></div><div class="lab"><div class="nm">Warn</div><div class="hex">#E7B24E</div></div></div>
+    <div class="sw" data-hex="#F0776B"><div class="chip" style="background:#F0776B"></div><div class="lab"><div class="nm">Bad</div><div class="hex">#F0776B</div></div></div>
+  </div>
+  <p class="small">Note the deliberate shift: in dark mode the accent lightens (<code>#5B41E0 → #A897FF</code>) and status colors brighten so they hold contrast on warm charcoal. No pure white, no pure black — warm paper and warm ink at both ends.</p>
+
+  <h3>Aurora mesh · the one color moment</h3>
+  <p>The "aurora" only survives as a single soft, blurred mesh field (blur 64px), used once — behind the dashboard hero and this page's header. Four radial stops:</p>
+  <div class="sw-grid">
+    <div class="sw" data-hex="#7C6CF5"><div class="chip" style="background:#7C6CF5"></div><div class="lab"><div class="nm">Iris</div><div class="hex">#7C6CF5</div></div></div>
+    <div class="sw" data-hex="#5FA8FF"><div class="chip" style="background:#5FA8FF"></div><div class="lab"><div class="nm">Sky</div><div class="hex">#5FA8FF</div></div></div>
+    <div class="sw" data-hex="#34E0C4"><div class="chip" style="background:#34E0C4"></div><div class="lab"><div class="nm">Aqua</div><div class="hex">#34E0C4</div></div></div>
+    <div class="sw" data-hex="#FF9EC0"><div class="chip" style="background:#FF9EC0"></div><div class="lab"><div class="nm">Blush</div><div class="hex">#FF9EC0</div></div></div>
+  </div>
+
+  <h3>Type system</h3>
+  <p>Hierarchy is carried by <strong>size &amp; weight, not tint</strong>. Three families, each with a strict job:</p>
+  <div class="ty-row"><span class="tk">Fraunces · serif</span><div><span class="ty-d">Business, run beautifully</span><p class="small" style="margin:8px 0 0">Display, headings, folios, hero metrics, pull-quotes. Weights 400/500/600 + italic 500.</p></div></div>
+  <div class="ty-row"><span class="tk">Plex Sans · sans</span><div><span class="ty-b">Body copy, buttons and inputs. The workhorse UI face — clear at 15px, letter-spacing −.006em.</span></div></div>
+  <div class="ty-row"><span class="tk">Plex Mono · mono</span><div><span class="ty-m">12,480.00 · labels · § spec · nav · captions</span><p class="small" style="margin:8px 0 0">All labels, spec strings, numbers/data, table headers, nav, captions, tags — tabular lining numerals.</p></div></div>
+
+  <div class="two" style="margin-top:var(--s5)">
+    <div>
+      <h3>Radius &amp; borders</h3>
+      <ul class="clean">
+        <li>One radius token: <code>--radius: 3px</code> — "near-sharp, editorial."</li>
+        <li>Rectangles stay near-sharp; only <b>marks</b> (dots, avatars) round.</li>
+        <li>Checkboxes/switch knobs use <code>2px</code> as the single fine exception.</li>
+        <li>No box borders — only hairlines: <code>--rule (.18α)</code> and <code>--rule-soft (.09α)</code>.</li>
+      </ul>
+      <h3>Motion</h3>
+      <ul class="clean">
+        <li>One easing curve everywhere: <code>cubic-bezier(.22, 1, .36, 1)</code>.</li>
+        <li>Durations: 120ms press · 200ms hover/color · 250ms transform · 500ms theme.</li>
+        <li>Set-pieces: hero rise 1s · aurora drift 34s · toast 300ms.</li>
+        <li><b>Static blocks never animate</b> — motion is only entrances &amp; hover.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Spacing scale (asymmetric)</h3>
+      <div class="space-row"><span class="sk">--s1 · 6px</span><span class="sbar" style="width:6px"></span></div>
+      <div class="space-row"><span class="sk">--s2 · 12px</span><span class="sbar" style="width:12px"></span></div>
+      <div class="space-row"><span class="sk">--s3 · 20px</span><span class="sbar" style="width:20px"></span></div>
+      <div class="space-row"><span class="sk">--s4 · 34px</span><span class="sbar" style="width:34px"></span></div>
+      <div class="space-row"><span class="sk">--s5 · 56px</span><span class="sbar" style="width:56px"></span></div>
+      <div class="space-row"><span class="sk">--s6 · 92px</span><span class="sbar" style="width:92px"></span></div>
+      <div class="space-row"><span class="sk">--s7 · 140px</span><span class="sbar" style="width:140px"></span></div>
+      <h3>Signature details</h3>
+      <ul class="clean">
+        <li><b>Folio numbers</b> in faint serif open every section (see 01–08).</li>
+        <li><b>§ mono spec-labels</b> in accent-keyed uppercase.</li>
+        <li><b>5% film grain</b> — a fixed SVG fractal-noise overlay.</li>
+        <li><b>Accent-tinted thin scrollbars</b>; <code>::selection</code> = accent.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 05 · COMPONENTS ══ -->
+<section id="components">
+  <div class="folio-h"><span class="folio">05</span><div>
+    <div class="sublab">Gallery</div>
+    <h2 class="sec-t">The component library, live</h2>
+  </div></div>
+  <p class="sec-lede">Every element below is styled with the shipped Aurora classes — this is the real vocabulary, not a mockup of it.</p>
+
+  <h4>Buttons — one accent, one radius</h4>
+  <div class="demo">
+    <button class="btn primary">Primary</button>
+    <button class="btn ghost">Ghost</button>
+    <button class="btn quiet">Quiet</button>
+    <button class="btn danger">Danger</button>
+    <button class="btn ghost sm">Small</button>
+    <button class="btn primary" disabled>Disabled</button>
+    <button class="link">Text link →</button>
+  </div>
+
+  <h4>Controls — switch · segmented · checkbox</h4>
+  <div class="demo">
+    <span class="sw-t on" onclick="this.classList.toggle('on')"></span>
+    <div class="seg"><button class="on">Compose</button><button>Analytics</button></div>
+    <span class="check on" onclick="this.classList.toggle('on')"><span class="box"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-11"/></svg></span> Remember me</span>
+  </div>
+
+  <h4>Fields — hairline-bordered, never filled cards</h4>
+  <div class="demo col">
+    <div class="field"><label>Campaign title</label><input class="inp" placeholder="Q4 Newsletter" /></div>
+    <div class="field"><label>Notes</label><textarea class="inp" rows="2" placeholder="Focus rings use the accent tint…"></textarea></div>
+  </div>
+
+  <h4>Indicators — tags · status dots · avatars · progress · chips</h4>
+  <div class="demo">
+    <span class="tag">Draft</span><span class="tag soft">Soft</span><span class="tag solid">Solid</span>
+    <span class="stat-dot pending">Pending</span><span class="stat-dot progress">In progress</span><span class="stat-dot done">Done</span>
+    <span class="avstack"><span class="av">DS</span><span class="av" style="background:#5FA8FF">AK</span><span class="av" style="background:#34E0C4">MJ</span></span>
+    <span class="bar"><i style="width:64%"></i></span>
+    <button class="chip on">Facebook</button><button class="chip">Instagram</button>
+  </div>
+
+  <h4>Borderless ledger table — the anti-card for data</h4>
+  <div class="scroll-x">
+  <table class="ledger">
+    <thead><tr><th>Project</th><th>Status</th><th>Progress</th><th>Spend</th></tr></thead>
+    <tbody>
+      <tr><td>Thanksgiving Gifts</td><td><span class="stat-dot progress">In progress</span></td><td><span class="bar"><i style="width:72%"></i></span></td><td class="num">$4,280.00</td></tr>
+      <tr><td>Christmas Decorations</td><td><span class="stat-dot pending">Pending</span></td><td><span class="bar"><i style="width:24%"></i></span></td><td class="num">$1,150.00</td></tr>
+      <tr><td>Q4 Newsletter</td><td><span class="stat-dot done">Done</span></td><td><span class="bar"><i style="width:100%"></i></span></td><td class="num">$620.00</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="two" style="margin-top:var(--s4)">
+    <div>
+      <h4>Metric band — big serif, not a tile</h4>
+      <div class="demo col">
+        <div class="metric"><div class="l">Spend · trailing 6 months</div><span class="big num">$48.2k</span><span class="delta">▲ 12% vs prior</span></div>
+      </div>
+    </div>
+    <div>
+      <h4>AI pull-quote — the "insight" moment</h4>
+      <div class="demo col">
+        <p class="pullquote">Your <b>Q4 Newsletter</b> is outperforming spend by 3× — consider reallocating the decorations budget.”</p>
+      </div>
+    </div>
+  </div>
+
+  <h4>Tool window &amp; dock — the Studio chrome</h4>
+  <div class="demo" style="align-items:flex-start;gap:32px">
+    <div class="win">
+      <div class="win-bar"><span class="wt">Calculator</span>
+        <button class="win-btn">–</button><button class="win-btn">×</button></div>
+      <div class="win-body">
+        <div style="font-family:var(--mono);font-size:26px;text-align:right;padding:8px 6px;border-bottom:1px solid var(--rule)">1,248.00</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:8px">
+          <button class="win-btn" style="width:auto;padding:10px 0">7</button><button class="win-btn" style="width:auto">8</button><button class="win-btn" style="width:auto">9</button><button class="win-btn" style="width:auto;color:var(--accent)">÷</button>
+        </div>
+      </div>
+    </div>
+    <div class="dock">
+      <button class="dock-item active">Calculator</button>
+      <button class="dock-item">Assistant</button>
+      <button class="dock-item">Notes</button>
+    </div>
+  </div>
+  <p class="small">Every tool window opens at the standard <b>280 × 380</b> "Calculator size" and can be dragged, resized (body scrolls on overflow) and minimized. The dock appears only while a window is open, and vanishes when the last one closes.</p>
+</section>
+
+<!-- ══ 06 · WINDOWING ══ -->
+<section id="windowing">
+  <div class="folio-h"><span class="folio">06</span><div>
+    <div class="sublab">Interaction model</div>
+    <h2 class="sec-t">"Use every feature at once" — four paradigms</h2>
+  </div></div>
+  <p class="sec-lede">A second, parallel exploration asked how a business owner could run many tools simultaneously. Four interactive prototypes were built on the same Aurora palette; only the interaction layer differed.</p>
+
+  <div class="dirs">
+    <div class="dir"><div class="prev" style="background:#F5F1E9"><span style="background:#5B41E0"></span><span style="background:#211D16"></span><span style="background:#EDE7DA"></span></div>
+      <div class="db"><h5>1 · Hybrid <span class="verdict tag-rec">was recommended</span></h5><p>Sidebar app; left-click opens a tool inline as a compact widget, right-click pops a floating resizable window. Dock + minimise. Data views stay full-page.</p></div></div>
+    <div class="dir"><div class="prev" style="background:radial-gradient(rgba(33,29,22,.10) 1.2px,transparent 1.2px) 0 0/22px 22px,#F5F1E9"><span style="background:#5B41E0"></span><span style="background:#211D16"></span><span style="background:#EDE7DA"></span></div>
+      <div class="db"><h5>2 · Canvas <span class="verdict tag-no">✕</span></h5><p><b>Everything</b> is a window — Dashboard, Projects, Tasks and every tool — launched from a 66px rail onto a dot-grid canvas. Max multitasking; boots with two windows open.</p></div></div>
+    <div class="dir"><div class="prev" style="background:#EDE7DA"><span style="background:#5B41E0"></span><span style="background:#211D16"></span><span style="background:#F5F1E9"></span></div>
+      <div class="db"><h5>3 · Panels <span class="verdict tag-no">✕ lightest</span></h5><p>Tools toggle as light, draggable, closable panels. No resize, no minimise, no dock — the simplest step toward multitasking.</p></div></div>
+    <div class="dir win"><div class="prev" style="background:linear-gradient(120deg,#F5F1E9,#EDE7DA 60%,#E4DCC9)"><span style="background:#5B41E0"></span><span style="background:#211D16"></span><span style="background:#EDE7DA"></span></div>
+      <div class="db"><h5>4 · Studio <span class="verdict tag-pick">✓ final · we build this</span></h5><p>The Hybrid, evolved: left-click opens the tool's <b>full-page</b> version inline (like a data view); right-click pops the compact window. Uniform size, auto-dock.</p></div></div>
+  </div>
+
+  <div class="scroll-x">
+  <table class="ledger">
+    <thead><tr><th>Aspect</th><th>Hybrid</th><th>Canvas</th><th>Panels</th><th>Studio ✓</th></tr></thead>
+    <tbody>
+      <tr><td>Shell</td><td>Sidebar + main</td><td>66px rail + canvas</td><td>Sidebar + main</td><td>Sidebar + main</td></tr>
+      <tr><td>Open trigger</td><td>L-click inline widget / R-click window</td><td>Click = window</td><td>Click = toggle panel</td><td>L-click inline <b>full page</b> / R-click window</td></tr>
+      <tr><td>Data views windowed?</td><td class="win-no">No</td><td class="win-yes">Yes (600×480…)</td><td class="win-no">No</td><td class="win-no">No</td></tr>
+      <tr><td>Resizable</td><td class="win-yes">Yes</td><td class="win-yes">Yes</td><td class="win-no">No</td><td class="win-yes">Yes</td></tr>
+      <tr><td>Minimizable</td><td class="win-yes">Yes</td><td class="win-yes">Yes</td><td class="win-no">No</td><td class="win-yes">Yes</td></tr>
+      <tr><td>Window size</td><td>Uniform 280×380</td><td>Per-tool sizes</td><td>Fixed 320px / 70vh</td><td>Uniform 280×380</td></tr>
+      <tr><td>Dock</td><td>Auto-hide when empty</td><td>Always shown</td><td class="win-no">None</td><td>Auto-hide when empty</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Why Studio — and its exact rules</h3>
+  <p>Canvas was too much (windowing the data views is disorienting and loses the readable full-page layouts). Panels was too little (no resize/minimise/dock caps multitasking). Hybrid was right but its inline mode showed only a cramped widget. <strong>Studio</strong> keeps Hybrid's dual trigger but upgrades the inline view to a full, feature-rich page — so one sidebar item yields both a full workspace and a floating utility.</p>
+  <ul class="clean">
+    <li><b>Left-click a tool</b> → opens its <b>full-page</b> version inline in the main area, exactly like Dashboard/Projects/Tasks. Header shows a <code>§ Tool</code> spec-label, serif title, and an <b>"Open in window ↗"</b> button.</li>
+    <li><b>Right-click a tool</b> → pops a <b>floating window</b> showing the tool's <b>compact widget</b> (not the full page) — the two-variant split is deliberate.</li>
+    <li><b>Uniform window size</b> — every window opens at the Calculator's <b>280 × 380</b>; users resize from there and the body scrolls on overflow.</li>
+    <li><b>Windows</b> are draggable (title bar), resizable (min 240×150), minimizable, closable; focus raises z-order and deepens the shadow; new windows cascade by <code>(x 96+i·34, y 92+i·30)</code>.</li>
+    <li><b>Dock</b> (bottom-center, blurred) auto-shows on first window and auto-hides when the last closes.</li>
+    <li><b>Sidebar dot</b> marks tools that currently have a window open (window state only; inline-open just marks the item active).</li>
+    <li><b>Notes</b> owns an in-page search, so it was removed from the topbar's searchable set to avoid two search boxes.</li>
+  </ul>
+</section>
+
+<!-- ══ 07 · THE BUILD ══ -->
+<section id="build">
+  <div class="folio-h"><span class="folio">07</span><div>
+    <div class="sublab">Implementation</div>
+    <h2 class="sec-t">How it ships in <code>apps/web</code></h2>
+  </div></div>
+  <p class="sec-lede">The design is not a mockup — it's the running React app. Here is exactly what implements each decision.</p>
+
+  <div class="two">
+    <div>
+      <h4>Stack</h4>
+      <ul class="clean">
+        <li>React 18 + TypeScript + Vite.</li>
+        <li>Redux Toolkit (auth + UI slices) &amp; RTK Query (API).</li>
+        <li>react-intl for i18n; a single hand-written <code>aurora.scss</code>.</li>
+        <li><b>Dropped</b> Fluent UI / MUI / framer-motion / styled-components / Google-Maps in favour of a lightweight custom Aurora layer.</li>
+        <li>Full stack: NestJS + Prisma + PostgreSQL API, JWT auth (see DEPLOYMENT.md).</li>
+      </ul>
+      <h4>App shell</h4>
+      <ul class="clean">
+        <li>248px sticky <b>sidebar</b> + fluid main area (<code>App.tsx</code> → <code>Sidebar</code>, <code>Topbar</code>, <code>WindowLayer</code>, <code>Dock</code>).</li>
+        <li>Brand mark, two nav groups (<b>Workspace</b> · <b>Tools</b>), user footer with initials avatar &amp; logout.</li>
+        <li>Topbar: <code>BizzNex / <b>Section</b></code> breadcrumb, contextual search (Projects/Tasks only), "Open in window ↗", EN/ES/FR segmented switch, theme toggle.</li>
+        <li>Windowing state lives in <code>layout/useWindows.ts</code>; live drag/resize geometry stays inside each <code>ToolWindow</code> to avoid re-renders on pointer move.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>The seven tools (<code>views/tools/*</code>)</h4>
+      <ul class="clean">
+        <li><b>Calculator</b> — keypad + memory (MC/MR/M+/M−), history tape, business quick-calc (sales tax / tip &amp; split / discount / profit margin).</li>
+        <li><b>Assistant (Brenda)</b> — chat launcher across Google/YouTube/Reddit, suggestion &amp; source chips, recent tape.</li>
+        <li><b>Notes</b> — full CRUD, in-page search, persisted via the real API.</li>
+        <li><b>Publisher</b> — compose once, multi-platform, live 0/280 char counter + preview, recent list.</li>
+        <li><b>Notifications</b> — connect-gate → aggregated inbox with platform filters + refresh.</li>
+        <li><b>Newsletter</b> — Compose / Analytics tabs, campaign ledger with status pills.</li>
+        <li><b>Events</b> — category + radius search over a results ledger.</li>
+      </ul>
+      <p class="small">Each tool has two renderings: a rich <b>full page</b> (left-click / inline, in <code>registry.tsx</code>) and a <b>compact widget</b> (right-click / window, in <code>widgets.tsx</code>).</p>
+    </div>
+  </div>
+
+  <h4>Cross-cutting</h4>
+  <div class="scroll-x">
+  <table class="ledger">
+    <thead><tr><th>Concern</th><th>Decision</th></tr></thead>
+    <tbody>
+      <tr><td>Theming</td><td><code>data-theme</code> on <code>&lt;html&gt;</code> flips the whole token set; 500ms eased transition. Persisted in the UI slice.</td></tr>
+      <tr><td>i18n</td><td>English, Spanish, French — real translations, live switch. Flat message catalogs in <code>i18n/messages.ts</code>.</td></tr>
+      <tr><td>Iconography</td><td>One hairline SVG set (<code>ui/Icon.tsx</code>): 24px grid, 1.7px stroke, rounded joins, <code>fill:none</code>, <code>currentColor</code>.</td></tr>
+      <tr><td>Responsive</td><td>Breakpoints at 900 / 860 / 640 / 480px: sidebar becomes an off-canvas drawer, 12-col fields collapse, windows go full-bleed, search/labels hide.</td></tr>
+      <tr><td>Accessibility</td><td>Focus rings (accent tint), <code>aria-hidden</code> on decorative SVG, <code>aria-label</code> on icon buttons, <code>@media (hover:none)</code> reveals row actions, tabular numerals for scanning.</td></tr>
+      <tr><td>Persistence</td><td>Projects, tasks and notes are saved through the API (JWT). Demo login: <code>demo@bizznex.app / password</code>.</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ══ 08 · DECISION LOG ══ -->
+<section id="decisions">
+  <div class="folio-h"><span class="folio">08</span><div>
+    <div class="sublab">Rationale</div>
+    <h2 class="sec-t">Small decisions log</h2>
+  </div></div>
+  <p class="sec-lede">The details that are easy to miss — each is a deliberate choice, recorded so it survives future edits.</p>
+  <div class="scroll-x">
+  <table class="ledger">
+    <thead><tr><th>Decision</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Warm paper, no pure white</td><td>White + boxes is the "AI-generated" tell; a warm cream surface reads as considered and calm.</td></tr>
+      <tr><td>Exactly one accent</td><td>A single flat accent forces hierarchy through type &amp; space, not color — the anti-rainbow rule.</td></tr>
+      <tr><td>3px radius everywhere</td><td>Near-sharp rectangles read editorial; only marks (dots, avatars) go round, so roundness signals "this is a mark."</td></tr>
+      <tr><td>Hairlines over borders</td><td>Two rule alphas (.18 / .09) group content without drawing boxes — "delete every border and it still reads."</td></tr>
+      <tr><td>Asymmetric spacing scale</td><td>6/12/20/34/56/92/140 grows non-linearly so whitespace itself creates rhythm and emphasis.</td></tr>
+      <tr><td>Mono for all data &amp; labels</td><td>Tabular numerals align in tables; uppercase mono spec-labels are the editorial fingerprint.</td></tr>
+      <tr><td>Aurora used exactly once</td><td>Restraint — one blurred mesh moment is a signature; everywhere would be noise.</td></tr>
+      <tr><td>5% film grain</td><td>A barely-there fractal-noise overlay removes the flat-digital "screenshot" feel.</td></tr>
+      <tr><td>Accent lightens in dark mode</td><td><code>#5B41E0 → #A897FF</code> keeps contrast on warm charcoal without glare.</td></tr>
+      <tr><td>One easing curve</td><td><code>cubic-bezier(.22,1,.36,1)</code> everywhere makes motion feel like one hand; static blocks never move.</td></tr>
+      <tr><td>Uniform 280×380 windows</td><td>Predictable "Calculator size" for every tool; the user resizes rather than the app guessing.</td></tr>
+      <tr><td>Dock auto-hides</td><td>Zero chrome when nothing is open — the dock earns its space only while windows exist.</td></tr>
+      <tr><td>Notes off the topbar search</td><td>Notes has its own in-page search; two search boxes would compete.</td></tr>
+      <tr><td>Full page vs compact widget</td><td>Inline = focused work surface; window = glanceable utility. Same tool, two honest sizes.</td></tr>
+      <tr><td>Dropped the component libraries</td><td>Fluent/MUI impose the very card idiom the brief rejects; a thin custom layer keeps the system pure and the bundle small.</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+</div><!-- /wrap -->
+
+<footer>
+  <div class="wrap">
+    <div class="colophon">
+      <b>BizzNex — Design Case Study.</b><br>
+      System <b>Aurora · v4 (editorial)</b> · Layout <b>Studio</b> · Set in <b>Fraunces</b> &amp; <b>IBM Plex</b>.<br>
+      Source of truth: <b>apps/web/src/styles/aurora.scss</b> · Guides: <b>design-style-guides/</b>.<br><br>
+      <b>Changelog</b><br>
+      2026-09-17 — Initial case study: directions, Aurora tokens, components, Studio model, build. <em>(draft — refresh before deploy)</em><br>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var btn = document.getElementById('themeBtn');
+  btn.addEventListener('click', function () {
+    root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+  var hint = document.getElementById('copyhint');
+  document.querySelectorAll('.sw[data-hex]').forEach(function (sw) {
+    sw.addEventListener('click', function () {
+      var hex = sw.getAttribute('data-hex');
+      if (navigator.clipboard) navigator.clipboard.writeText(hex);
+      hint.textContent = 'Copied ' + hex;
+      hint.classList.add('show');
+      clearTimeout(sw._t);
+      sw._t = setTimeout(function () { hint.classList.remove('show'); }, 1100);
+    });
+  });
+})();
+</script>
+</body>
+</html>
