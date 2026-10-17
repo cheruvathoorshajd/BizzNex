@@ -1,0 +1,203 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  password      String
+  name          String
+  onboarding    Json           @default("{}")
+  preferences   Json           @default("{}")
+  /// bumped on password change: every token signed with an older version stops working
+  tokenVersion  Int            @default(0)
+  createdAt     DateTime       @default(now())
+  projects      Project[]
+  notes         Note[]
+  companies     Company[]
+  contacts      Contact[]
+  deals         Deal[]
+  activities    Activity[]
+  campaigns     Campaign[]
+  posts         Post[]
+  events        Event[]
+  notifications Notification[]
+}
+
+model Project {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  owner     String   @default("You")
+  spend     Int      @default(0)
+  trend     Int[]    @default([])
+  createdAt DateTime @default(now())
+  tasks     Task[]
+
+  @@index([userId])
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name        String
+  description String    @default("")
+  startDate   DateTime?
+  endDate     DateTime?
+  status      String    @default("Pending")
+  createdAt   DateTime  @default(now())
+
+  @@index([projectId])
+}
+
+model Note {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  date        DateTime?
+  location    String    @default("")
+  description String    @default("")
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// ── CRM ──────────────────────────────────────────────
+
+model Company {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  industry  String    @default("")
+  website   String    @default("")
+  createdAt DateTime  @default(now())
+  contacts  Contact[]
+  deals     Deal[]
+
+  @@index([userId])
+}
+
+model Contact {
+  id         String     @id @default(cuid())
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  email      String     @default("")
+  phone      String     @default("")
+  title      String     @default("")
+  companyId  String?
+  company    Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  createdAt  DateTime   @default(now())
+  deals      Deal[]
+  activities Activity[]
+
+  @@index([userId])
+  @@index([companyId])
+}
+
+model Deal {
+  id         String     @id @default(cuid())
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title      String
+  value      Int        @default(0)
+  stage      String     @default("Lead") // Lead | Qualified | Proposal | Won | Lost
+  contactId  String?
+  contact    Contact?   @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  companyId  String?
+  company    Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  closeDate  DateTime?
+  createdAt  DateTime   @default(now())
+  activities Activity[]
+
+  @@index([userId])
+  @@index([contactId])
+  @@index([companyId])
+}
+
+model Activity {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String    @default("Note") // Call | Email | Meeting | Note | Task
+  subject   String
+  notes     String    @default("")
+  dueDate   DateTime?
+  done      Boolean   @default(false)
+  contactId String?
+  contact   Contact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  dealId    String?
+  deal      Deal?     @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([contactId])
+  @@index([dealId])
+}
+
+// ── Persisted tools ──────────────────────────────────
+
+model Campaign {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  subject     String    @default("")
+  content     String    @default("")
+  audience    String    @default("All subscribers")
+  status      String    @default("draft") // draft | scheduled | sent
+  recipients  Int       @default(0)
+  scheduledAt DateTime?
+  sentAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  body        String    @default("")
+  platforms   String[]  @default([])
+  status      String    @default("draft") // draft | published
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Event {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  category  String    @default("General")
+  location  String    @default("")
+  startsAt  DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String   @default("system") // deal | campaign | task | event | system
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
