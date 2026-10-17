@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- BizzNex Skyline, favicon cut: heavier stroke, no window stripes (they merge at 16px), lit window kept -->
+  <style>
+    .i { stroke: #211D16; } .w { fill: #5B41E0; }
+    @media (prefers-color-scheme: dark) { .i { stroke: #EDE8DD; } .w { fill: #A897FF; } }
+  </style>
+  <g class="i" fill="none" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M6 42V25H16"/><path d="M16 42V11L28 6V42"/><path d="M28 18H41V42"/><path d="M3.5 42H44.5"/>
+  </g>
+  <rect class="w" x="19.8" y="15.2" width="4.8" height="6" rx=".8"/>
+</svg>
