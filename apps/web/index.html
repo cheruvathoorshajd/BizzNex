@@ -1,7 +1,9 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- theme before first paint (persisted choice, else the OS setting); CSP: keep its sha256 in sync -->
+    <script>try{var u=JSON.parse(localStorage.getItem('bizznex-ui'))||{}}catch(e){u={}}document.documentElement.dataset.theme=u.theme&&!u.followSystem?u.theme:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'</script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />

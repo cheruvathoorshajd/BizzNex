@@ -14,9 +14,10 @@ export default function Dock({ wins, onToggle }: Props) {
   if (!wins.length) return null;
 
   return (
-    <div className="dock">
+    <div className="dock" role="toolbar" aria-label="Open windows">
       {wins.map((w) => (
-        <button key={w.id} data-dock={w.id} className={cx('dock-item', !w.min && 'active')} onClick={() => onToggle(w.id)}>
+        <button key={w.id} type="button" data-dock={w.id} className={cx('dock-item', !w.min && 'active')} aria-pressed={!w.min}
+          title={w.min ? 'Restore window' : 'Minimise window'} onClick={() => onToggle(w.id)}>
           {t(LABELS[w.id])}
         </button>
       ))}

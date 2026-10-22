@@ -12,6 +12,11 @@ export default function CountUp({ value, format = (n) => String(Math.round(n)), 
 
   useEffect(() => countTo(current.current, value, ms, (v) => { current.current = v; setShown(v); }), [value, ms]);
 
-  // the final value stays available to assistive tech while the digits move
-  return <span aria-label={format(value)}>{format(shown)}</span>;
+  // assistive tech reads the final value once; the moving digits are visual only
+  return (
+    <span>
+      <span className="sr-only">{format(value)}</span>
+      <span aria-hidden="true">{format(shown)}</span>
+    </span>
+  );
 }

@@ -20,7 +20,7 @@ export default function Modal({ title, onClose, children, footer, wide }: Props)
   const ref = useRef<HTMLDivElement>(null);
   const overlay = useRef<HTMLDivElement>(null);
   const close = useRef(onClose);
-  close.current = onClose;
+  useLayoutEffect(() => { close.current = onClose; });
 
   useLayoutEffect(() => {
     const dialog = ref.current!;
@@ -68,7 +68,7 @@ export default function Modal({ title, onClose, children, footer, wide }: Props)
   }, []);
 
   return (
-    <div ref={overlay} className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+    <div ref={overlay} className="overlay" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div ref={ref} className={cx('modal', wide && 'wide')} role="dialog" aria-modal="true" aria-label={title}>
         <div className="modal-head">
           <h3>{title}</h3>

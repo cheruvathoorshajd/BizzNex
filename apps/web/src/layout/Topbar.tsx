@@ -1,5 +1,6 @@
 import { useAppDispatch, useAppSelector } from '../store';
-import { setLanguage } from '../store/uiSlice';
+import { setLanguage, themeMode } from '../store/uiSlice';
+import type { ThemeMode } from '../store/uiSlice';
 import type { ReactNode } from 'react';
 import type { Language } from '../types';
 import { useT } from '../i18n/useT';
@@ -11,24 +12,31 @@ interface Props {
   query: string;
   onQuery: (q: string) => void;
   onMenu: () => void;
+  menuOpen?: boolean;
   showSearch?: boolean;
   onOpenWindow?: () => void;
   help?: ReactNode;
 }
 
 const LANGS: Language[] = ['en', 'es', 'fr'];
+/** The theme switch steps light → dark → system (follow the OS) → light. */
+const NEXT_THEME: Record<ThemeMode, ThemeMode> = { light: 'dark', dark: 'system', system: 'light' };
+const THEME_UI: Record<ThemeMode, { icon: string; label: string }> = {
+  light: { icon: 'sun', label: 'Light' }, dark: { icon: 'moon', label: 'Dark' }, system: { icon: 'monitor', label: 'Auto' },
+};
 
-export default function Topbar({ title, query, onQuery, onMenu, showSearch, onOpenWindow, help }: Props) {
+export default function Topbar({ title, query, onQuery, onMenu, menuOpen, showSearch, onOpenWindow, help }: Props) {
   const t = useT();
   const dispatch = useAppDispatch();
   const switchTheme = useThemeSwitch();
   const language = useAppSelector((s) => s.ui.language);
-  const theme = useAppSelector((s) => s.ui.theme);
+  const mode = useAppSelector(themeMode);
+  const next = NEXT_THEME[mode];
 
   return (
     <header className="topbar">
       <div className="row gap-3">
-        <button className="icon-btn menu-btn" onClick={onMenu} aria-label="Menu"><Icon name="menu" /></button>
+        <button className="icon-btn menu-btn" onClick={onMenu} aria-label="Menu" aria-expanded={!!menuOpen} aria-controls="app-sidebar"><Icon name="menu" /></button>
         <span className="crumb">BizzNex / <b>{title}</b></span>
       </div>
 
@@ -41,6 +49,7 @@ export default function Topbar({ title, query, onQuery, onMenu, showSearch, onOp
               value={query}
               onChange={(e) => onQuery(e.target.value)}
               placeholder={t('action.search') + '…'}
+              aria-label={t('action.search')}
             />
           </label>
         )}
@@ -53,15 +62,16 @@ export default function Topbar({ title, query, onQuery, onMenu, showSearch, onOp
         )}
 
         <div className="top-prefs" data-tour="top-prefs">
-        <div className="seg lang">
+        <div className="seg lang" role="group" aria-label="Language">
           {LANGS.map((l) => (
-            <button key={l} className={l === language ? 'on' : ''} onClick={() => dispatch(setLanguage(l))}>{l}</button>
+            <button key={l} type="button" className={l === language ? 'on' : ''} aria-pressed={l === language} onClick={() => dispatch(setLanguage(l))}>{l}</button>
           ))}
         </div>
 
-        <button className="tgl" onClick={switchTheme} aria-label="Toggle theme">
-          <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={15} />
-          <span className="tgl-text">{theme === 'dark' ? 'Light' : 'Dark'}</span>
+        <button className="tgl" onClick={(e) => switchTheme(e, next)}
+          aria-label={`Theme: ${THEME_UI[mode].label}. Switch to ${THEME_UI[next].label}`} title={`Switch to ${THEME_UI[next].label} theme`}>
+          <Icon name={THEME_UI[next].icon} size={15} />
+          <span className="tgl-text">{THEME_UI[next].label}</span>
         </button>
         </div>
 

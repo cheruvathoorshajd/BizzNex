@@ -1,12 +1,15 @@
+import { lazy } from 'react';
 import type { ReactNode } from 'react';
 import type { ViewId } from '../../types';
-import Calculator from './Calculator';
-import Chatbot from './Chatbot';
-import Notes from './Notes';
-import Publisher from './Publisher';
-import Notifications from './Notifications';
-import Newsletter from './Newsletter';
-import Events from './Events';
+
+// full-page tool views load on first open (App wraps them in Suspense); windows use the eager widgets
+const Calculator = lazy(() => import('./Calculator'));
+const Chatbot = lazy(() => import('./Chatbot'));
+const Notes = lazy(() => import('./Notes'));
+const Publisher = lazy(() => import('./Publisher'));
+const Notifications = lazy(() => import('./Notifications'));
+const Newsletter = lazy(() => import('./Newsletter'));
+const Events = lazy(() => import('./Events'));
 
 /** The tool views that can also open as floating windows (right-click in the sidebar).
  *  Workspace views (dashboard/projects/tasks) are inline-only. */
