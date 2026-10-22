@@ -4,8 +4,8 @@ import {
 } from '../services/api';
 import { useT } from '../i18n/useT';
 import { useToast } from '../ui/Toast';
-import Modal from '../ui/Modal';
-import { cx, fmtShort, toDateInput, fromDateInput, dotClass } from '../utils';
+import TaskModal from './TaskModal';
+import { cx, fmtShort, dotClass } from '../utils';
 import Icon from '../ui/Icon';
 import type { Status, Task, ViewId } from '../types';
 import { errorText } from '../services/errors';
@@ -14,7 +14,6 @@ import LoadError from '../ui/LoadError';
 import { rows } from '../ui/motion';
 
 const STATUSES: Status[] = ['In Progress', 'Pending', 'Completed'];
-const ALL_STATUSES: Status[] = ['Pending', 'In Progress', 'Completed'];
 
 type TaskRow = Task & { project: string };
 
@@ -114,59 +113,5 @@ export default function Tasks({ query, onNavigate }: { query: string; onNavigate
         <button className="link" onClick={() => onNavigate('projects')}><Icon name="arrow" size={14} style={{ transform: 'rotate(180deg)' }} /> {t('nav.projects')}</button>
       </div>
     </div>
-  );
-}
-
-/* ── Task modal (create / edit) ── */
-function TaskModal({ editing, projects, onClose, onSave }: {
-  editing?: TaskRow;
-  projects: { id: string; name: string }[];
-  onClose: () => void;
-  onSave: (projectId: string, v: { name: string; description: string; startDate: string | null; endDate: string | null; status: Status }) => void;
-}) {
-  const t = useT();
-  const [projectId, setProjectId] = useState(editing?.projectId ?? projects[0]?.id ?? '');
-  const [name, setName] = useState(editing?.name ?? '');
-  const [description, setDescription] = useState(editing?.description ?? '');
-  const [start, setStart] = useState(toDateInput(editing?.startDate));
-  const [end, setEnd] = useState(toDateInput(editing?.endDate));
-  const [status, setStatus] = useState<Status>(editing?.status ?? 'Pending');
-  const valid = name.trim().length > 0 && !!projectId;
-  const [saving, setSaving] = useState(false);
-
-  return (
-    <Modal
-      title={editing ? t('action.edit') : t('action.newTask')}
-      onClose={onClose}
-      footer={<>
-        <button className="btn ghost" onClick={onClose}>{t('action.cancel')}</button>
-        <button className="btn primary" disabled={!valid || saving} onClick={async () => { setSaving(true); try { await onSave(projectId, { name: name.trim(), description: description.trim(), startDate: fromDateInput(start), endDate: fromDateInput(end), status }); } finally { setSaving(false); } }}>{editing ? t('action.save') : t('action.create')}</button>
-      </>}
-    >
-      <div className="modal-body">
-        <div className="fields">
-          <div className="field full">
-            <label>{t('field.project')}</label>
-            {editing
-              ? <input className="inp" value={editing.project} disabled />
-              : (
-                <select className="inp" value={projectId} onChange={(e) => setProjectId(e.target.value)}>
-                  {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-              )}
-          </div>
-          <div className="field full"><label>{t('field.name')}</label><input className="inp" value={name} onChange={(e) => setName(e.target.value)} autoFocus /></div>
-          <div className="field full"><label>{t('field.description')}</label><textarea className="inp" value={description} onChange={(e) => setDescription(e.target.value)} /></div>
-          <div className="field wide"><label>{t('field.start')}</label><input className="inp" type="date" value={start} onChange={(e) => setStart(e.target.value)} /></div>
-          <div className="field wide"><label>{t('field.end')}</label><input className="inp" type="date" value={end} onChange={(e) => setEnd(e.target.value)} /></div>
-          <div className="field full">
-            <label>{t('field.status')}</label>
-            <div className="seg">
-              {ALL_STATUSES.map((s) => <button key={s} className={s === status ? 'on' : ''} onClick={() => setStatus(s)}>{t('status.' + s)}</button>)}
-            </div>
-          </div>
-        </div>
-      </div>
-    </Modal>
   );
 }

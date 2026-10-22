@@ -40,7 +40,7 @@ model Project {
   createdAt DateTime @default(now())
   tasks     Task[]
 
-  @@index([userId])
+  @@index([userId, createdAt]) // listed per user, newest first
 }
 
 model Task {
@@ -54,7 +54,7 @@ model Task {
   status      String    @default("Pending")
   createdAt   DateTime  @default(now())
 
-  @@index([projectId])
+  @@index([projectId, createdAt]) // tasks are listed per project, oldest first
 }
 
 model Note {
@@ -83,7 +83,7 @@ model Company {
   contacts  Contact[]
   deals     Deal[]
 
-  @@index([userId])
+  @@index([userId, createdAt]) // listed per user, newest first
 }
 
 model Contact {
@@ -100,7 +100,7 @@ model Contact {
   deals      Deal[]
   activities Activity[]
 
-  @@index([userId])
+  @@index([userId, createdAt]) // listed per user, newest first
   @@index([companyId])
 }
 
@@ -119,7 +119,7 @@ model Deal {
   createdAt  DateTime   @default(now())
   activities Activity[]
 
-  @@index([userId])
+  @@index([userId, createdAt]) // listed per user, newest first
   @@index([contactId])
   @@index([companyId])
 }
@@ -139,7 +139,7 @@ model Activity {
   deal      Deal?     @relation(fields: [dealId], references: [id], onDelete: SetNull)
   createdAt DateTime  @default(now())
 
-  @@index([userId])
+  @@index([userId, createdAt]) // listed per user, newest first
   @@index([contactId])
   @@index([dealId])
 }

@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { TASK_DATES_MESSAGE, taskDatesInOrder } from '@bizznex/shared';
 import type { CreateTaskInput, UpdateTaskInput } from '@bizznex/shared';
 
 @Injectable()
@@ -9,13 +10,6 @@ export class TasksService {
   private async assertProject(userId: string, projectId: string) {
     const project = await this.prisma.project.findFirst({ where: { id: projectId, userId } });
     if (!project) throw new NotFoundException('Project not found');
-  }
-
-  listAll(userId: string) {
-    return this.prisma.task.findMany({
-      where: { project: { userId } },
-      orderBy: { endDate: 'asc' },
-    });
   }
 
   async add(userId: string, projectId: string, dto: CreateTaskInput) {
@@ -36,6 +30,10 @@ export class TasksService {
     await this.assertProject(userId, projectId);
     const task = await this.prisma.task.findFirst({ where: { id: taskId, projectId } });
     if (!task) throw new NotFoundException('Task not found');
+    // a partial update can move one date past the other, so check the merged result
+    const startDate = dto.startDate !== undefined ? dto.startDate : task.startDate?.toISOString() ?? null;
+    const endDate = dto.endDate !== undefined ? dto.endDate : task.endDate?.toISOString() ?? null;
+    if (!taskDatesInOrder({ startDate, endDate })) throw new BadRequestException(TASK_DATES_MESSAGE);
     return this.prisma.task.update({
       where: { id: taskId },
       data: {

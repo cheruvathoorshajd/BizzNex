@@ -1,17 +1,21 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import {
   useGetDealsQuery, useCreateDealMutation, useUpdateDealMutation, useDeleteDealMutation,
-  useGetContactsQuery, useGetCompaniesQuery, useCreateNotificationMutation, useMeQuery,
+  useGetContactsQuery, useGetCompaniesQuery,
 } from '../services/api';
 import { DEAL_STAGES } from '@bizznex/shared';
 import type { Deal, DealStage } from '../types';
 import { useToast } from '../ui/Toast';
 import Icon from '../ui/Icon';
-import { fmtMoney, cx } from '../utils';
+import { fmtMoney, fmtDay, cx } from '../utils';
 import { errorText } from '../services/errors';
 import { useConfirm } from '../ui/Confirm';
 import LoadError from '../ui/LoadError';
 import { animate } from '../ui/motion';
+
+/** ◀/▶ walk these; Won and Lost are end states, reached by "Mark won"/"Mark lost" and left by "Reopen". */
+const OPEN_STAGES: DealStage[] = ['Lead', 'Qualified', 'Proposal'];
+const isClosed = (s: DealStage) => s === 'Won' || s === 'Lost';
 
 export default function Deals({ query = '' }: { query?: string }) {
   const toast = useToast();
@@ -23,8 +27,6 @@ export default function Deals({ query = '' }: { query?: string }) {
   const [createDeal, { isLoading: creating }] = useCreateDealMutation();
   const [updateDeal] = useUpdateDealMutation();
   const [deleteDeal] = useDeleteDealMutation();
-  const [createNotification] = useCreateNotificationMutation();
-  const { data: me } = useMeQuery();
 
   const [title, setTitle] = useState('');
   const [value, setValue] = useState('');
@@ -72,18 +74,18 @@ export default function Deals({ query = '' }: { query?: string }) {
     });
   }, [deals]);
 
-  const move = async (d: Deal, dir: -1 | 1) => {
-    const i = DEAL_STAGES.indexOf(d.stage);
-    const next = DEAL_STAGES[Math.min(DEAL_STAGES.length - 1, Math.max(0, i + dir))];
+  // the server stamps the close date and posts the "Deal won" notification
+  const changeStage = async (d: Deal, next: DealStage) => {
     if (next === d.stage) return;
     const card = document.querySelector<HTMLElement>(`[data-deal="${d.id}"]`);
     if (card) flights.current.set(d.id, card.getBoundingClientRect());
-    try {
-      await updateDeal({ id: d.id, body: { stage: next } }).unwrap();
-      if (next === 'Won' && me?.preferences?.notifications?.dealWon !== false) {
-        await createNotification({ kind: 'deal', message: `Deal won: ${d.title} (${fmtMoney(d.value)})` }).unwrap().catch(() => {});
-      }
-    } catch (err) { toast(errorText(err)); }
+    try { await updateDeal({ id: d.id, body: { stage: next } }).unwrap(); }
+    catch (err) { toast(errorText(err)); }
+  };
+  const move = (d: Deal, dir: -1 | 1) => {
+    const i = OPEN_STAGES.indexOf(d.stage);
+    if (i < 0) return;
+    return changeStage(d, OPEN_STAGES[Math.min(OPEN_STAGES.length - 1, Math.max(0, i + dir))]);
   };
 
   const remove = async (id: string, name: string) => {
@@ -92,12 +94,13 @@ export default function Deals({ query = '' }: { query?: string }) {
     catch (err) { toast(errorText(err)); }
   };
 
-  const pipelineValue = deals.filter((d) => d.stage !== 'Lost').reduce((s, d) => s + d.value, 0);
+  const pipelineValue = deals.filter((d) => !isClosed(d.stage)).reduce((s, d) => s + d.value, 0);
+  const wonValue = deals.filter((d) => d.stage === 'Won').reduce((s, d) => s + d.value, 0);
 
   return (
     <div>
       <div className="view-head">
-        <p className="spec"><span className="k">§ CRM</span><span>{deals.length} deals</span><span>Pipeline {fmtMoney(pipelineValue)}</span></p>
+        <p className="spec"><span className="k">§ CRM</span><span>{deals.length} deals</span><span>Pipeline {fmtMoney(pipelineValue)}</span><span>Won {fmtMoney(wonValue)}</span></p>
         <h1 className="view-title">Deals</h1>
       </div>
 
@@ -142,7 +145,7 @@ export default function Deals({ query = '' }: { query?: string }) {
                   <span className="pv num">{fmtMoney(total)}</span>
                 </div>
                 {col.map((d) => {
-                  const i = DEAL_STAGES.indexOf(d.stage);
+                  const i = OPEN_STAGES.indexOf(d.stage);
                   return (
                     <div className="dcard" key={d.id} data-deal={d.id}>
                       <div className="dt">{d.title}</div>
@@ -150,9 +153,16 @@ export default function Deals({ query = '' }: { query?: string }) {
                         <div className="dm">{[nameOf(d.contactId, contacts), nameOf(d.companyId, companies)].filter(Boolean).join(' · ')}</div>
                       )}
                       <div className="dval num">{fmtMoney(d.value)}</div>
-                      <div className="dnav">
-                        <button className="btn ghost sm" onClick={() => move(d, -1)} disabled={i === 0} aria-label="Move back">◀</button>
-                        <button className="btn ghost sm" onClick={() => move(d, 1)} disabled={i === DEAL_STAGES.length - 1} aria-label="Move forward">▶</button>
+                      {isClosed(d.stage) && d.closeDate && <div className="dm">Closed {fmtDay(d.closeDate)}</div>}
+                      <div className="dnav" style={{ flexWrap: 'wrap' }}>
+                        {isClosed(d.stage) ? (
+                          <button className="btn ghost sm" onClick={() => changeStage(d, 'Proposal')}>Reopen</button>
+                        ) : (<>
+                          <button className="btn ghost sm" onClick={() => move(d, -1)} disabled={i === 0} aria-label="Move back">◀</button>
+                          <button className="btn ghost sm" onClick={() => move(d, 1)} disabled={i === OPEN_STAGES.length - 1} aria-label="Move forward">▶</button>
+                          <button className="btn ghost sm" onClick={() => changeStage(d, 'Won')}>Mark won</button>
+                          <button className="btn ghost sm" onClick={() => changeStage(d, 'Lost')}>Mark lost</button>
+                        </>)}
                         <button className="btn quiet sm" onClick={() => remove(d.id, d.title)} aria-label="Delete" style={{ marginLeft: 'auto' }}><Icon name="trash" size={13} /></button>
                       </div>
                     </div>

@@ -2,7 +2,7 @@ import { useMemo, useRef, lazy, Suspense } from 'react';
 import { useGetProjectsQuery } from '../services/api';
 import { useAppSelector } from '../store';
 import { useT } from '../i18n/useT';
-import { fmtMoney, fmtShort, sparkPoints, cx, dotClass } from '../utils';
+import { fmtMoney, fmtShort, sparkPoints, cx, dotClass, todayInput, toDateInput } from '../utils';
 import type { Status, Task, ViewId } from '../types';
 import CountUp from '../ui/CountUp';
 
@@ -12,6 +12,13 @@ function overallStatus(tasks: Task[]): Status {
   if (tasks.length && tasks.every((t) => t.status === 'Completed')) return 'Completed';
   if (tasks.some((t) => t.status === 'In Progress')) return 'In Progress';
   return 'Pending';
+}
+
+/** The Sunday that ends the current week, as a "YYYY-MM-DD" calendar date. */
+function weekEnd(today: string) {
+  const d = new Date(`${today}T00:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() + ((7 - d.getUTCDay()) % 7));
+  return d.toISOString().slice(0, 10);
 }
 
 /** Morning until noon, afternoon until 6 pm, in the viewer's own time. */
@@ -41,9 +48,13 @@ export default function Dashboard({ onNavigate }: { onNavigate: (v: ViewId) => v
     const open = allTasks.length - done;
     const completion = allTasks.length ? Math.round((done / allTasks.length) * 100) : 0;
     const spend = projects.reduce((n, p) => n + p.spend, 0);
+    // trends end at the latest month, so line them up from the end: a shorter history started later
     const len = Math.max(0, ...projects.map((p) => p.trend.length));
-    const series = Array.from({ length: len }, (_, i) => projects.reduce((n, p) => n + (p.trend[i] || 0), 0));
-    return { done, open, completion, spend, series };
+    const series = Array.from({ length: len }, (_, i) =>
+      projects.reduce((n, p) => n + (p.trend[p.trend.length - len + i] || 0), 0));
+    // a project is active until every task is done, as in its status (an empty one has work ahead)
+    const active = projects.filter((p) => overallStatus(p.tasks) !== 'Completed').length;
+    return { done, open, completion, spend, series, active };
   }, [projects]);
 
   const delta = useMemo(() => {
@@ -59,11 +70,15 @@ export default function Dashboard({ onNavigate }: { onNavigate: (v: ViewId) => v
     return { name: behind.name, n: behind.tasks.filter((tk) => tk.status === 'Pending').length };
   }, [projects]);
 
-  const weekTasks = useMemo(() =>
-    projects.flatMap((p) => p.tasks.map((tk) => ({ ...tk, project: p.name })))
-      .filter((tk) => tk.status !== 'Completed')
-      .sort((a, b) => +new Date(a.endDate ?? 0) - +new Date(b.endDate ?? 0))
-      .slice(0, 5), [projects]);
+  // open tasks due by Sunday, overdue ones included (and first); undated tasks are left out
+  const weekTasks = useMemo(() => {
+    const today = todayInput(), end = weekEnd(today);
+    return projects.flatMap((p) => p.tasks.map((tk) => ({ ...tk, project: p.name, due: toDateInput(tk.endDate) })))
+      .filter((tk) => tk.status !== 'Completed' && tk.due && tk.due <= end)
+      .sort((a, b) => a.due.localeCompare(b.due))
+      .slice(0, 5)
+      .map((tk) => ({ ...tk, overdue: tk.due < today }));
+  }, [projects]);
 
   return (
     <div style={{ position: 'relative' }}>
@@ -85,8 +100,9 @@ export default function Dashboard({ onNavigate }: { onNavigate: (v: ViewId) => v
             <>
               <div className="metrics mt-5 d3-lift-2">
                 <div className="metric-hero">
-                  <p className="spec"><span className="k">§ {t('dash.spend')}</span><span>{t('dash.trailing')}</span></p>
-                  <div className="big num"><CountUp value={m.spend} format={fmtMoney} /></div>
+                  {/* the latest month of the trend, so the figure and the ▲% beside it measure the same thing */}
+                  <p className="spec"><span className="k">§ {t('dash.spend')}</span><span>{t(m.series.length ? 'dash.trailing' : 'dash.total')}</span></p>
+                  <div className="big num"><CountUp value={m.series.length ? m.series[m.series.length - 1] : m.spend} format={fmtMoney} /></div>
                   {delta && (
                     <div className="delta" style={{ color: delta.up ? 'var(--ok)' : 'var(--bad)' }}>
                       {delta.up ? '▲' : '▼'} {Math.abs(delta.pct).toFixed(1)}%&nbsp;&nbsp;{t('dash.vsStart')}
@@ -94,7 +110,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (v: ViewId) => v
                   )}
                 </div>
                 <div className="ledger-list">
-                  <div className="lrow"><span className="l">{t('dash.activeProjects')}</span><span><span className="v"><CountUp value={projects.length} /></span></span></div>
+                  <div className="lrow"><span className="l">{t('dash.activeProjects')}</span><span><span className="v"><CountUp value={m.active} /></span></span></div>
                   <div className="lrow"><span className="l">{t('dash.openTasks')}</span><span><span className="v"><CountUp value={m.open} /></span></span></div>
                   <div className="lrow"><span className="l">{t('status.Completed')}</span><span><span className="v"><CountUp value={m.done} /></span></span></div>
                   <div className="lrow"><span className="l">{t('dash.completion')}</span><span><span className="v"><CountUp value={m.completion} format={(n) => Math.round(n) + '%'} /></span></span></div>
@@ -158,7 +174,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (v: ViewId) => v
                 <div className="titem" key={tk.id}>
                   <span className="idx num">{String(i + 1).padStart(2, '0')}</span>
                   <span className="nm">{tk.name}<div className="desc">{tk.project}</div></span>
-                  <span className="dt">{fmtShort(tk.endDate ?? '')}</span>
+                  <span className="dt" style={tk.overdue ? { color: 'var(--bad)' } : undefined}>{tk.overdue ? 'OVERDUE · ' : ''}{fmtShort(tk.due)}</span>
                 </div>
               ))}
               {!weekTasks.length && <p className="cap">Nothing due — you're all clear.</p>}

@@ -77,7 +77,7 @@ export default function Companies({ query = '' }: { query?: string }) {
         <div>
           <div className="sublab" style={{ marginTop: 0 }}>§ All companies</div>
           {isError ? <LoadError what="companies" error={error} onRetry={refetch} /> : isLoading && <p className="loading">Loading…</p>}
-          {!isLoading && shown.length === 0 && <div className="cap" style={{ padding: '16px 0' }}>No companies yet.</div>}
+          {!isLoading && shown.length === 0 && <div className="cap" style={{ padding: '16px 0' }}>{q ? `No matches for “${query.trim()}”.` : 'No companies yet.'}</div>}
           {shown.length > 0 && (
             <div className="scroll-x">
               <table className="ledger">
@@ -118,12 +118,13 @@ export default function Companies({ query = '' }: { query?: string }) {
 function CompanyModal({ editing, onClose, onSave }: {
   editing: Company;
   onClose: () => void;
-  onSave: (v: { name: string; industry: string; website: string }) => void;
+  onSave: (v: { name: string; industry: string; website: string }) => Promise<void>;
 }) {
   const [name, setName] = useState(editing.name);
   const [industry, setIndustry] = useState(editing.industry);
   const [website, setWebsite] = useState(editing.website);
   const valid = name.trim().length > 0;
+  const [saving, setSaving] = useState(false);
 
   return (
     <Modal
@@ -133,8 +134,12 @@ function CompanyModal({ editing, onClose, onSave }: {
         <button className="btn ghost" onClick={onClose}>Cancel</button>
         <button
           className="btn primary"
-          disabled={!valid}
-          onClick={() => onSave({ name: name.trim(), industry: industry.trim(), website: website.trim() })}
+          disabled={!valid || saving}
+          onClick={async () => {
+            setSaving(true);
+            try { await onSave({ name: name.trim(), industry: industry.trim(), website: website.trim() }); }
+            finally { setSaving(false); }
+          }}
         >Save</button>
       </>}
     >

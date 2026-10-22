@@ -13,6 +13,9 @@ import { useConfirm } from '../ui/Confirm';
 import LoadError from '../ui/LoadError';
 import { rows } from '../ui/motion';
 
+/** The stored 'Task' type is a to-do on a contact or deal, not a project task: say so. */
+const typeLabel = (t: ActivityType) => (t === 'Task' ? 'Follow-up' : t);
+
 export default function Activities({ query = '' }: { query?: string }) {
   const toast = useToast();
   const confirm = useConfirm();
@@ -36,7 +39,7 @@ export default function Activities({ query = '' }: { query?: string }) {
 
   const q = query.trim().toLowerCase();
   const shown = q
-    ? activities.filter((a) => (a.subject + a.notes + a.type + contactName(a.contactId) + dealName(a.dealId)).toLowerCase().includes(q))
+    ? activities.filter((a) => (a.subject + a.notes + a.type + typeLabel(a.type) + contactName(a.contactId) + dealName(a.dealId)).toLowerCase().includes(q))
     : activities;
 
   const add = async () => {
@@ -76,7 +79,7 @@ export default function Activities({ query = '' }: { query?: string }) {
           <div className="sublab" style={{ marginTop: 0 }}>§ Log activity</div>
           <div className="field"><label>Type</label>
             <select className="inp" value={type} onChange={(e) => setType(e.target.value as ActivityType)}>
-              {ACTIVITY_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+              {ACTIVITY_TYPES.map((t) => <option key={t} value={t}>{typeLabel(t)}</option>)}
             </select>
           </div>
           <div className="field"><label>Subject</label><input className="inp" value={subject} onChange={(e) => setSubject(e.target.value)} /></div>
@@ -100,12 +103,12 @@ export default function Activities({ query = '' }: { query?: string }) {
         <div ref={rows}>
           <div className="sublab" style={{ marginTop: 0 }}>§ Timeline</div>
           {isError ? <LoadError what="activities" error={error} onRetry={refetch} /> : isLoading && <p className="loading">Loading…</p>}
-          {!isLoading && shown.length === 0 && <div className="cap" style={{ padding: '16px 0' }}>No activities logged yet.</div>}
+          {!isLoading && shown.length === 0 && <div className="cap" style={{ padding: '16px 0' }}>{q ? `No matches for “${query.trim()}”.` : 'No activities logged yet.'}</div>}
           {shown.map((a) => {
             const rel = [contactName(a.contactId), dealName(a.dealId)].filter(Boolean).join(' · ');
             return (
               <div className="titem" key={a.id}>
-                <span className="actkind">{a.type}</span>
+                <span className="actkind">{typeLabel(a.type)}</span>
                 <span className="nm" style={a.done ? { textDecoration: 'line-through', opacity: .6 } : undefined}>
                   {a.subject}
                   {(rel || a.notes) && <div className="desc">{[rel, a.notes].filter(Boolean).join(' — ')}</div>}

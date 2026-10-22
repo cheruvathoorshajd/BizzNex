@@ -19,11 +19,6 @@ export class ProjectsController {
     return this.projects.list(userId);
   }
 
-  @Get(':id')
-  get(@CurrentUser() userId: string, @Param('id') id: string) {
-    return this.projects.get(userId, id);
-  }
-
   @Post()
   create(@CurrentUser() userId: string, @Body(new ZodValidationPipe(createProjectSchema)) body: CreateProjectInput) {
     return this.projects.create(userId, body);
