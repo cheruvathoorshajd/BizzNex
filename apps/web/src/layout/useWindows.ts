@@ -23,18 +23,25 @@ export function useWindows() {
     setWins((ws) => ws.map((w) => (w.id === id ? { ...w, z: nz } : w)));
   }, []);
 
+  // Side effects (z / cascade counters) stay outside the state updaters: StrictMode runs updaters
+  // twice, which would otherwise skip cascade slots.
+  const open = useRef(new Set<ToolId>());
+
   const openWindow = useCallback((id: ToolId) => {
-    setWins((ws) => {
-      z.current += 1;
-      const existing = ws.find((w) => w.id === id);
-      if (existing) return ws.map((w) => (w.id === id ? { ...w, min: false, z: z.current } : w));
-      const i = casc.current % 6;
-      casc.current += 1;
-      return [...ws, { id, min: false, z: z.current, x: 96 + i * 34, y: 92 + i * 30 }];
-    });
+    z.current += 1;
+    const nz = z.current;
+    if (open.current.has(id)) {
+      setWins((ws) => ws.map((w) => (w.id === id ? { ...w, min: false, z: nz } : w)));
+      return;
+    }
+    open.current.add(id);
+    const i = casc.current % 6;
+    casc.current += 1;
+    setWins((ws) => (ws.some((w) => w.id === id) ? ws : [...ws, { id, min: false, z: nz, x: 96 + i * 34, y: 92 + i * 30 }]));
   }, []);
 
   const closeWindow = useCallback((id: ToolId) => {
+    open.current.delete(id);
     setWins((ws) => ws.filter((w) => w.id !== id));
   }, []);
 

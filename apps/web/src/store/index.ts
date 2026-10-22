@@ -1,7 +1,7 @@
 import { configureStore, combineReducers, createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit';
 import { useDispatch, useSelector } from 'react-redux';
 import type { TypedUseSelectorHook } from 'react-redux';
-import ui from './uiSlice';
+import ui, { systemTheme } from './uiSlice';
 import auth, { logout, setCredentials } from './authSlice';
 import { api } from '../services/api';
 
@@ -37,11 +37,11 @@ function load(): any {
     const ui = localStorage.getItem(UI_KEY);
     const auth = localStorage.getItem(AUTH_KEY);
     if (ui) p.ui = { ...JSON.parse(ui), introSeen: false }; // every visit opens on the landing page
-    if (start) p.ui = { language: 'en', theme: 'light', ...p.ui, introSeen: true, authMode: start };
+    if (start) p.ui = { language: 'en', theme: systemTheme(), ...(p.ui ?? { followSystem: true }), introSeen: true, authMode: start };
     if (auth) p.auth = JSON.parse(auth);
     return Object.keys(p).length ? p : undefined;
   } catch {
-    return start ? { ui: { language: 'en', theme: 'light', introSeen: true, authMode: start } } : undefined;
+    return start ? { ui: { language: 'en', theme: systemTheme(), followSystem: true, introSeen: true, authMode: start } } : undefined;
   }
 }
 

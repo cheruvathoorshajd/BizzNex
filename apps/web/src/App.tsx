@@ -1,11 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, lazy, useLayoutEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 import { IntlProvider } from 'react-intl';
-import { store, useAppSelector } from './store';
+import { store, useAppDispatch, useAppSelector } from './store';
+import { systemThemeChanged } from './store/uiSlice';
 import { messages } from './i18n/messages';
 import { useT } from './i18n/useT';
 import { ToastProvider } from './ui/Toast';
 import { ConfirmProvider } from './ui/Confirm';
+import ErrorBoundary from './ui/ErrorBoundary';
 import { useMeQuery } from './services/api';
 import Sidebar from './layout/Sidebar';
 import Topbar from './layout/Topbar';
@@ -16,8 +18,6 @@ import { LABELS, NAV } from './nav';
 import { viewTransition } from './ui/motion';
 import type { ViewId } from './types';
 
-import Auth from './views/Auth';
-import Landing from './views/Landing';
 import Dashboard from './views/Dashboard';
 import Projects from './views/Projects';
 import Tasks from './views/Tasks';
@@ -25,41 +25,64 @@ import Contacts from './views/Contacts';
 import Companies from './views/Companies';
 import Deals from './views/Deals';
 import Activities from './views/Activities';
-import Settings from './views/Settings';
 import type { SettingsSection } from './views/Settings';
 import { isToolId, toolNode } from './views/tools/registry';
 import type { ToolId } from './views/tools/registry';
 import { useOnboarding } from './onboarding/useOnboarding';
-import SetupWizard from './onboarding/SetupWizard';
-import Tour from './onboarding/Tour';
 import Checklist from './onboarding/Checklist';
 import FeatureIntro from './onboarding/FeatureIntro';
 import HelpMenu from './onboarding/HelpMenu';
 import SampleBanner from './onboarding/SampleBanner';
-import FeatureGuide from './onboarding/FeatureGuide';
-import BrandGuide from './onboarding/BrandGuide';
+
+// Code-split: screens most visits never reach (or reach once) load on demand.
+const Auth = lazy(() => import('./views/Auth'));
+const Landing = lazy(() => import('./views/Landing'));
+const Settings = lazy(() => import('./views/Settings'));
+const SetupWizard = lazy(() => import('./onboarding/SetupWizard'));
+const Tour = lazy(() => import('./onboarding/Tour'));
+const FeatureGuide = lazy(() => import('./onboarding/FeatureGuide'));
+const BrandGuide = lazy(() => import('./onboarding/BrandGuide'));
+
+const Loading = () => <p className="loading" role="status">Loading…</p>;
 
 export default function App() {
   return (
-    <Provider store={store}>
-      <Root />
-    </Provider>
+    <ErrorBoundary what="BizzNex">
+      <Provider store={store}>
+        <Root />
+      </Provider>
+    </ErrorBoundary>
   );
 }
 
 function Root() {
   const language = useAppSelector((s) => s.ui.language);
   const theme = useAppSelector((s) => s.ui.theme);
+  const followSystem = useAppSelector((s) => s.ui.followSystem);
+  const dispatch = useAppDispatch();
 
-  useEffect(() => {
+  // layout effects: the theme is right before first paint (index.html sets it even earlier)
+  useLayoutEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  // 'system' theme: follow the OS light/dark setting live
+  useLayoutEffect(() => {
+    if (!followSystem || !window.matchMedia) return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const sync = () => dispatch(systemThemeChanged(mq.matches ? 'dark' : 'light'));
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, [followSystem, dispatch]);
 
   return (
     <IntlProvider locale={language} messages={messages[language]} defaultLocale="en">
       <ToastProvider>
         <ConfirmProvider>
-          <Gate />
+          <ErrorBoundary what="BizzNex">
+            <Gate />
+          </ErrorBoundary>
         </ConfirmProvider>
       </ToastProvider>
     </IntlProvider>
@@ -74,7 +97,7 @@ function Gate() {
   const introSeen = useAppSelector((s) => s.ui.introSeen);
 
   // signed out: the landing page opens every visit → create account / demo / sign in
-  if (!token) return introSeen ? <Auth /> : <Landing />;
+  if (!token) return <Suspense fallback={<Loading />}>{introSeen ? <Auth /> : <Landing />}</Suspense>;
   return <Shell />;
 }
 
@@ -109,17 +132,22 @@ function Shell() {
   // New users and demo visitors are guided (wizard, first-visit page guides, checklist).
   // Returning sign-ins only get what they open themselves from the Help (?) menu.
   const startPage = user?.preferences?.startPage;
-  const startApplied = useRef(false);
-  useEffect(() => {
-    if (!loaded || startApplied.current) return;
-    startApplied.current = true;
+  const [startApplied, setStartApplied] = useState(false);
+  if (loaded && !startApplied) {
+    setStartApplied(true);
     if (startPage && startPage !== 'dashboard') setView(startPage);
-  }, [loaded, startPage]);
+  }
 
   const wizardOpen = loaded && guided && onb.wizard === 'pending';
   const showIntro = loaded && !wizardOpen && !touring
     && (guideFor === view || (guided && !(onb.seen ?? []).includes(view)));
   const dismissIntro = () => { markSeen(view); setGuideFor(null); };
+
+  // mobile menu: open the drawer and put keyboard focus on its first link
+  const openMenu = () => {
+    setMenuOpen(true);
+    requestAnimationFrame(() => document.querySelector<HTMLElement>('#app-sidebar .nav')?.focus({ preventScroll: true }));
+  };
 
   const startTour = () => { setChecklistOpen(false); setMenuOpen(false); setTouring(true); };
   const endTour = (completed: boolean) => {
@@ -153,14 +181,16 @@ function Shell() {
 
   return (
     <div className="app">
-      {menuOpen && <div className="scrim" onClick={() => setMenuOpen(false)} />}
-      <Sidebar view={view} onNavigate={navigate} onOpenWindow={openWindowFor} openWindowIds={openIds} open={menuOpen} onOpenSettings={() => openSettings()} />
+      {menuOpen && <div className="scrim" aria-hidden="true" onClick={() => setMenuOpen(false)} />}
+      <Sidebar view={view} onNavigate={navigate} onOpenWindow={openWindowFor} openWindowIds={openIds} open={menuOpen}
+        onClose={() => setMenuOpen(false)} onOpenSettings={() => openSettings()} />
       <div className="main-area">
         <Topbar
           title={t(LABELS[view])}
           query={query}
           onQuery={setQuery}
-          onMenu={() => setMenuOpen(true)}
+          onMenu={openMenu}
+          menuOpen={menuOpen}
           showSearch={searchable.includes(view)}
           onOpenWindow={isToolId(view) ? () => openWindow(view) : undefined}
           help={
@@ -177,7 +207,9 @@ function Shell() {
         <div className="view">
           <SampleBanner />
           {showIntro && <FeatureIntro key={view} view={view} onDismiss={dismissIntro} />}
-          {render()}
+          <ErrorBoundary key={`page-${view}`} what="this page">
+            <Suspense fallback={<Loading />}>{render()}</Suspense>
+          </ErrorBoundary>
         </div>
       </div>
       <WindowLayer wins={wins} onFocus={focusWindow} onClose={closeWindow} onMinimize={toggleMin} />
@@ -192,6 +224,7 @@ function Shell() {
           onDemoWindow={() => { navigate('dashboard'); openWindow('calculator'); }}
         />
       )}
+      <Suspense fallback={null}>
       {featureGuide && <FeatureGuide onClose={() => setFeatureGuide(false)} onNavigate={navigate} />}
       {brandGuide && <BrandGuide onClose={() => setBrandGuide(false)} />}
       {touring && (
@@ -204,6 +237,7 @@ function Shell() {
       {wizardOpen && (
         <SetupWizard onFinish={({ tour, landing }) => (tour ? startTour() : navigate(landing))} />
       )}
+      </Suspense>
     </div>
   );
 }

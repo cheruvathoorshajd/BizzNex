@@ -75,6 +75,7 @@ export function ghostExit(node: HTMLElement | null, run: (ghost: HTMLElement) =>
   const ghost = node.cloneNode(true) as HTMLElement;
   ghost.setAttribute('aria-hidden', 'true');
   ghost.classList.add('motion-ghost');
+  ghost.inert = true; // a picture of what was there: nothing in it can be clicked, focused or read out
   Object.assign(ghost.style, {
     position: 'fixed', left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px`,
     right: 'auto', bottom: 'auto', margin: '0', zIndex: z === 'auto' ? '100' : z, pointerEvents: 'none',

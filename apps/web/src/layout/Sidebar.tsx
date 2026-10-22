@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { NAV } from '../nav';
 import type { ViewId } from '../types';
 import { useAppDispatch, useAppSelector } from '../store';
@@ -15,21 +16,37 @@ interface Props {
   onOpenWindow: (v: ViewId) => void;
   openWindowIds: ViewId[];
   open: boolean;
+  onClose: () => void;
   onOpenSettings: () => void;
 }
 
 const initials = (name?: string) =>
   (name || 'U').trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase()).join('') || 'U';
 
-export default function Sidebar({ view, onNavigate, onOpenWindow, openWindowIds, open, onOpenSettings }: Props) {
+export default function Sidebar({ view, onNavigate, onOpenWindow, openWindowIds, open, onClose, onOpenSettings }: Props) {
   const t = useT();
   const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.auth.user);
   const { data: projects = [] } = useGetProjectsQuery();
   const openTasks = projects.reduce((n, p) => n + p.tasks.filter((tk) => tk.status !== 'Completed').length, 0);
+  const ref = useRef<HTMLElement>(null);
+  const close = useRef(onClose);
+  useEffect(() => { close.current = onClose; });
+
+  // mobile drawer: Escape closes it, and focus goes back to the menu button that opened it
+  useEffect(() => {
+    if (!open) return;
+    const aside = ref.current!;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !e.defaultPrevented) close.current(); };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      if (aside.contains(document.activeElement)) document.querySelector<HTMLElement>('.menu-btn')?.focus({ preventScroll: true });
+    };
+  }, [open]);
 
   return (
-    <aside className={cx('sidebar', open && 'open')}>
+    <aside ref={ref} id="app-sidebar" className={cx('sidebar', open && 'open')}>
       <div className="brand"><Logo /></div>
 
       {NAV.map((section) => (
@@ -41,6 +58,7 @@ export default function Sidebar({ view, onNavigate, onOpenWindow, openWindowIds,
               <button
                 key={item.id}
                 className={cx('nav', view === item.id && 'active')}
+                aria-current={view === item.id ? 'page' : undefined}
                 onClick={() => onNavigate(item.id)}
                 onContextMenu={tool ? (e) => { e.preventDefault(); onOpenWindow(item.id); } : undefined}
                 title={tool ? 'Click opens here · right-click opens a window' : undefined}
