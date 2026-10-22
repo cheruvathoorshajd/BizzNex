@@ -7,6 +7,9 @@ import { DEMO_EMAIL } from '@bizznex/shared';
 import type { RegisterInput, LoginInput, AuthResponse, User } from '@bizznex/shared';
 import { DemoService } from '../demo/demo.service';
 
+/** A cost-10 hash of a throwaway value: unknown emails still pay for one compare, so timing doesn't reveal which accounts exist. */
+const DUMMY_HASH = '$2a$10$EvbJ5e82HFyjF534dwS9d.WOdIl1gOKr6hrcqYRboECzXoO6ijDVy';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -38,9 +41,8 @@ export class AuthService {
     const email = input.email.toLowerCase();
     if (email === DEMO_EMAIL) await this.demo.resetIfStale();
     const u = await this.users.findByEmail(email);
-    if (!u) throw new UnauthorizedException('Invalid credentials');
-    const ok = await bcrypt.compare(input.password, u.password);
-    if (!ok) throw new UnauthorizedException('Invalid credentials');
+    const ok = await bcrypt.compare(input.password, u?.password ?? DUMMY_HASH);
+    if (!u || !ok) throw new UnauthorizedException('Invalid credentials');
     return { token: this.sign(u), user: this.toUser(u) };
   }
 

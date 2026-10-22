@@ -6,6 +6,7 @@ import { setAuthMode, setIntroSeen } from '../store/uiSlice';
 import type { AuthMode } from '../store/uiSlice';
 import { useLoginMutation, useRegisterMutation } from '../services/api';
 import { DEMO, useEnterDemo } from '../onboarding/useEnterDemo';
+import { errorText } from '../services/errors';
 import { cx } from '../utils';
 import Icon from '../ui/Icon';
 import Logo from '../ui/Logo';
@@ -34,13 +35,14 @@ function describe(err: any, mode: Mode): Errors {
   if (status === 'FETCH_ERROR') return { form: 'We can’t reach the BizzNex server. Check your connection and try again.' };
   if (status === 401) return { form: 'That email and password don’t match an account.' };
   if (status === 409) return { email: 'An account with this email already exists.' };
+  if (status === 429) return { form: errorText(err) };
   const fields = err?.data?.errors?.fieldErrors as Record<string, string[]> | undefined;
   if (fields) {
     return {
       name: fields.name?.[0], email: fields.email?.[0], password: fields.password?.[0],
     };
   }
-  return { form: mode === 'signin' ? 'We couldn’t sign you in. Try again.' : 'We couldn’t create your account. Try again.' };
+  return { form: errorText(err, mode === 'signin' ? 'We couldn’t sign you in. Try again.' : 'We couldn’t create your account. Try again.') };
 }
 
 const FEATURES = [
@@ -62,6 +64,7 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [show, setShow] = useState(false);
   const [caps, setCaps] = useState(false);
+  const [forgot, setForgot] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const firstRef = useRef<HTMLInputElement>(null);
@@ -87,7 +90,7 @@ export default function Auth() {
   const shown = (k: keyof Errors) => (touched[k] || touched.submit ? errors[k] : undefined);
   useEffect(() => { if (Object.keys(touched).length) setErrors((prev) => ({ ...validate(), form: prev.form })); }, [name, email, password, mode]);
 
-  const switchMode = (m: Mode) => { setMode(m); setErrors({}); setTouched({}); };
+  const switchMode = (m: Mode) => { setMode(m); setErrors({}); setTouched({}); setForgot(false); };
 
   const authenticate = async (creds: { email: string; password: string; name?: string }, m: Mode) => {
     try {
@@ -183,7 +186,12 @@ export default function Auth() {
           </div>
 
           <div className="field">
-            <label htmlFor="auth-password">Password</label>
+            <div className="auth2-label-row">
+              <label htmlFor="auth-password">Password</label>
+              {mode === 'signin' && (
+                <button type="button" className="inline-link" aria-expanded={forgot} aria-controls="auth-forgot" onClick={() => setForgot((f) => !f)}>Forgot password?</button>
+              )}
+            </div>
             <div className="pw-wrap">
               <input id="auth-password" className={cx('inp', shown('password') && 'bad')} type={show ? 'text' : 'password'} value={password}
                 autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
@@ -198,6 +206,12 @@ export default function Auth() {
             <div id="pw-hint">
               {shown('password') && <p className="field-err">{shown('password')}</p>}
               {caps && <p className="field-warn">Caps Lock is on.</p>}
+              {/* there is no email delivery, so no reset email is promised */}
+              {mode === 'signin' && forgot && (
+                <p className="auth2-note" id="auth-forgot" role="status">
+                  Password reset by email isn’t available in this build. If you’re signed in on another device, change it in Settings → Security; otherwise <button type="button" className="inline-link" onClick={() => switchMode('signup')}>create a new account</button>.
+                </p>
+              )}
               {mode === 'signup' && password && (
                 <div className="pw-meter" aria-live="polite">
                   <div className={`pw-bars s${pw.score}`}>{[1, 2, 3, 4].map((n) => <i key={n} className={n <= pw.score ? 'on' : ''} />)}</div>

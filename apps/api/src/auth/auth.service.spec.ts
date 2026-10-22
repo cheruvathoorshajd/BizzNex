@@ -2,6 +2,12 @@ import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { AuthService } from './auth.service';
 
+// the real bcrypt, with compare observable
+jest.mock('bcryptjs', () => {
+  const actual = jest.requireActual('bcryptjs');
+  return { ...actual, compare: jest.fn(actual.compare) };
+});
+
 describe('AuthService', () => {
   const users: any = { findByEmail: jest.fn(), findById: jest.fn(), create: jest.fn() };
   const jwt: any = { sign: jest.fn().mockReturnValue('tok') };
@@ -37,6 +43,12 @@ describe('AuthService', () => {
     users.findByEmail.mockResolvedValueOnce({ id: 'u1', email: 'a@b.co', name: 'A', password, createdAt: new Date() });
     await expect(svc.login({ email: 'a@b.co', password: 'nope' }))
       .rejects.toBeInstanceOf(UnauthorizedException);
+  });
+
+  it('still runs a password compare for an unknown email', async () => {
+    users.findByEmail.mockResolvedValueOnce(null);
+    await expect(svc.login({ email: 'nobody@b.co', password: 'secret1' })).rejects.toBeInstanceOf(UnauthorizedException);
+    expect(bcrypt.compare).toHaveBeenCalledTimes(1);
   });
 
   it('refreshes the shared demo workspace before a demo sign-in, and only then', async () => {
