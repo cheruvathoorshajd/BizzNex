@@ -12,6 +12,7 @@ import { errorText } from '../../services/errors';
 import { useConfirm } from '../../ui/Confirm';
 import LoadError from '../../ui/LoadError';
 import { rows } from '../../ui/motion';
+import { POST_BODY_MAX, postBodyLimit } from '@bizznex/shared';
 
 const PLATFORMS = ['Facebook', 'Instagram', 'Twitter', 'LinkedIn'];
 
@@ -29,10 +30,17 @@ export default function Publisher() {
   const [platforms, setPlatforms] = useState<string[]>([]);
 
   const toggle = (p: string) => setPlatforms((x) => (x.includes(p) ? x.filter((i) => i !== p) : [...x, p]));
+  // X (Twitter) allows 280 characters; other platforms take up to POST_BODY_MAX.
+  const max = postBodyLimit(platforms);
+  const tooLong = body.length > max;
 
   const publish = async () => {
     if (!title.trim() || !platforms.length) {
       toast('Add a title and pick a platform');
+      return;
+    }
+    if (tooLong) {
+      toast(`Keep the description to ${max} characters for ${platforms.join(', ')}`);
       return;
     }
     setPublishing(true);
@@ -67,17 +75,17 @@ export default function Publisher() {
 
       <div className="tool-cols">
         <div className="panel">
-          <div className="field" style={{ marginTop: 0 }}><label>Content title</label><input className="inp" value={title} onChange={(e) => setTitle(e.target.value)} /></div>
+          <div className="field" style={{ marginTop: 0 }}><label htmlFor="pb-title">Content title</label><input id="pb-title" className="inp" value={title} onChange={(e) => setTitle(e.target.value)} /></div>
           <div className="field">
-            <label>Description <span className="cap" style={{ float: 'right', margin: 0 }}>{body.length} / 280</span></label>
-            <textarea className="inp" rows={4} maxLength={280} value={body} onChange={(e) => setBody(e.target.value)} />
+            <label htmlFor="pb-body">Description <span className={cx('cap', tooLong && 'err')} style={{ float: 'right', margin: 0 }}>{body.length} / {max}</span></label>
+            <textarea id="pb-body" className="inp" rows={4} maxLength={POST_BODY_MAX} aria-invalid={tooLong} value={body} onChange={(e) => setBody(e.target.value)} />
           </div>
-          <div className="sublab">§ Platforms</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {PLATFORMS.map((p) => <button key={p} className={cx('chip', platforms.includes(p) && 'on')} onClick={() => toggle(p)}>{p}</button>)}
+          <div className="sublab" id="pb-platforms">§ Platforms</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }} role="group" aria-labelledby="pb-platforms">
+            {PLATFORMS.map((p) => <button key={p} className={cx('chip', platforms.includes(p) && 'on')} aria-pressed={platforms.includes(p)} onClick={() => toggle(p)}>{p}</button>)}
           </div>
           <div style={{ marginTop: 16, display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-            <button className="btn primary" onClick={publish} disabled={publishing}>{publishing ? 'Publishing…' : 'Publish content'}</button>
+            <button className="btn primary" onClick={publish} disabled={publishing || tooLong}>{publishing ? 'Publishing…' : 'Publish content'}</button>
             <PreviewBadge label="Posting simulated" />
           </div>
         </div>

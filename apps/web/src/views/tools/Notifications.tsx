@@ -80,10 +80,17 @@ export default function Notifications() {
             </span>
             <span className="dt">{fmtDate(n.createdAt)}</span>
             <span className="row-act">
+              {!n.read && (
+                <button
+                  className="btn quiet sm"
+                  onClick={(e) => { e.stopPropagation(); markRead(n.id); }}
+                  aria-label={`Mark as read: ${n.message}`}
+                ><Icon name="check" size={14} /></button>
+              )}
               <button
                 className="btn quiet sm"
                 onClick={(e) => { e.stopPropagation(); del(n.id); }}
-                aria-label="Delete"
+                aria-label={`Delete notification: ${n.message}`}
               ><Icon name="trash" size={14} /></button>
             </span>
           </div>

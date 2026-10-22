@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { calc, cx } from '../../utils';
+import { calc, calcInput, cx } from '../../utils';
 
 const MEM_KEYS = ['MC', 'MR', 'M+', 'M−'];
 const KEYS = ['C', '⌫', '%', '÷', '7', '8', '9', '×', '4', '5', '6', '−', '1', '2', '3', '+', '0', '.', '='];
@@ -14,6 +14,8 @@ const BC_LABELS: Record<Mode, [string, string, string]> = {
 
 export default function Calculator() {
   const [expr, setExpr] = useState('');
+  /** The display shows a result from '=' (or MR): a digit starts over, an operator carries on. */
+  const [fresh, setFresh] = useState(false);
   const [mem, setMem] = useState(0);
   const [tape, setTape] = useState<{ e: string; r: string }[]>([]);
   const [mode, setMode] = useState<Mode>('tax');
@@ -21,6 +23,7 @@ export default function Calculator() {
   const [b, setB] = useState('8');
 
   const pressKey = (k: string) => {
+    setFresh(k === '=');
     if (k === 'C') return setExpr('');
     if (k === '⌫') return setExpr((e) => (e === 'Error' ? '' : e.slice(0, -1)));
     if (k === '=') {
@@ -31,13 +34,13 @@ export default function Calculator() {
       } catch { setExpr('Error'); }
       return;
     }
-    setExpr((e) => (e === 'Error' ? '' : e) + k);
+    setExpr((e) => calcInput(e, k, fresh));
   };
 
   const pressMem = (m: string) => {
     const cur = Number(expr) || 0;
     if (m === 'MC') setMem(0);
-    else if (m === 'MR') setExpr(String(mem));
+    else if (m === 'MR') { setExpr(String(mem)); setFresh(true); }
     else if (m === 'M+') setMem((x) => x + cur);
     else setMem((x) => x - cur);
   };

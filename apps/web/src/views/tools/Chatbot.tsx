@@ -2,16 +2,18 @@ import { useRef, useState } from 'react';
 import { useAskAssistantMutation } from '../../services/api';
 import { useOnboarding } from '../../onboarding/useOnboarding';
 
+/* Brenda is rule-based: these are exactly the questions she can answer (see assistant.service.ts). */
 const SUGGESTIONS = [
-  'Draft a follow-up email to a new lead',
-  'Ideas to move a stalled deal forward',
-  'Summarise my week from my open tasks',
-  'Q4 marketing plan for a small retailer',
+  'How is my pipeline?',
+  'Tasks due this week',
+  'How many contacts do I have?',
+  'Open activities',
 ];
+export const BRENDA_GREETING = "Hi! I'm Brenda, BizzNex's built-in assistant. I can tell you about your deals, tasks due this week, contacts and open activities.";
 
 export default function Chatbot() {
   const [msgs, setMsgs] = useState<{ t: string; u: boolean }[]>([
-    { t: "Hi! I'm Brenda, your BizzNex assistant. Ask me about your contacts, deals, projects or marketing.", u: false },
+    { t: BRENDA_GREETING, u: false },
   ]);
   const [input, setInput] = useState('');
   const [recent, setRecent] = useState<string[]>([]);
@@ -47,7 +49,7 @@ export default function Chatbot() {
 
       <div className="tool-cols">
         <div className="panel" style={{ display: 'flex', flexDirection: 'column', height: 440 }}>
-          <div className="chat-log" ref={logRef} style={{ flex: 1, maxHeight: 'none' }}>
+          <div className="chat-log" ref={logRef} style={{ flex: 1, maxHeight: 'none' }} role="log" aria-live="polite">
             {msgs.map((m, i) => <div key={i} className={`msg ${m.u ? 'user' : 'bot'}`} style={{ whiteSpace: 'pre-wrap' }}>{m.t}</div>)}
             {isLoading && <div className="msg bot">…</div>}
           </div>
