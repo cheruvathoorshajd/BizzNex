@@ -1,17 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import { START_PAGES } from '@bizznex/shared';
-import type { OnboardingGoal, UserPreferences } from '@bizznex/shared';
+import type { Industry, OnboardingGoal, UserPreferences } from '@bizznex/shared';
 import { useAppDispatch, useAppSelector } from '../store';
 import { logout, refreshCredentials } from '../store/authSlice';
 import { errorText } from '../services/errors';
-import { setAuthMode, setLanguage, setTheme } from '../store/uiSlice';
+import { setAuthMode, setLanguage, setTheme, themeMode } from '../store/uiSlice';
 import {
-  API_BASE, useChangePasswordMutation, useClearSampleMutation, useDeleteAccountMutation,
-  useSeedSampleMutation, useUpdatePreferencesMutation, useUpdateProfileMutation,
+  useChangePasswordMutation, useClearSampleMutation, useDeleteAccountMutation, useLazyExportDataQuery,
+  useRevokeSessionsMutation, useSeedSampleMutation, useUpdatePreferencesMutation, useUpdateProfileMutation,
 } from '../services/api';
+import { useConfirm } from '../ui/Confirm';
 import { useOnboarding } from '../onboarding/useOnboarding';
-import { GOALS, ROLES, TEAM_SIZES } from '../onboarding/content';
+import { GOALS } from '../onboarding/content';
+import BusinessFields, { profileFrom, validateBusiness } from '../onboarding/BusinessFields';
+import type { BusinessErrors, BusinessProfile } from '../onboarding/BusinessFields';
 import { LABELS } from '../nav';
 import { useT } from '../i18n/useT';
 import { useToast } from '../ui/Toast';
@@ -22,7 +25,7 @@ import type { Language, ViewId } from '../types';
 export type SettingsSection = 'profile' | 'workspace' | 'preferences' | 'notifications' | 'security' | 'data' | 'help' | 'delete';
 
 const SECTIONS: { id: SettingsSection; label: string; icon: string; hint: string }[] = [
-  { id: 'profile', label: 'Profile', icon: 'user', hint: 'Name, email and photo' },
+  { id: 'profile', label: 'Profile', icon: 'user', hint: 'Your name and email' },
   { id: 'workspace', label: 'Workspace', icon: 'building', hint: 'Business details and plan' },
   { id: 'preferences', label: 'Preferences', icon: 'grid', hint: 'Theme, language, start page' },
   { id: 'notifications', label: 'Notifications', icon: 'bell', hint: 'What we tell you about' },
@@ -68,9 +71,8 @@ export default function Settings({ section, onSection, onTour, onFeatureGuide, o
   const t = useT();
   const toast = useToast();
   const dispatch = useAppDispatch();
-  const theme = useAppSelector((s) => s.ui.theme);
+  const theme = useAppSelector(themeMode);
   const language = useAppSelector((s) => s.ui.language);
-  const token = useAppSelector((s) => s.auth.token);
   const session = useAppSelector((s) => s.auth.session);
   const { user, state, update, demo } = useOnboarding();
   const prefs: UserPreferences = user?.preferences ?? {};
@@ -80,36 +82,52 @@ export default function Settings({ section, onSection, onTour, onFeatureGuide, o
   const [updatePreferences] = useUpdatePreferencesMutation();
   const [changePassword, { isLoading: savingPw }] = useChangePasswordMutation();
   const [deleteAccount, { isLoading: deleting }] = useDeleteAccountMutation();
+  const [revokeSessions, { isLoading: revoking }] = useRevokeSessionsMutation();
+  const [fetchExport] = useLazyExportDataQuery();
+  const confirm = useConfirm();
   const [seed, { isLoading: seeding }] = useSeedSampleMutation();
   const [clear, { isLoading: clearing }] = useClearSampleMutation();
 
   /* ── profile ── */
   const [name, setName] = useState(user?.name ?? '');
   const [email, setEmail] = useState(user?.email ?? '');
+  const [profilePw, setProfilePw] = useState('');
   const [profileErr, setProfileErr] = useState('');
   useEffect(() => { setName(user?.name ?? ''); setEmail(user?.email ?? ''); }, [user?.name, user?.email]);
-  const profileDirty = name.trim() !== (user?.name ?? '') || email.trim().toLowerCase() !== (user?.email ?? '');
+  // a new sign-in email takes the current password, like a new password does
+  const emailChanged = email.trim().toLowerCase() !== (user?.email ?? '');
+  const profileDirty = name.trim() !== (user?.name ?? '') || emailChanged;
   const saveProfile = async (e: FormEvent) => {
     e.preventDefault(); setProfileErr('');
     if (!name.trim()) { setProfileErr('Enter your name.'); return; }
+    if (emailChanged && !profilePw) { setProfileErr('Enter your current password to change your email.'); return; }
     try {
-      const res = await updateProfile({ name: name.trim(), email: email.trim() }).unwrap();
+      const res = await updateProfile({ name: name.trim(), email: email.trim(), ...(emailChanged && { currentPassword: profilePw }) }).unwrap();
       dispatch(refreshCredentials({ token: res.token, user: res.user }));
+      setProfilePw('');
       toast('Profile saved');
     } catch (err) { setProfileErr(errorText(err)); }
   };
 
   /* ── workspace (the details from setup) ── */
-  const [company, setCompany] = useState(state.profile?.company ?? '');
-  const [role, setRole] = useState(state.profile?.role ?? '');
-  const [teamSize, setTeamSize] = useState(state.profile?.teamSize ?? '');
+  const [biz, setBiz] = useState<BusinessProfile>(() => profileFrom(state.profile));
+  const [bizErrors, setBizErrors] = useState<BusinessErrors>({});
   const [goals, setGoals] = useState<OnboardingGoal[]>(state.profile?.goals ?? []);
-  const workspaceDirty = company !== (state.profile?.company ?? '') || role !== (state.profile?.role ?? '') || teamSize !== (state.profile?.teamSize ?? '')
+  const saved = profileFrom(state.profile);
+  const workspaceDirty = (Object.keys(saved) as (keyof BusinessProfile)[]).some((k) => biz[k] !== saved[k])
     || goals.join() !== (state.profile?.goals ?? []).join();
-  const saveWorkspace = (e: FormEvent) => {
+  const saveWorkspace = async (e: FormEvent) => {
     e.preventDefault();
-    update({ profile: { company: company.trim(), role, teamSize, goals } });
-    toast('Workspace details saved');
+    const errors = validateBusiness(biz, { required: false });
+    setBizErrors(errors);
+    if (Object.keys(errors).length) return;
+    try {
+      await update({ profile: {
+        company: biz.company.trim(), website: biz.website.trim(), industry: biz.industry as Industry | '',
+        country: biz.country, logoUrl: biz.logoUrl, role: biz.role, teamSize: biz.teamSize, goals,
+      } });
+      toast('Workspace details saved');
+    } catch (err) { toast(errorText(err)); }
   };
 
   /* ── preferences & notifications (saved on the account) ── */
@@ -135,23 +153,31 @@ export default function Settings({ section, onSection, onTour, onFeatureGuide, o
       toast('Password changed · other sessions signed out');
     } catch (err) { setPwErr(errorText(err)); }
   };
+  const signOutEverywhere = async () => {
+    if (!(await confirm({
+      title: 'Sign out of all devices?',
+      body: 'Every browser and device signed in to this account is signed out. You stay signed in here.',
+      confirmLabel: 'Sign out everywhere',
+    }))) return;
+    try {
+      // the token version bump ends every session; this one continues on the fresh token
+      const res = await revokeSessions().unwrap();
+      dispatch(refreshCredentials({ token: res.token, user: res.user }));
+      toast('Signed out of all other devices');
+    } catch (err) { toast(errorText(err)); }
+  };
 
   /* ── data ── */
   const [exporting, setExporting] = useState(false);
   const exportData = async () => {
     setExporting(true);
     try {
-      const paths = ['projects', 'notes', 'companies', 'contacts', 'deals', 'activities', 'campaigns', 'posts', 'events', 'notifications'];
-      const get = async (p: string) => {
-        const r = await fetch(`${API_BASE}/${p}`, { headers: { authorization: `Bearer ${token}` } });
-        if (!r.ok) throw new Error(p);
-        return r.json();
-      };
-      const rows = await Promise.all(paths.map(get));
+      // through the API layer, so an expired session signs out like everywhere else
+      const records = await fetchExport().unwrap();
       const data = {
         exportedAt: new Date().toISOString(),
         account: { name: user?.name, email: user?.email, memberSince: user?.createdAt, workspace: state.profile ?? {}, preferences: prefs },
-        ...Object.fromEntries(paths.map((p, i) => [p, rows[i]])),
+        ...records,
       };
       const a = document.createElement('a');
       a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
@@ -194,21 +220,19 @@ export default function Settings({ section, onSection, onTour, onFeatureGuide, o
               <div className="field"><label htmlFor="st-name">Full name</label><input id="st-name" className="inp" value={name} onChange={(e) => setName(e.target.value)} disabled={locked} autoComplete="name" maxLength={80} /></div>
               <div className="field"><label htmlFor="st-email">Email</label><input id="st-email" className="inp" type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={locked} autoComplete="email" />
                 <p className="st-help">You sign in with this email.</p></div>
+              {emailChanged && !locked && (
+                <div className="field full"><label htmlFor="st-profile-pw">Current password</label><input id="st-profile-pw" className="inp" type="password" value={profilePw} onChange={(e) => setProfilePw(e.target.value)} autoComplete="current-password" />
+                  <p className="st-help">Needed to change the email you sign in with.</p></div>
+              )}
             </div>
           </Card>
         </form>
       );
       case 'workspace': return (<>
-        <form onSubmit={saveWorkspace}>
+        <form onSubmit={saveWorkspace} noValidate>
           <Card title="Workspace" sub="Your business details. They shape your getting-started checklist." foot={
             <button className="btn primary sm" disabled={!workspaceDirty}>Save workspace</button>}>
-            <div className="st-fields">
-              <div className="field full"><label htmlFor="st-company">Company or workspace name</label><input id="st-company" className="inp" value={company} onChange={(e) => setCompany(e.target.value)} maxLength={120} placeholder="e.g. Northwind Studio" /></div>
-            </div>
-            <p className="st-label">Your role</p>
-            <div className="ob-chips">{ROLES.map((r) => <button key={r} type="button" className={cx('chip', role === r && 'on')} aria-pressed={role === r} onClick={() => setRole(r)}>{r}</button>)}</div>
-            <p className="st-label">Team size</p>
-            <div className="ob-chips">{TEAM_SIZES.map((s) => <button key={s} type="button" className={cx('chip', teamSize === s && 'on')} aria-pressed={teamSize === s} onClick={() => setTeamSize(s)}>{s}</button>)}</div>
+            <BusinessFields idp="st" value={biz} onChange={(p) => setBiz((b) => ({ ...b, ...p }))} errors={bizErrors} />
             <p className="st-label">Goals</p>
             <div className="ob-chips">{GOALS.map((g) => {
               const on = goals.includes(g.id);
@@ -223,7 +247,7 @@ export default function Settings({ section, onSection, onTour, onFeatureGuide, o
       case 'preferences': return (<>
         <Card title="Appearance" sub="Saved on this device.">
           <div className="st-row"><div className="st-row-t"><b>Theme</b><span>Light or dark.</span></div>
-            <div className="seg" role="radiogroup" aria-label="Theme">{(['light', 'dark'] as const).map((m) => <button key={m} type="button" role="radio" aria-checked={theme === m} className={theme === m ? 'on' : ''} onClick={() => dispatch(setTheme(m))}>{m === 'light' ? 'Light' : 'Dark'}</button>)}</div></div>
+            <div className="seg" role="radiogroup" aria-label="Theme">{(['light', 'dark', 'system'] as const).map((m) => <button key={m} type="button" role="radio" aria-checked={theme === m} className={theme === m ? 'on' : ''} onClick={() => dispatch(setTheme(m))}>{m === 'light' ? 'Light' : m === 'dark' ? 'Dark' : 'System'}</button>)}</div></div>
           <div className="st-row"><div className="st-row-t"><b>Language</b><span>Navigation and app text.</span></div>
             <div className="seg" role="radiogroup" aria-label="Language">{LANGS.map((l) => <button key={l.id} type="button" role="radio" aria-checked={language === l.id} className={language === l.id ? 'on' : ''} onClick={() => dispatch(setLanguage(l.id))}>{l.label}</button>)}</div></div>
         </Card>
@@ -264,6 +288,8 @@ export default function Settings({ section, onSection, onTour, onFeatureGuide, o
           <div className="st-row"><div className="st-row-t"><b>This browser</b><span>{kindLabel}{session?.startedAt ? ` · since ${fmtDate(session.startedAt)}` : ''}</span></div><span className="tag soft">Current</span></div>
           <div className="st-row"><div className="st-row-t"><b>Sign out</b><span>End this session. Your data stays in your account.</span></div>
             <button type="button" className="btn ghost sm" onClick={() => dispatch(logout())}>Sign out</button></div>
+          <div className="st-row"><div className="st-row-t"><b>Sign out of all devices</b><span>End every other session, for example on a lost or shared device. You stay signed in here.</span></div>
+            <button type="button" className="btn ghost sm" onClick={signOutEverywhere} disabled={locked || revoking}>{revoking ? 'Signing out…' : 'Sign out everywhere'}</button></div>
         </Card>
       </>);
       case 'data': return (<>

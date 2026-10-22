@@ -134,21 +134,37 @@ async function fill(tx: Prisma.TransactionClient, userId: string) {
 
 }
 
+export interface DemoReset { reset: boolean; resetAt: Date }
+
 /**
  * Puts the shared demo workspace back to its known state, in one transaction so a
- * visitor never sees it half-built. Used by `npm run seed` and by the periodic reset on demo sign-in.
+ * visitor never sees it half-built. Used by `npm run seed` (always) and by demo sign-in
+ * (only when the last reset is older than `maxAgeMs`).
+ *
+ * The last reset time is stored on the demo user's row, so every API instance agrees on it.
+ * The advisory lock makes a second instance wait for the first one's reset and then see it
+ * as fresh, instead of resetting again. Waiting (rather than a try-lock) matters: the caller
+ * signs a token right after this returns, and that token must carry the post-reset version.
  */
-export async function resetDemoWorkspace(prisma: PrismaClient): Promise<string> {
-  const password = await bcrypt.hash(DEMO_PASSWORD, 10);
+export async function resetDemoWorkspace(prisma: PrismaClient, maxAgeMs?: number): Promise<DemoReset> {
   return prisma.$transaction(async (tx) => {
+    // any fixed key works, as long as every instance uses the same one; released at commit
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(4242001)`;
+    const cur = await tx.user.findUnique({ where: { email: DEMO_EMAIL }, select: { onboarding: true } });
+    const last = new Date(Date.parse((cur?.onboarding as { resetAt?: string } | null)?.resetAt ?? '') || 0);
+    if (maxAgeMs != null && cur && Date.now() - last.getTime() < maxAgeMs) return { reset: false, resetAt: last };
+
+    const resetAt = new Date();
+    const password = await bcrypt.hash(DEMO_PASSWORD, 10);
     const user = await tx.user.upsert({
       where: { email: DEMO_EMAIL },
-      // onboarding progress for demo visits lives in the browser, so the account keeps a clean slate
-      update: { name: DEMO_NAME, password, onboarding: {}, preferences: {} },
-      create: { email: DEMO_EMAIL, password, name: DEMO_NAME },
+      // Onboarding progress for demo visits lives in the browser, so the account's `onboarding` only
+      // holds the reset time. The version bump signs out sessions that were looking at the old data.
+      update: { name: DEMO_NAME, password, onboarding: { resetAt: resetAt.toISOString() }, preferences: {}, tokenVersion: { increment: 1 } },
+      create: { email: DEMO_EMAIL, password, name: DEMO_NAME, onboarding: { resetAt: resetAt.toISOString() } },
     });
     await wipe(tx, user.id);
     await fill(tx, user.id);
-    return user.id;
+    return { reset: true, resetAt };
   }, { timeout: 20_000 });
 }

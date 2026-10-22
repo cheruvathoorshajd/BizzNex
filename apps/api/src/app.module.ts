@@ -19,6 +19,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { AssistantModule } from './assistant/assistant.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { AccountModule } from './account/account.module';
+import { LookupModule } from './lookup/lookup.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { AccountModule } from './account/account.module';
     AssistantModule,
     OnboardingModule,
     AccountModule,
+    LookupModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

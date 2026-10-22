@@ -26,9 +26,16 @@ export interface UserPreferences {
   startPage?: (typeof START_PAGES)[number];
   notifications?: { dealWon?: boolean; weeklySummary?: boolean; productNews?: boolean };
 }
+/** One email rule for sign-up, sign-in and profile changes. */
+export const emailSchema = z.string().trim().max(254).email('Enter a valid email address');
+/** bcrypt only reads the first 72 bytes, so anything longer is refused instead of silently truncated. */
+const within72Bytes = (pw: string) => new TextEncoder().encode(pw).length <= 72;
+const PW_TOO_LONG = 'Use a shorter password (72 bytes at most)';
 export const updateProfileSchema = z.object({
   name: z.string().trim().min(1, 'Enter your name').max(80).optional(),
-  email: z.string().trim().email('Enter a valid email address').optional(),
+  email: emailSchema.optional(),
+  /** Required by the server when the email changes. */
+  currentPassword: z.string().min(1).optional(),
 });
 export const updatePreferencesSchema = z.object({
   startPage: z.enum(START_PAGES).optional(),
@@ -36,7 +43,7 @@ export const updatePreferencesSchema = z.object({
 });
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Enter your current password'),
-  newPassword: z.string().min(8, 'Use at least 8 characters').max(72, 'Use 72 characters or fewer'),
+  newPassword: z.string().min(8, 'Use at least 8 characters').refine(within72Bytes, PW_TOO_LONG),
 });
 export const deleteAccountSchema = z.object({ password: z.string().min(1, 'Enter your password') });
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
@@ -47,6 +54,35 @@ export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;
 /* ── Onboarding ── */
 export const ONBOARDING_ROLES = ['Founder', 'Sales', 'Marketing', 'Operations', 'Freelancer', 'Other'] as const;
 export const TEAM_SIZES = ['Just me', '2–10', '11–50', '51–200', '200+'] as const;
+export type TeamSize = (typeof TEAM_SIZES)[number];
+export const INDUSTRIES = [
+  'Retail & e-commerce', 'Professional services', 'Marketing & creative', 'Food & hospitality',
+  'Events & entertainment', 'Construction & trades', 'Health & wellness', 'Real estate',
+  'Technology & software', 'Education & training', 'Finance & insurance', 'Manufacturing',
+  'Non-profit', 'Other',
+] as const;
+export type Industry = (typeof INDUSTRIES)[number];
+
+/** A company found by the business lookup (public data from Wikidata; no API key). */
+export interface CompanyMatch {
+  id: string;
+  name: string;
+  description: string;
+  website: string | null;
+  domain: string | null;
+  /** The source's own industry wording, e.g. "e-commerce". */
+  industryLabel: string | null;
+  /** That wording mapped onto BizzNex's industry list, when it maps cleanly. */
+  industry: Industry | null;
+  employees: number | null;
+  teamSize: TeamSize | null;
+  /** Country name in English, e.g. "Canada". */
+  country: string | null;
+  /** ISO 3166-1 alpha-2 of that country, e.g. "CA", when Wikidata has it. */
+  countryCode: string | null;
+  /** The company's logo on Wikimedia Commons, when Wikidata lists one. */
+  logoUrl: string | null;
+}
 export const ONBOARDING_GOALS = ['projects', 'pipeline', 'relationships', 'marketing', 'events', 'organise'] as const;
 export type OnboardingGoal = (typeof ONBOARDING_GOALS)[number];
 
@@ -59,7 +95,10 @@ export interface SampleIds {
 export interface OnboardingState {
   /** 'pending' right after sign-up → the setup wizard shows; 'done' once finished or skipped. */
   wizard?: 'pending' | 'done';
-  profile?: { company?: string; role?: string; teamSize?: string; goals?: OnboardingGoal[] };
+  profile?: {
+    company?: string; website?: string; industry?: string; country?: string; logoUrl?: string;
+    role?: string; teamSize?: string; goals?: OnboardingGoal[];
+  };
   tourDone?: boolean;
   checklistDismissed?: boolean;
   /** Views whose first-visit feature intro has been dismissed. */
@@ -73,6 +112,12 @@ export const updateOnboardingSchema = z.object({
   wizard: z.enum(['pending', 'done']).optional(),
   profile: z.object({
     company: z.string().max(120).optional(),
+    website: z.string().trim().max(200).optional(),
+    industry: z.enum(INDUSTRIES).or(z.literal('')).optional(),
+    /** ISO 3166-1 alpha-2, e.g. "CA" */
+    country: z.string().regex(/^([A-Z]{2})?$/).optional(),
+    // Commons file names run to 240 bytes, which percent-encoding can triple
+    logoUrl: z.string().url().max(2048).startsWith('https://').or(z.literal('')).optional(),
     role: z.string().max(40).optional(),
     teamSize: z.string().max(20).optional(),
     goals: z.array(z.enum(ONBOARDING_GOALS)).max(ONBOARDING_GOALS.length).optional(),
@@ -123,13 +168,14 @@ export interface AuthResponse {
 
 /* ── Auth schemas ── */
 export const registerSchema = z.object({
-  email: z.string().trim().max(254).email('Enter a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters').max(72, 'Use 72 characters or fewer'),
+  email: emailSchema,
+  password: z.string().min(8, 'Password must be at least 8 characters').refine(within72Bytes, PW_TOO_LONG),
   name: z.string().trim().min(1, 'Tell us your name').max(80),
 });
 export const loginSchema = z.object({
-  email: z.string().trim().max(254).email(),
-  password: z.string().min(1).max(200),
+  email: emailSchema,
+  // same byte cap as sign-up, so a longer password can't sign in on its first 72 bytes alone
+  password: z.string().min(1).refine(within72Bytes, PW_TOO_LONG),
 });
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
@@ -139,7 +185,7 @@ export const MAX_AMOUNT = 1_000_000_000;
 
 /* ── Project schemas ── */
 export const createProjectSchema = z.object({
-  name: z.string().max(200).min(1),
+  name: z.string().trim().max(200).min(1),
   owner: z.string().max(80).default('You'),
   spend: z.number().int().nonnegative().max(MAX_AMOUNT).default(0),
   trend: z.array(z.number().int().nonnegative().max(MAX_AMOUNT)).max(24).optional(),
@@ -150,14 +196,19 @@ export type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
 
 /* ── Task schemas ── */
 const isoOrNull = z.string().datetime().nullable().optional();
-export const createTaskSchema = z.object({
-  name: z.string().max(200).min(1),
+const taskFields = z.object({
+  name: z.string().trim().max(200).min(1),
   description: z.string().max(10000).default(''),
   startDate: isoOrNull,
   endDate: isoOrNull,
   status: statusSchema.default('Pending'),
 });
-export const updateTaskSchema = createTaskSchema.partial();
+/** True when the dates are in order (or either is missing). The server also checks merged values on update. */
+export const taskDatesInOrder = (t: { startDate?: string | null; endDate?: string | null }) =>
+  !t.startDate || !t.endDate || new Date(t.endDate).getTime() >= new Date(t.startDate).getTime();
+export const TASK_DATES_MESSAGE = 'End date must be on or after the start date.';
+export const createTaskSchema = taskFields.refine(taskDatesInOrder, { message: TASK_DATES_MESSAGE, path: ['endDate'] });
+export const updateTaskSchema = taskFields.partial();
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 
@@ -181,7 +232,7 @@ export interface Company {
   createdAt: string;
 }
 export const createCompanySchema = z.object({
-  name: z.string().max(200).min(1),
+  name: z.string().trim().max(200).min(1),
   industry: z.string().max(80).default(''),
   website: z.string().max(300).default(''),
 });
@@ -197,8 +248,8 @@ export interface Contact {
   createdAt: string;
 }
 export const createContactSchema = z.object({
-  name: z.string().max(200).min(1),
-  email: z.string().email().or(z.literal('')).default(''),
+  name: z.string().trim().max(200).min(1),
+  email: z.string().trim().max(254).email().or(z.literal('')).default(''),
   phone: z.string().max(40).default(''),
   title: z.string().max(200).default(''),
   companyId: z.string().max(64).nullable().optional(),
@@ -218,7 +269,7 @@ export interface Deal {
   closeDate: string | null; createdAt: string;
 }
 export const createDealSchema = z.object({
-  title: z.string().max(200).min(1),
+  title: z.string().trim().max(200).min(1),
   value: z.number().int().nonnegative().max(MAX_AMOUNT).default(0),
   stage: dealStageSchema.default('Lead'),
   contactId: z.string().max(64).nullable().optional(),
@@ -242,7 +293,7 @@ export interface Activity {
 }
 export const createActivitySchema = z.object({
   type: activityTypeSchema.default('Note'),
-  subject: z.string().max(200).min(1),
+  subject: z.string().trim().max(200).min(1),
   notes: z.string().max(10000).default(''),
   dueDate: isoOrNull,
   done: z.boolean().default(false),
@@ -270,7 +321,6 @@ export const createCampaignSchema = z.object({
   title: z.string().max(200).min(1),
   subject: z.string().max(200).default(''),
   content: z.string().max(10000).default(''),
-  audience: z.string().max(120).default('All subscribers'),
   /** 'sent' sends now; 'scheduled' needs a future scheduledAt. Omitted = draft. */
   status: campaignStatusSchema.optional(),
   scheduledAt: isoOrNull,
@@ -279,11 +329,9 @@ export const updateCampaignSchema = z.object({
   title: z.string().max(200).min(1).optional(),
   subject: z.string().max(200).optional(),
   content: z.string().max(10000).optional(),
-  audience: z.string().max(120).optional(),
+  /** Same rules as create; recipients and sentAt are always set by the server. */
   status: campaignStatusSchema.optional(),
-  recipients: z.number().int().nonnegative().max(MAX_AMOUNT).optional(),
   scheduledAt: isoOrNull,
-  sentAt: isoOrNull,
 });
 export type CreateCampaignInput = z.infer<typeof createCampaignSchema>;
 export type UpdateCampaignInput = z.infer<typeof updateCampaignSchema>;
@@ -292,6 +340,14 @@ export type UpdateCampaignInput = z.infer<typeof updateCampaignSchema>;
 export const POST_STATUSES = ['draft', 'published'] as const;
 export type PostStatus = (typeof POST_STATUSES)[number];
 export const postStatusSchema = z.enum(POST_STATUSES);
+/** Longest post body BizzNex stores. */
+export const POST_BODY_MAX = 10000;
+/** X (Twitter) caps a post at 280 characters, so a post that goes there must fit. */
+export const POST_PLATFORM_LIMITS: Record<string, number> = { Twitter: 280 };
+/** The body limit for a set of platforms: the strictest one that applies. */
+export function postBodyLimit(platforms: readonly string[]): number {
+  return Math.min(POST_BODY_MAX, ...platforms.map((p) => POST_PLATFORM_LIMITS[p] ?? POST_BODY_MAX));
+}
 export interface Post {
   id: string; userId: string;
   title: string; body: string; platforms: string[];
@@ -300,17 +356,17 @@ export interface Post {
 }
 export const createPostSchema = z.object({
   title: z.string().max(200).min(1),
-  body: z.string().max(10000).default(''),
+  body: z.string().max(POST_BODY_MAX).default(''),
   platforms: z.array(z.string().max(40)).max(10).default([]),
   /** 'published' publishes now. Omitted = draft. */
   status: postStatusSchema.optional(),
 });
 export const updatePostSchema = z.object({
   title: z.string().max(200).min(1).optional(),
-  body: z.string().max(10000).optional(),
+  body: z.string().max(POST_BODY_MAX).optional(),
   platforms: z.array(z.string().max(40)).max(10).optional(),
+  /** 'published' publishes now; publishedAt is always set by the server. */
   status: postStatusSchema.optional(),
-  publishedAt: isoOrNull,
 });
 export type CreatePostInput = z.infer<typeof createPostSchema>;
 export type UpdatePostInput = z.infer<typeof updatePostSchema>;
@@ -337,20 +393,14 @@ export interface NotificationItem {
   kind: string; message: string; read: boolean;
   createdAt: string;
 }
-export const createNotificationSchema = z.object({
-  kind: z.string().max(40).default('system'),
-  message: z.string().max(500).min(1),
-});
 export const updateNotificationSchema = z.object({
   read: z.boolean().optional(),
 });
-export type CreateNotificationInput = z.infer<typeof createNotificationSchema>;
 export type UpdateNotificationInput = z.infer<typeof updateNotificationSchema>;
 
 /* ── Assistant (AI) ── */
 export interface AssistantReply {
   reply: string;
-  configured: boolean;
 }
 export const assistantAskSchema = z.object({
   prompt: z.string().max(2000).min(1),
