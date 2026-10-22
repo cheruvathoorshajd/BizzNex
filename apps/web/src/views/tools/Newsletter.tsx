@@ -4,6 +4,7 @@ import {
   useGetCampaignsQuery,
   useCreateCampaignMutation,
   useDeleteCampaignMutation,
+  useGetContactsQuery,
 } from '../../services/api';
 import { useToast } from '../../ui/Toast';
 import Icon from '../../ui/Icon';
@@ -12,8 +13,6 @@ import { errorText } from '../../services/errors';
 import { useConfirm } from '../../ui/Confirm';
 import LoadError from '../../ui/LoadError';
 import { rows } from '../../ui/motion';
-
-const AUDIENCES = ['All subscribers', 'Monthly plan', 'Quarterly plan', 'Yearly plan'];
 
 export default function Newsletter() {
   const toast = useToast();
@@ -24,12 +23,13 @@ export default function Newsletter() {
   const [sending, setSending] = useState(false);
   const [sendAt, setSendAt] = useState('');
   const [deleteCampaign] = useDeleteCampaignMutation();
+  const { data: contacts } = useGetContactsQuery();
+  const reachable = contacts?.filter((c) => c.email).length;
 
   const [tab, setTab] = useState<'compose' | 'analytics'>('compose');
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
-  const [audience, setAudience] = useState(AUDIENCES[0]);
 
   const send = async (mode: 'sent' | 'scheduled') => {
     if (!title.trim() || !subject.trim() || !content.trim()) {
@@ -41,7 +41,7 @@ export default function Newsletter() {
     setSending(true);
     try {
       const c = await createCampaign({
-        title: title.trim(), subject: subject.trim(), content: content.trim(), audience,
+        title: title.trim(), subject: subject.trim(), content: content.trim(),
         status: mode, scheduledAt,
       }).unwrap();
       toast(mode === 'sent' ? `Campaign sent to ${c.recipients} contact${c.recipients === 1 ? '' : 's'}` : 'Campaign scheduled for ' + fmtDateTime(c.scheduledAt ?? ''));
@@ -82,12 +82,10 @@ export default function Newsletter() {
 
       {tab === 'compose' ? (
         <div style={{ maxWidth: 620 }}>
-          <div className="field"><label>Campaign title</label><input className="inp" value={title} onChange={(e) => setTitle(e.target.value)} /></div>
-          <div className="field"><label>Subject line</label><input className="inp" value={subject} onChange={(e) => setSubject(e.target.value)} /></div>
-          <div className="field"><label>Email content</label><textarea className="inp" rows={6} value={content} onChange={(e) => setContent(e.target.value)} /></div>
-          <div className="field"><label>Target audience</label>
-            <select className="inp" value={audience} onChange={(e) => setAudience(e.target.value)}>{AUDIENCES.map((a) => <option key={a}>{a}</option>)}</select>
-          </div>
+          <div className="field"><label htmlFor="nl-title">Campaign title</label><input id="nl-title" className="inp" value={title} onChange={(e) => setTitle(e.target.value)} /></div>
+          <div className="field"><label htmlFor="nl-subject">Subject line</label><input id="nl-subject" className="inp" value={subject} onChange={(e) => setSubject(e.target.value)} /></div>
+          <div className="field"><label htmlFor="nl-content">Email content</label><textarea id="nl-content" className="inp" rows={6} value={content} onChange={(e) => setContent(e.target.value)} /></div>
+          <p className="cap" style={{ margin: '4px 0 0' }}>Sends to all contacts with an email{reachable !== undefined ? ` (${reachable})` : ''}.</p>
           <div style={{ display: 'flex', gap: 10, marginTop: 8, alignItems: 'center', flexWrap: 'wrap' }}>
             <button className="btn primary" onClick={() => send('sent')} disabled={sending}>Send now</button>
             <input className="inp nl-when" type="datetime-local" aria-label="Schedule for" value={sendAt} min={nowLocal()} onChange={(e) => setSendAt(e.target.value)} />
@@ -109,12 +107,11 @@ export default function Newsletter() {
           )}
           {!isLoading && campaigns.length > 0 && (
             <div className="scroll-x"><table className="ledger">
-              <thead><tr><th>Title</th><th>Audience</th><th>Status</th><th className="r">Recipients</th><th>Date</th><th></th></tr></thead>
+              <thead><tr><th>Title</th><th>Status</th><th className="r">Recipients</th><th>Date</th><th></th></tr></thead>
               <tbody ref={rows}>
                 {campaigns.map((c) => (
                   <tr key={c.id}>
                     <td><div className="pname">{c.title}</div><div className="pmeta">{c.subject}</div></td>
-                    <td>{c.audience}</td>
                     <td><span className={`stat-dot ${c.status === 'sent' ? 'done' : 'pending'}`}>{c.status}</span></td>
                     <td className="num r">{c.status === 'sent' ? c.recipients : '—'}</td>
                     <td className="num">{c.scheduledAt && c.status === 'scheduled' ? fmtDateTime(c.scheduledAt) : fmtDate(c.sentAt || c.createdAt)}</td>

@@ -1,10 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../common/current-user.decorator';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
-import { createNotificationSchema, updateNotificationSchema } from '@bizznex/shared';
-import type { CreateNotificationInput, UpdateNotificationInput } from '@bizznex/shared';
+import { updateNotificationSchema } from '@bizznex/shared';
+import type { UpdateNotificationInput } from '@bizznex/shared';
 import { NotificationsService } from './notifications.service';
 
 @ApiTags('notifications')
@@ -19,10 +19,8 @@ export class NotificationsController {
     return this.notifications.list(userId);
   }
 
-  @Post()
-  create(@CurrentUser() userId: string, @Body(new ZodValidationPipe(createNotificationSchema)) body: CreateNotificationInput) {
-    return this.notifications.create(userId, body);
-  }
+  /* No POST: notifications are created on the server, by the service that made the change
+     (NotificationsService.notify), so clients can't forge them. */
 
   @Patch(':id')
   update(

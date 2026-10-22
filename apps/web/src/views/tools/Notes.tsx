@@ -17,7 +17,7 @@ export default function Notes() {
   const { data: notes = [], isLoading: fetching, isError, error, refetch } = useGetNotesQuery();
   const isLoading = fetching || isError; // an error is not an empty list
   const [createNote, { isLoading: creating }] = useCreateNoteMutation();
-  const [updateNote] = useUpdateNoteMutation();
+  const [updateNote, { isLoading: saving }] = useUpdateNoteMutation();
   const [deleteNote] = useDeleteNoteMutation();
   const [editing, setEditing] = useState<Note | null>(null);
 
@@ -57,25 +57,25 @@ export default function Notes() {
       </div>
 
       <div className="row-head" style={{ marginTop: 6 }}>
-        <input className="inp" placeholder="Search notes…" style={{ maxWidth: 280 }} value={search} onChange={(e) => setSearch(e.target.value)} />
+        <input className="inp" placeholder="Search notes…" aria-label="Search notes" style={{ maxWidth: 280 }} value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
       <div className="tool-cols">
         <div className="panel">
           <div className="sublab" style={{ marginTop: 0 }}>§ New note</div>
-          <div className="field"><label>Title</label><input className="inp" value={title} onChange={(e) => setTitle(e.target.value)} /></div>
+          <div className="field"><label htmlFor="nt-title">Title</label><input id="nt-title" className="inp" value={title} onChange={(e) => setTitle(e.target.value)} /></div>
           <div style={{ display: 'flex', gap: 10 }}>
-            <div className="field" style={{ flex: 1 }}><label>Location</label><input className="inp" value={location} onChange={(e) => setLocation(e.target.value)} /></div>
-            <div className="field" style={{ flex: 1 }}><label>Date</label><input className="inp" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+            <div className="field" style={{ flex: 1 }}><label htmlFor="nt-location">Location</label><input id="nt-location" className="inp" value={location} onChange={(e) => setLocation(e.target.value)} /></div>
+            <div className="field" style={{ flex: 1 }}><label htmlFor="nt-date">Date</label><input id="nt-date" className="inp" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
           </div>
-          <div className="field"><label>Description</label><textarea className="inp" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} /></div>
+          <div className="field"><label htmlFor="nt-desc">Description</label><textarea id="nt-desc" className="inp" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} /></div>
           <button className="btn primary" onClick={add} disabled={!title.trim() || creating}>Add note</button>
         </div>
 
         <div ref={rows}>
           <div className="sublab" style={{ marginTop: 0 }}>§ All notes</div>
           {isError ? <LoadError what="notes" error={error} onRetry={refetch} /> : isLoading && <p className="loading">Loading…</p>}
-          {!isLoading && shown.length === 0 && <div className="cap" style={{ padding: '16px 0' }}>No matching notes.</div>}
+          {!isLoading && shown.length === 0 && <div className="cap" style={{ padding: '16px 0' }}>{notes.length === 0 ? 'No notes yet.' : 'No matching notes.'}</div>}
           {shown.map((n) => (
             <div className="titem" key={n.id}>
               <span className="nm">{n.title}<div className="desc">{n.description}</div></span>
@@ -90,15 +90,16 @@ export default function Notes() {
       </div>
 
       {editing && (
-        <NoteModal editing={editing} onClose={() => setEditing(null)} onSave={save} />
+        <NoteModal editing={editing} onClose={() => setEditing(null)} onSave={save} saving={saving} />
       )}
     </div>
   );
 }
 
 /* ── Note modal ── */
-function NoteModal({ editing, onClose, onSave }: {
+function NoteModal({ editing, onClose, onSave, saving }: {
   editing: Note;
+  saving: boolean;
   onClose: () => void;
   onSave: (v: { title: string; location: string; date: string | null; description: string }) => void;
 }) {
@@ -116,19 +117,19 @@ function NoteModal({ editing, onClose, onSave }: {
         <button className="btn ghost" onClick={onClose}>Cancel</button>
         <button
           className="btn primary"
-          disabled={!valid}
+          disabled={!valid || saving}
           onClick={() => onSave({
             title: title.trim(), location: location.trim(), date: fromDateInput(date), description: description.trim(),
           })}
-        >Save</button>
+        >{saving ? 'Saving…' : 'Save'}</button>
       </>}
     >
       <div className="modal-body">
         <div className="fields">
-          <div className="field full"><label>Title</label><input className="inp" value={title} onChange={(e) => setTitle(e.target.value)} autoFocus /></div>
-          <div className="field wide"><label>Location</label><input className="inp" value={location} onChange={(e) => setLocation(e.target.value)} /></div>
-          <div className="field"><label>Date</label><input className="inp" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
-          <div className="field full"><label>Description</label><textarea className="inp" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} /></div>
+          <div className="field full"><label htmlFor="ntm-title">Title</label><input id="ntm-title" className="inp" value={title} onChange={(e) => setTitle(e.target.value)} autoFocus /></div>
+          <div className="field wide"><label htmlFor="ntm-location">Location</label><input id="ntm-location" className="inp" value={location} onChange={(e) => setLocation(e.target.value)} /></div>
+          <div className="field"><label htmlFor="ntm-date">Date</label><input id="ntm-date" className="inp" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+          <div className="field full"><label htmlFor="ntm-desc">Description</label><textarea id="ntm-desc" className="inp" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} /></div>
         </div>
       </div>
     </Modal>

@@ -25,7 +25,7 @@ export default function Events({ query = '' }: { query?: string }) {
   const { data: events = [], isLoading: fetching, isError, error, refetch } = useGetEventsQuery();
   const isLoading = fetching || isError; // an error is not an empty list
   const [createEvent, { isLoading: creating }] = useCreateEventMutation();
-  const [updateEvent] = useUpdateEventMutation();
+  const [updateEvent, { isLoading: saving }] = useUpdateEventMutation();
   const [deleteEvent] = useDeleteEventMutation();
   const [editing, setEditing] = useState<EventItem | null>(null);
 
@@ -77,14 +77,37 @@ export default function Events({ query = '' }: { query?: string }) {
   };
 
   const q = query.trim().toLowerCase();
+  const time = (e: EventItem) => (e.startsAt ? new Date(e.startsAt).getTime() : Infinity);
   const shown = [...events]
     .filter((e) => (filter === 'All categories' || e.category === filter))
     .filter((e) => (q ? (e.name + ' ' + e.category + ' ' + e.location).toLowerCase().includes(q) : true))
-    .sort((a, b) => {
-      const at = a.startsAt ? new Date(a.startsAt).getTime() : Infinity;
-      const bt = b.startsAt ? new Date(b.startsAt).getTime() : Infinity;
-      return at - bt;
-    });
+    .sort((a, b) => time(a) - time(b));
+  // Today's events count as upcoming; undated ones stay there too, last.
+  const startOfToday = new Date().setHours(0, 0, 0, 0);
+  const upcoming = shown.filter((e) => time(e) >= startOfToday);
+  const past = shown.filter((e) => time(e) < startOfToday).reverse();
+
+  const table = (list: EventItem[]) => (
+    <div className="scroll-x" style={{ marginTop: 12 }}><table className="ledger">
+      <thead><tr><th>Event</th><th>Category</th><th>When</th><th>Location</th><th></th></tr></thead>
+      <tbody ref={rows}>
+        {list.map((e) => (
+          <tr key={e.id}>
+            <td><div className="pname">{e.name}</div></td>
+            <td><span className="tag">{e.category}</span></td>
+            <td className="num">{e.startsAt ? fmtDay(e.startsAt) : '—'}</td>
+            <td>{e.location || '—'}</td>
+            <td>
+              <span className="row-act">
+                <button className="btn quiet sm" onClick={() => setEditing(e)} aria-label={`Edit ${e.name}`}><Icon name="edit" size={14} /></button>
+                <button className="btn quiet sm" onClick={() => del(e.id, e.name)} aria-label={`Delete ${e.name}`}><Icon name="trash" size={14} /></button>
+              </span>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table></div>
+  );
 
   return (
     <div>
@@ -97,13 +120,13 @@ export default function Events({ query = '' }: { query?: string }) {
       <div className="tool-cols">
         <div className="panel">
           <div className="sublab" style={{ marginTop: 0 }}>§ New event</div>
-          <div className="field"><label>Name</label><input className="inp" value={name} onChange={(e) => setName(e.target.value)} /></div>
-          <div className="field"><label>Category</label>
-            <select className="inp" value={category} onChange={(e) => setCategory(e.target.value)}>{CATEGORIES.map((c) => <option key={c}>{c}</option>)}</select>
+          <div className="field"><label htmlFor="ev-name">Name</label><input id="ev-name" className="inp" value={name} onChange={(e) => setName(e.target.value)} /></div>
+          <div className="field"><label htmlFor="ev-category">Category</label>
+            <select id="ev-category" className="inp" value={category} onChange={(e) => setCategory(e.target.value)}>{CATEGORIES.map((c) => <option key={c}>{c}</option>)}</select>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
-            <div className="field" style={{ flex: 1 }}><label>Location</label><input className="inp" value={location} onChange={(e) => setLocation(e.target.value)} /></div>
-            <div className="field" style={{ flex: 1 }}><label>Date</label><input className="inp" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+            <div className="field" style={{ flex: 1 }}><label htmlFor="ev-location">Location</label><input id="ev-location" className="inp" value={location} onChange={(e) => setLocation(e.target.value)} /></div>
+            <div className="field" style={{ flex: 1 }}><label htmlFor="ev-date">Date</label><input id="ev-date" className="inp" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
           </div>
           <button className="btn primary" onClick={add} disabled={!name.trim() || creating}>Add event</button>
         </div>
@@ -111,45 +134,33 @@ export default function Events({ query = '' }: { query?: string }) {
         <div>
           <div className="row-head" style={{ marginTop: 0 }}>
             <div className="sublab" style={{ margin: 0 }}>§ Upcoming</div>
-            <select className="inp" style={{ maxWidth: 220 }} value={filter} onChange={(e) => setFilter(e.target.value)}>{FILTERS.map((f) => <option key={f}>{f}</option>)}</select>
+            <select className="inp" style={{ maxWidth: 220 }} aria-label="Filter by category" value={filter} onChange={(e) => setFilter(e.target.value)}>{FILTERS.map((f) => <option key={f}>{f}</option>)}</select>
           </div>
           {isError ? <LoadError what="events" error={error} onRetry={refetch} /> : isLoading && <p className="loading">Loading…</p>}
           {!isLoading && events.length === 0 && <div className="cap" style={{ padding: '14px 0' }}>No events yet.</div>}
           {!isLoading && events.length > 0 && shown.length === 0 && <div className="cap" style={{ padding: '14px 0' }}>No events match your filters.</div>}
-          {shown.length > 0 && (
-            <div className="scroll-x" style={{ marginTop: 12 }}><table className="ledger">
-              <thead><tr><th>Event</th><th>Category</th><th>When</th><th>Location</th><th></th></tr></thead>
-              <tbody ref={rows}>
-                {shown.map((e) => (
-                  <tr key={e.id}>
-                    <td><div className="pname">{e.name}</div></td>
-                    <td><span className="tag">{e.category}</span></td>
-                    <td className="num">{e.startsAt ? fmtDay(e.startsAt) : '—'}</td>
-                    <td>{e.location || '—'}</td>
-                    <td>
-                      <span className="row-act">
-                        <button className="btn quiet sm" onClick={() => setEditing(e)} aria-label="Edit"><Icon name="edit" size={14} /></button>
-                        <button className="btn quiet sm" onClick={() => del(e.id, e.name)} aria-label="Delete"><Icon name="trash" size={14} /></button>
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table></div>
+          {!isLoading && shown.length > 0 && upcoming.length === 0 && <div className="cap" style={{ padding: '14px 0' }}>Nothing upcoming.</div>}
+          {!isLoading && upcoming.length > 0 && table(upcoming)}
+          {!isLoading && past.length > 0 && (
+            <>
+              <div className="sublab">§ Past</div>
+              {table(past)}
+            </>
           )}
         </div>
       </div>
 
       {editing && (
-        <EventModal editing={editing} onClose={() => setEditing(null)} onSave={save} />
+        <EventModal editing={editing} onClose={() => setEditing(null)} onSave={save} saving={saving} />
       )}
     </div>
   );
 }
 
 /* ── Event modal ── */
-function EventModal({ editing, onClose, onSave }: {
+function EventModal({ editing, onClose, onSave, saving }: {
   editing: EventItem;
+  saving: boolean;
   onClose: () => void;
   onSave: (v: { name: string; category: string; location: string; startsAt: string | null }) => void;
 }) {
@@ -167,24 +178,24 @@ function EventModal({ editing, onClose, onSave }: {
         <button className="btn ghost" onClick={onClose}>Cancel</button>
         <button
           className="btn primary"
-          disabled={!valid}
+          disabled={!valid || saving}
           onClick={() => onSave({
             name: name.trim(), category, location: location.trim(), startsAt: fromDateInput(date),
           })}
-        >Save</button>
+        >{saving ? 'Saving…' : 'Save'}</button>
       </>}
     >
       <div className="modal-body">
         <div className="fields">
-          <div className="field full"><label>Name</label><input className="inp" value={name} onChange={(e) => setName(e.target.value)} autoFocus /></div>
+          <div className="field full"><label htmlFor="evm-name">Name</label><input id="evm-name" className="inp" value={name} onChange={(e) => setName(e.target.value)} autoFocus /></div>
           <div className="field full">
-            <label>Category</label>
-            <select className="inp" value={category} onChange={(e) => setCategory(e.target.value)}>
+            <label htmlFor="evm-category">Category</label>
+            <select id="evm-category" className="inp" value={category} onChange={(e) => setCategory(e.target.value)}>
               {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
             </select>
           </div>
-          <div className="field wide"><label>Location</label><input className="inp" value={location} onChange={(e) => setLocation(e.target.value)} /></div>
-          <div className="field"><label>Date</label><input className="inp" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+          <div className="field wide"><label htmlFor="evm-location">Location</label><input id="evm-location" className="inp" value={location} onChange={(e) => setLocation(e.target.value)} /></div>
+          <div className="field"><label htmlFor="evm-date">Date</label><input id="evm-date" className="inp" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
         </div>
       </div>
     </Modal>
