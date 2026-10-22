@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import type { OnboardingState, UpdateOnboardingInput } from '@bizznex/shared';
+import type { Industry, OnboardingState, UpdateOnboardingInput } from '@bizznex/shared';
 import { useAppDispatch, useAppSelector } from '../store';
 import { updateDemoOnboarding } from '../store/authSlice';
 import {
@@ -7,7 +7,7 @@ import {
   useGetProjectsQuery, useGetContactsQuery, useGetCompaniesQuery, useGetDealsQuery,
   useGetActivitiesQuery, useGetNotesQuery, useGetPostsQuery, useGetCampaignsQuery, useGetEventsQuery,
 } from '../services/api';
-import { CHECKLIST } from './content';
+import { CHECKLIST, INDUSTRY_GOALS } from './content';
 import type { ChecklistItem, ChecklistKey } from './content';
 
 /**
@@ -33,9 +33,12 @@ export function useOnboarding() {
   const user = me ?? fallback;
   const state: OnboardingState = demo ? demoState : user?.onboarding ?? {};
 
-  const update = useCallback((p: UpdateOnboardingInput) => {
-    if (demo) dispatch(updateDemoOnboarding(p));
-    else patch(p);
+  /** Rejects when the save fails, for callers that await it; fire-and-forget callers can ignore it safely. */
+  const update = useCallback((p: UpdateOnboardingInput): Promise<void> => {
+    if (demo) { dispatch(updateDemoOnboarding(p)); return Promise.resolve(); }
+    const saved = patch(p).unwrap().then(() => undefined);
+    saved.catch(() => undefined); // no unhandled rejection for callers that don't await
+    return saved;
   }, [demo, dispatch, patch]);
 
   const markSeen = useCallback((view: string) => {
@@ -94,12 +97,15 @@ export function useChecklist() {
       window: acts.includes('window'),
     };
 
-    // Recommended first: items matching the goals picked in setup.
+    // Recommended first: items matching the goals picked in setup, then what the industry usually needs.
     const goals = state.profile?.goals ?? [];
-    const rank = (i: ChecklistItem) => (i.key === 'tour' ? -1 : i.goals.some((g) => goals.includes(g)) ? 0 : 1);
+    const suggested = INDUSTRY_GOALS[state.profile?.industry as Industry] ?? [];
+    const rank = (i: ChecklistItem) => (i.key === 'tour' ? -1
+      : i.goals.some((g) => goals.includes(g)) ? 0
+        : i.goals.some((g) => suggested.includes(g)) ? 1 : 2);
     const items = [...CHECKLIST]
       .sort((a, b) => rank(a) - rank(b))
-      .map((i) => ({ ...i, done: done[i.key], recommended: rank(i) === 0 && goals.length > 0 }));
+      .map((i) => ({ ...i, done: done[i.key], recommended: rank(i) >= 0 && rank(i) <= 1 }));
 
     const count = items.filter((i) => i.done).length;
     return { items, count, total: items.length, complete: count === items.length };

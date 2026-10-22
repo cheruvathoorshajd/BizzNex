@@ -195,7 +195,8 @@ bizznex/
 │   │   ├── prisma/                  PrismaService
 │   │   ├── notes/                   ★ THE PATTERN — copy this for new resources
 │   │   ├── assistant/               Brenda — local, key-free
-│   │   ├── demo/                    the shared demo workspace and its 30-minute self-reset
+│   │   ├── lookup/                  company search for onboarding (Wikidata + Commons logos, free, no key)
+│   │   ├── demo/                    the shared demo workspace and its reset on sign-in
 │   │   └── …projects, tasks, CRM ×4, campaigns, posts, events, notifications, onboarding, account, users, health
 │   └── test/app.e2e-spec.ts
 └── apps/web/src/
@@ -542,8 +543,14 @@ npm run seed
 
 Demo data lives in `apps/api/src/demo/demo-workspace.ts` (`fill()`). `npm run seed` upserts
 the demo user, then wipes and refills its records in one transaction, so re-running is
-safe. The same code runs on the 30-minute demo self-reset. Sample data for new accounts
-is separate, in `apps/api/src/onboarding/onboarding.service.ts`.
+safe. The same code runs when a demo sign-in finds the last reset more than 30 minutes old:
+the reset time is kept in the demo user's `onboarding` JSON, a Postgres advisory lock lets
+only one API instance reset at a time, and the reset bumps the demo user's `tokenVersion`, so
+demo sessions open on the old data are signed out (the visitor signing in gets a token issued
+after the reset). Sample data for new accounts is separate, in
+`apps/api/src/onboarding/onboarding.service.ts`: every write to `User.onboarding` there locks the
+user's row (`SELECT … FOR UPDATE`), and removing the sample deletes its tasks by id and keeps
+any sample project that holds a task the user added.
 
 ---
 
@@ -660,7 +667,7 @@ built then served by nginx with SPA fallback).
 | `CORS_ORIGIN` | the web domain(s), comma-separated; **required in prod** |
 | `PORT` | injected by most PaaS |
 | `NODE_ENV` | `production` makes `JWT_SECRET` and `CORS_ORIGIN` mandatory (the API won't boot without them) |
-| `SWAGGER_ENABLED` | `false` hides `/docs` |
+| `ENABLE_DOCS` | Swagger at `/docs`: on in development, off in production unless `true` |
 | `DEMO_RESET_MINUTES` | how stale the shared demo gets before the next demo sign-in resets it (default 30) |
 
 **web**

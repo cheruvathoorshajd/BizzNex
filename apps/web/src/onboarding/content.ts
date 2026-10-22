@@ -1,6 +1,6 @@
 /** All onboarding copy lives here, so tone stays consistent and edits stay in one place. */
-import { ONBOARDING_ROLES, TEAM_SIZES as SHARED_TEAM_SIZES } from '@bizznex/shared';
-import type { OnboardingGoal } from '@bizznex/shared';
+import { INDUSTRIES as SHARED_INDUSTRIES, ONBOARDING_ROLES, TEAM_SIZES as SHARED_TEAM_SIZES } from '@bizznex/shared';
+import type { Industry, OnboardingGoal } from '@bizznex/shared';
 import type { ViewId } from '../types';
 
 /* ── Setup wizard ─────────────────────────────────────────────── */
@@ -17,6 +17,63 @@ export const GOALS: { id: OnboardingGoal; icon: string; title: string; body: str
 /** Shared with the API so the wizard and the stored profile never drift apart. */
 export const ROLES: readonly string[] = ONBOARDING_ROLES;
 export const TEAM_SIZES: readonly string[] = SHARED_TEAM_SIZES;
+export const INDUSTRIES = SHARED_INDUSTRIES;
+
+/** What a business in each industry usually needs first. The checklist suggests these after the goals picked in setup. */
+export const INDUSTRY_GOALS: Record<Industry, OnboardingGoal[]> = {
+  'Retail & e-commerce': ['marketing', 'relationships'],
+  'Professional services': ['relationships', 'pipeline'],
+  'Marketing & creative': ['projects', 'marketing'],
+  'Food & hospitality': ['marketing', 'events'],
+  'Events & entertainment': ['events', 'marketing'],
+  'Construction & trades': ['projects', 'pipeline'],
+  'Health & wellness': ['relationships', 'organise'],
+  'Real estate': ['pipeline', 'relationships'],
+  'Technology & software': ['projects', 'pipeline'],
+  'Education & training': ['events', 'organise'],
+  'Finance & insurance': ['relationships', 'pipeline'],
+  'Manufacturing': ['projects', 'pipeline'],
+  'Non-profit': ['events', 'marketing'],
+  'Other': [],
+};
+
+/* ── Countries (ISO 3166-1 alpha-2), named by the browser in English ── */
+const COUNTRY_CODES = ('AD AE AF AG AI AL AM AO AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BW BY BZ '
+  + 'CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR '
+  + 'GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GT GU GW GY HK HN HR HT HU ID IE IL IM IN IQ IR IS IT JE JM JO JP '
+  + 'KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ '
+  + 'NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW '
+  + 'SA SB SC SD SE SG SH SI SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TG TH TJ TK TL TM TN TO TR TT TV TW TZ '
+  + 'UA UG US UY UZ VA VC VE VG VI VN VU WF WS XK YE YT ZA ZM ZW').split(' ');
+
+const regionNames = (() => { try { return new Intl.DisplayNames(['en'], { type: 'region' }); } catch { return null; } })();
+export const countryName = (code?: string) => (code ? regionNames?.of(code) ?? code : '');
+
+/** Every country, sorted by name, for a select. */
+export const COUNTRIES: { code: string; name: string }[] = COUNTRY_CODES
+  .map((code) => ({ code, name: countryName(code) }))
+  .sort((a, b) => a.name.localeCompare(b.name));
+
+/** Official names Wikidata uses that differ from the browser's short ones. */
+const COUNTRY_ALIASES: Record<string, string> = {
+  "people's republic of china": 'CN', 'republic of china': 'TW', 'united states of america': 'US', usa: 'US',
+  'united kingdom of great britain and northern ireland': 'GB', uk: 'GB', 'great britain': 'GB',
+  'republic of korea': 'KR', 'korea, south': 'KR', "democratic people's republic of korea": 'KP',
+  'russian federation': 'RU', 'kingdom of the netherlands': 'NL', 'the netherlands': 'NL',
+  'czech republic': 'CZ', 'republic of ireland': 'IE', 'ivory coast': 'CI', 'state of palestine': 'PS',
+  'kingdom of denmark': 'DK', 'federated states of micronesia': 'FM', 'east timor': 'TL',
+  'democratic republic of the congo': 'CD', 'republic of the congo': 'CG', 'eswatini': 'SZ', 'swaziland': 'SZ',
+  'burma': 'MM', 'vatican city': 'VA', 'hong kong': 'HK', 'macau': 'MO', 'turkey': 'TR', 'türkiye': 'TR',
+  'cape verde': 'CV', 'the bahamas': 'BS', 'the gambia': 'GM', 'north macedonia': 'MK', 'syria': 'SY',
+  'iran': 'IR', 'laos': 'LA', 'vietnam': 'VN', 'brunei': 'BN', 'moldova': 'MD', 'bolivia': 'BO', 'venezuela': 'VE', 'tanzania': 'TZ',
+};
+
+/** "Canada" → "CA", for names that come back from the company lookup (when it has no ISO code itself). */
+export const countryCodeFor = (name: string | null) => {
+  if (!name) return '';
+  const n = name.trim().toLowerCase();
+  return COUNTRY_ALIASES[n] ?? COUNTRIES.find((c) => c.name.toLowerCase() === n)?.code ?? '';
+};
 
 /* ── Product tour ─────────────────────────────────────────────── */
 
@@ -217,7 +274,7 @@ export const INTROS: Record<ViewId, FeatureIntro> = {
     title: 'Write once, post everywhere',
     lede: 'Draft a post, choose your platforms and check the live preview before you publish.',
     tips: [
-      'Posts are limited to 280 characters, and the counter shows how many you\'ve used.',
+      'Posts going to Twitter must fit in 280 characters. The counter shows the limit for the platforms you pick.',
       'Posts are saved in BizzNex. Posting to the real social networks is a preview for now and needs connected accounts.',
     ],
   },
@@ -227,13 +284,13 @@ export const INTROS: Record<ViewId, FeatureIntro> = {
     lede: 'Won deals, tasks due soon and campaign updates show up here.',
     tips: [
       'Mark notifications as read one at a time, or all at once.',
-      'Winning a deal adds a notification automatically.',
+      'Winning a deal, sending a campaign or publishing a post adds a notification automatically.',
     ],
   },
   newsletter: {
     kicker: 'Tool · Newsletter',
     title: 'Email campaigns for your audience',
-    lede: 'Write a campaign, choose an audience, then schedule or send it. The Analytics tab tracks its performance.',
+    lede: 'Write a campaign, then send or schedule it to every contact with an email address. The Analytics tab lists what you have sent.',
     tips: [
       'Write a short, specific subject line. It affects how many people open the email.',
       'Campaigns are saved in BizzNex. Sending real email is a preview for now.',

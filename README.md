@@ -11,8 +11,8 @@ React + NestJS + PostgreSQL, with one shared Zod contract between them.
 ![The BizzNex dashboard](docs/screenshots/dashboard.webp)
 
 **Try it:** run it locally ([§ 8](#8--running-it)) and click **Explore the demo** on the
-landing page, or sign in as `demo@bizznex.app` / `password`. The demo workspace resets
-itself every 30 minutes. *(A hosted demo isn't deployed yet.)*
+landing page, or sign in as `demo@bizznex.app` / `password`. The demo workspace is rebuilt
+on the first demo sign-in once its last reset is 30 minutes old. *(A hosted demo isn't deployed yet.)*
 
 | | |
 |---|---|
@@ -26,7 +26,8 @@ itself every 30 minutes. *(A hosted demo isn't deployed yet.)*
 - **Tenant isolation that covers links:** you can't read, edit or *attach* another
   account's records, and e2e tests prove it ([§ 5](#5--architecture--engineering-decisions)).
 - **Sessions you can revoke:** a password change signs every other session out.
-- **A shared demo that can't be wrecked:** it resets itself on a timer, in one transaction.
+- **A shared demo that can't be wrecked:** a demo sign-in after 30 minutes rebuilds it in one
+  transaction, under a database lock, and signs out the sessions still open on the old data.
 - **Onboarding that respects returning users:** guided for new accounts and demo visitors,
   hands-off for sign-ins, with a `?` menu for everyone.
 - **Failure states designed in:** load errors with Retry, optimistic moves that roll back,
@@ -71,14 +72,16 @@ itself every 30 minutes. *(A hosted demo isn't deployed yet.)*
   on, with *Create account*, *Sign in* and *Explore the demo*. Deep links
   `/?start=signup` and `/?start=signin` skip straight to the right tab.
 - **Onboarding** (`apps/web/src/onboarding/`) — new accounts and demo visitors get a
-  setup wizard (business, role, team size, goals), a spotlight product tour, a
+  setup wizard (business details, goals, look, starting data), a spotlight product tour, a
   getting-started checklist driven by real actions, and a one-time intro card on each
   page. Returning sign-ins get none of that pushed at them, only the **?** help menu.
   Progress is stored on the account (`PATCH /onboarding`). See
   [`docs/onboarding-flow.md`](./docs/onboarding-flow.md).
 - **Shared demo workspace** — one click signs in to a seeded account. The demo's account
-  settings are locked server-side, and its data **resets itself** on the first demo
-  sign-in after 30 minutes, so one visitor can't wreck it for the next.
+  settings and server-side onboarding are locked, and its data **resets itself** on the first
+  demo sign-in once the last reset is 30 minutes old, so one visitor can't wreck it for the
+  next. The reset time is stored in the database and a Postgres advisory lock lets only one
+  API instance reset at a time; a reset signs out demo sessions that were open on the old data.
 - **Sample data** — any new account can load (and later remove) a realistic sample set
   in one transaction.
 
@@ -292,7 +295,7 @@ entire point.
 
 ### API module pattern
 Every resource module mirrors the same shape: `JwtAuthGuard` + `@CurrentUser()` +
-`ZodValidationPipe`, with GET/POST/PATCH/DELETE. 16 controllers, all registered in
+`ZodValidationPipe`, with GET/POST/PATCH/DELETE. 17 controllers, all registered in
 `app.module.ts` behind a global `ThrottlerGuard`. Errors funnel through one
 `AllExceptionsFilter`.
 
@@ -380,7 +383,7 @@ chunk so it never blocks first paint.
 | Validation | Zod in `packages/shared` | One schema for API *and* client |
 | Enums | String + Zod, not Prisma enums | Avoids a migration for a code-level change |
 | Migrations | Versioned, `migrate deploy` on boot | `db push --accept-data-loss` was replaced once the app held real accounts |
-| Shared demo | Self-resetting every 30 min | Locking it would hide the product; leaving it open lets one visitor break it |
+| Shared demo | Reset on the first sign-in after 30 min | Locking it would hide the product; leaving it open lets one visitor break it |
 | Session revocation | `tokenVersion` claim | Stateless JWTs, but a password change still ends other sessions |
 | Deletes | Confirm dialog naming the side effects | One mis-click shouldn't remove a project and its tasks |
 | Assistant | Local, no external API | No keys, no cost, no network — and it reads real data |
@@ -469,6 +472,7 @@ POST   /auth/register · POST /auth/login · GET /auth/me
 PATCH  /account/profile       → fresh token (the email is in it)
 PATCH  /account/preferences · POST /account/password · DELETE /account
 PATCH /onboarding · POST/DELETE /onboarding/sample   (state comes back on GET /auth/me)
+GET    /lookup/companies?q=   → public company data (Wikidata, no API key)
 
 GET    /projects · POST /projects · GET/PATCH/DELETE /projects/:id
 GET    /tasks
@@ -497,7 +501,7 @@ API with a dead DB is visible rather than silently green.
 
 ## 10 · Testing & CI
 
-- **Unit** (34): Jest for the API (auth, account, ownership checks, error mapping,
+- **Unit** (38): Jest for the API (auth, account, ownership checks, error mapping, company lookup,
   demo reset, projects) and Vitest for the web app (date handling, the calculator, error text).
 - **E2E** (5): `apps/api/test/app.e2e-spec.ts` runs against a live PostgreSQL via
   supertest. It covers register → create → list, cross-account isolation (another
@@ -525,7 +529,7 @@ shipped tokens, components and tool inventory before each production deploy.
 
 ## 12 · Honest status
 
-**Working and verified:** typecheck and lint clean in all three workspaces, 34 unit
+**Working and verified:** typecheck and lint clean in all three workspaces, 38 unit
 tests, 5 e2e tests against Postgres, a clean production build, and browser runs of the
 onboarding, settings and CRUD flows (including dates in a US time zone).
 
@@ -536,8 +540,10 @@ records these create are real and persisted.
 **Known limits:** lists aren't paginated yet. Deals and activities can't be edited
 beyond their stage or done state, and posts and campaigns can't be edited after they're
 created. Navigation, the dashboard, projects and tasks are translated into Spanish and
-French; the CRM pages, tools, settings, landing, sign-in and onboarding are English-only. The demo reset runs in-process, which is right for
-a single API instance but would need a scheduled job behind a load balancer.
+French; the CRM pages, tools, settings, landing, sign-in and onboarding are English-only. The demo resets only when someone signs in to it
+(there is no timer), so an idle demo can sit stale until the next visitor arrives, and a
+reset signs out any demo session still open. The company lookup only knows companies listed
+on Wikidata.
 
 **Not yet built** — the honest gap to full CRM/ERP parity: quotes and invoices, reporting,
 teams and roles, CSV import, and the ERP modules (finance, inventory, orders, HR).

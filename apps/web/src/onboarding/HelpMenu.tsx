@@ -46,7 +46,7 @@ export default function HelpMenu({ onTour, onChecklist, onPageGuide, onFeatureGu
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement;
       const typing = el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName);
-      if (e.key === '?' && !typing && !document.querySelector('.tour, .ob, .overlay')) { e.preventDefault(); setOpen((o) => !o); }
+      if (e.key === '?' && !typing && !document.querySelector('.tour, .ob, .overlay:not(.motion-ghost)')) { e.preventDefault(); setOpen((o) => !o); }
       else if (e.key === 'Escape') setOpen(false);
     };
     const onDown = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) setOpen(false); };

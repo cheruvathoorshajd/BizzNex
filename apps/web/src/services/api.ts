@@ -15,10 +15,11 @@ import type {
   Campaign, CreateCampaignInput, UpdateCampaignInput,
   Post, CreatePostInput, UpdatePostInput,
   EventItem, CreateEventInput, UpdateEventInput,
-  NotificationItem, CreateNotificationInput, UpdateNotificationInput,
+  NotificationItem, UpdateNotificationInput,
   AssistantReply, AssistantAskInput,
   UpdateOnboardingInput,
   UpdateProfileInput, UpdatePreferencesInput, ChangePasswordInput, DeleteAccountInput,
+  CompanyMatch,
 } from '@bizznex/shared';
 
 export const API_BASE = (import.meta.env.VITE_API_URL as string) || 'http://localhost:3001';
@@ -33,8 +34,8 @@ const rawBaseQuery = fetchBaseQuery({
   },
 });
 
-/** These answer 401 for a wrong password, which must not end the session. */
-const PASSWORD_CHECKS = ['/auth/login', '/auth/register', '/account/password', '/account'];
+/** Sign-in answers 401 for wrong credentials. (Account settings answer 400 for a wrong current password.) */
+const PASSWORD_CHECKS = ['/auth/login', '/auth/register'];
 
 /** A 401 anywhere else means the session expired or was revoked: sign out instead of failing every action. */
 const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (args, apiCtx, extra) => {
@@ -46,11 +47,14 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
   return result;
 };
 
+/** What "Export data" in Settings downloads, one list endpoint each. */
+const EXPORT_PATHS = ['projects', 'notes', 'companies', 'contacts', 'deals', 'activities', 'campaigns', 'posts', 'events', 'notifications'];
+
 export const api = createApi({
   reducerPath: 'api',
   baseQuery,
   tagTypes: [
-    'Projects', 'Tasks', 'Notes', 'Me',
+    'Projects', 'Notes', 'Me',
     'Companies', 'Contacts', 'Deals', 'Activities',
     'Campaigns', 'Posts', 'Events', 'Notifications',
   ],
@@ -84,6 +88,11 @@ export const api = createApi({
         } catch { undo.undo(); }
       },
     }),
+    // ── business lookup (public company data, no API key) ──
+    lookupCompanies: b.query<CompanyMatch[], string>({
+      query: (q) => `/lookup/companies?q=${encodeURIComponent(q)}`,
+      keepUnusedDataFor: 300,
+    }),
     // ── account settings ──
     updateProfile: b.mutation<AuthResponse, UpdateProfileInput>({
       query: (body) => ({ url: '/account/profile', method: 'PATCH', body }),
@@ -100,16 +109,29 @@ export const api = createApi({
     changePassword: b.mutation<AuthResponse, ChangePasswordInput>({
       query: (body) => ({ url: '/account/password', method: 'POST', body }),
     }),
+    revokeSessions: b.mutation<AuthResponse, void>({
+      query: () => ({ url: '/account/sessions/revoke', method: 'POST' }),
+    }),
     deleteAccount: b.mutation<{ ok: boolean }, DeleteAccountInput>({
       query: (body) => ({ url: '/account', method: 'DELETE', body }),
     }),
+    /** Every record in the account, fetched through the same auth (and 401 sign-out) as the rest of the app. */
+    exportData: b.query<Record<string, unknown>, void>({
+      async queryFn(_arg, _api, _extra, fetchWithBQ) {
+        const results = await Promise.all(EXPORT_PATHS.map((p) => fetchWithBQ(`/${p}`)));
+        const failed = results.find((r) => r.error);
+        if (failed?.error) return { error: failed.error };
+        return { data: Object.fromEntries(EXPORT_PATHS.map((p, i) => [p, results[i].data])) };
+      },
+      keepUnusedDataFor: 0,
+    }),
     seedSample: b.mutation<User, void>({
       query: () => ({ url: '/onboarding/sample', method: 'POST' }),
-      invalidatesTags: ['Me', 'Projects', 'Tasks', 'Notes', 'Companies', 'Contacts', 'Deals', 'Activities', 'Campaigns', 'Posts', 'Events', 'Notifications'],
+      invalidatesTags: ['Me', 'Projects', 'Notes', 'Companies', 'Contacts', 'Deals', 'Activities', 'Campaigns', 'Posts', 'Events', 'Notifications'],
     }),
     clearSample: b.mutation<User, void>({
       query: () => ({ url: '/onboarding/sample', method: 'DELETE' }),
-      invalidatesTags: ['Me', 'Projects', 'Tasks', 'Notes', 'Companies', 'Contacts', 'Deals', 'Activities', 'Campaigns', 'Posts', 'Events', 'Notifications'],
+      invalidatesTags: ['Me', 'Projects', 'Notes', 'Companies', 'Contacts', 'Deals', 'Activities', 'Campaigns', 'Posts', 'Events', 'Notifications'],
     }),
 
     // ── projects ──
@@ -124,21 +146,21 @@ export const api = createApi({
     }),
     deleteProject: b.mutation<{ ok: boolean }, string>({
       query: (id) => ({ url: `/projects/${id}`, method: 'DELETE' }),
-      invalidatesTags: ['Projects', 'Tasks'],
+      invalidatesTags: ['Projects'],
     }),
 
     // ── tasks ──
     addTask: b.mutation<Task, { projectId: string; body: CreateTaskInput }>({
       query: ({ projectId, body }) => ({ url: `/projects/${projectId}/tasks`, method: 'POST', body }),
-      invalidatesTags: ['Projects', 'Tasks'],
+      invalidatesTags: ['Projects'],
     }),
     updateTask: b.mutation<Task, { projectId: string; taskId: string; body: UpdateTaskInput }>({
       query: ({ projectId, taskId, body }) => ({ url: `/projects/${projectId}/tasks/${taskId}`, method: 'PATCH', body }),
-      invalidatesTags: ['Projects', 'Tasks'],
+      invalidatesTags: ['Projects'],
     }),
     deleteTask: b.mutation<{ ok: boolean }, { projectId: string; taskId: string }>({
       query: ({ projectId, taskId }) => ({ url: `/projects/${projectId}/tasks/${taskId}`, method: 'DELETE' }),
-      invalidatesTags: ['Projects', 'Tasks'],
+      invalidatesTags: ['Projects'],
     }),
 
     // ── notes ──
@@ -202,7 +224,8 @@ export const api = createApi({
         }));
         try { await queryFulfilled; } catch { patch.undo(); }
       },
-      invalidatesTags: ['Deals'],
+      // winning a deal adds a notification on the server
+      invalidatesTags: ['Deals', 'Notifications'],
     }),
     deleteDeal: b.mutation<{ ok: boolean }, string>({
       query: (id) => ({ url: `/deals/${id}`, method: 'DELETE' }),
@@ -228,11 +251,11 @@ export const api = createApi({
     getCampaigns: b.query<Campaign[], void>({ query: () => '/campaigns', providesTags: ['Campaigns'] }),
     createCampaign: b.mutation<Campaign, CreateCampaignInput>({
       query: (body) => ({ url: '/campaigns', method: 'POST', body }),
-      invalidatesTags: ['Campaigns'],
+      invalidatesTags: ['Campaigns', 'Notifications'], // sending/publishing adds a notification on the server
     }),
     updateCampaign: b.mutation<Campaign, { id: string; body: UpdateCampaignInput }>({
       query: ({ id, body }) => ({ url: `/campaigns/${id}`, method: 'PATCH', body }),
-      invalidatesTags: ['Campaigns'],
+      invalidatesTags: ['Campaigns', 'Notifications'], // sending/publishing adds a notification on the server
     }),
     deleteCampaign: b.mutation<{ ok: boolean }, string>({
       query: (id) => ({ url: `/campaigns/${id}`, method: 'DELETE' }),
@@ -243,11 +266,11 @@ export const api = createApi({
     getPosts: b.query<Post[], void>({ query: () => '/posts', providesTags: ['Posts'] }),
     createPost: b.mutation<Post, CreatePostInput>({
       query: (body) => ({ url: '/posts', method: 'POST', body }),
-      invalidatesTags: ['Posts'],
+      invalidatesTags: ['Posts', 'Notifications'], // sending/publishing adds a notification on the server
     }),
     updatePost: b.mutation<Post, { id: string; body: UpdatePostInput }>({
       query: ({ id, body }) => ({ url: `/posts/${id}`, method: 'PATCH', body }),
-      invalidatesTags: ['Posts'],
+      invalidatesTags: ['Posts', 'Notifications'], // sending/publishing adds a notification on the server
     }),
     deletePost: b.mutation<{ ok: boolean }, string>({
       query: (id) => ({ url: `/posts/${id}`, method: 'DELETE' }),
@@ -271,10 +294,6 @@ export const api = createApi({
 
     // ── notifications ──
     getNotifications: b.query<NotificationItem[], void>({ query: () => '/notifications', providesTags: ['Notifications'] }),
-    createNotification: b.mutation<NotificationItem, CreateNotificationInput>({
-      query: (body) => ({ url: '/notifications', method: 'POST', body }),
-      invalidatesTags: ['Notifications'],
-    }),
     updateNotification: b.mutation<NotificationItem, { id: string; body: UpdateNotificationInput }>({
       query: ({ id, body }) => ({ url: `/notifications/${id}`, method: 'PATCH', body }),
       invalidatesTags: ['Notifications'],
@@ -294,7 +313,9 @@ export const api = createApi({
 export const {
   useRegisterMutation, useLoginMutation, useMeQuery,
   useUpdateOnboardingMutation, useSeedSampleMutation, useClearSampleMutation,
+  useLazyLookupCompaniesQuery,
   useUpdateProfileMutation, useUpdatePreferencesMutation, useChangePasswordMutation, useDeleteAccountMutation,
+  useRevokeSessionsMutation, useLazyExportDataQuery,
   useGetProjectsQuery, useCreateProjectMutation, useUpdateProjectMutation, useDeleteProjectMutation,
   useAddTaskMutation, useUpdateTaskMutation, useDeleteTaskMutation,
   useGetNotesQuery, useCreateNoteMutation, useUpdateNoteMutation, useDeleteNoteMutation,
@@ -305,6 +326,6 @@ export const {
   useGetCampaignsQuery, useCreateCampaignMutation, useUpdateCampaignMutation, useDeleteCampaignMutation,
   useGetPostsQuery, useCreatePostMutation, useUpdatePostMutation, useDeletePostMutation,
   useGetEventsQuery, useCreateEventMutation, useUpdateEventMutation, useDeleteEventMutation,
-  useGetNotificationsQuery, useCreateNotificationMutation, useUpdateNotificationMutation, useDeleteNotificationMutation,
+  useGetNotificationsQuery, useUpdateNotificationMutation, useDeleteNotificationMutation,
   useAskAssistantMutation,
 } = api;
