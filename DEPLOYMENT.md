@@ -19,7 +19,7 @@ Run through this **before every production deploy**:
 - [ ] **Refresh the design case study** — [`bizznex-case-study.html`](./bizznex-case-study.html) is a living document. Re-diff it against `apps/web/src/styles/aurora.scss` (tokens), the shipped components, the tool inventory (`apps/web/src/views/tools/*`), the i18n locale set (en/es/fr) and the Studio interaction model. Update the "Last updated" date + changelog, tick the in-page checklist, and confirm it's linked from the landing page.
 - [ ] `npm run typecheck`, `npm run lint` and `npm run test` are clean.
 - [ ] `npm run build` is clean (web + api).
-- [ ] Env vars set on the target (`DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN`, `VITE_API_URL`).
+- [ ] Env vars set on the target (`DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN`, `VITE_API_URL`). `JWT_SECRET` must be at least 32 random characters (`openssl rand -hex 32`).
 - [ ] CORS origin matches the deployed web domain.
 
 ---
@@ -30,11 +30,12 @@ Run through this **before every production deploy**:
 cp apps/api/.env.example apps/api/.env      # optional for non-docker runs
 docker compose up --build
 # web  → http://localhost:8080
-# api  → http://localhost:3001  (Swagger at /docs)
+# api  → http://localhost:3001  (Swagger at /docs; compose runs the API in development mode)
 # db   → localhost:5432
 ```
 
 The API container runs `prisma migrate deploy` on boot, so the schema is created automatically.
+It runs as the unprivileged `node` user, not root.
 Demo data: the first demo sign-in (*Explore the demo*) creates and fills the demo
 workspace. To seed it ahead of time, run from your host against the compose database (the
 runtime image has no dev tools, so seeding inside the container won't work):
@@ -59,10 +60,11 @@ neither Vercel nor AWS. Two services (api, web) + one Postgres plugin.
    - Settings → **Build**: set *Dockerfile Path* = `apps/api/Dockerfile`, *Root Directory* = `/` (repo root is the build context).
    - Variables:
      - `DATABASE_URL` = `${{Postgres.DATABASE_URL}}`
-     - `JWT_SECRET` = a long random string
+     - `JWT_SECRET` = a random string of at least 32 characters (`openssl rand -hex 32`)
      - `CORS_ORIGIN` = the web service URL (fill in after step 5)
      - *(leave `PORT` unset — Railway injects it and the API reads it)*
    - Deploy. The container runs `prisma migrate deploy` then starts. Generate a public domain (Settings → Networking).
+   - Health check: point it at `/health`. It answers 503 when the database is unreachable.
 5. **Web service**: *New → GitHub Repo* → same repo.
    - Build: *Dockerfile Path* = `apps/web/Dockerfile`, *Root Directory* = `/`.
    - Variables: `VITE_API_URL` = the API's public URL (e.g. `https://bizznex-api.up.railway.app`).
@@ -110,11 +112,12 @@ Create a **PostgreSQL** instance, then two services from this repo:
 | Var | Example | Notes |
 |-----|---------|-------|
 | `DATABASE_URL` | `postgresql://user:pass@host:5432/db?schema=public` | required |
-| `JWT_SECRET` | long random string | **required in production** (the API refuses to boot without it) |
+| `JWT_SECRET` | `openssl rand -hex 32` | **required in production**: the API refuses to boot without it, or with one under 32 characters or containing `change-me` |
 | `JWT_EXPIRES_IN` | `7d` | token lifetime |
 | `CORS_ORIGIN` | `https://your-web-domain` | comma-separated allowed origins; **required in production** |
 | `NODE_ENV` | `production` | set by the Dockerfile |
-| `SWAGGER_ENABLED` | `false` | hides `/docs`; on by default |
+| `ENABLE_DOCS` | `true` | Swagger at `/docs`: on in development, **off in production** unless `true` |
+| `TRUST_PROXY` | `1` | proxy hops in front of the API, so rate limits key on the client IP, not the proxy. Default `1` in production, off otherwise; `0` disables. Accepts any Express `trust proxy` value |
 | `DEMO_RESET_MINUTES` | `30` | how stale the shared demo gets before the next demo sign-in resets it |
 | `PORT` | `3001` | injected by most PaaS |
 
@@ -132,5 +135,15 @@ Create a **PostgreSQL** instance, then two services from this repo:
   container and CI both run `prisma migrate deploy`. **A database created earlier with
   `db push`** already has the tables, so mark the baseline as applied once before the
   first deploy: `npx prisma migrate resolve --applied 0_init` (from `apps/api`).
+- **Health**: `GET /health` returns `{ status, db, timestamp }`: 200 with `status: "ok"` when
+  the database answers, **503** with `status: "error"` when it doesn't. It isn't rate limited.
+- **Container users**: the API image runs as `node` (non-root). The web image is stock
+  `nginx:alpine`.
+- **Web security headers** (`apps/web/nginx.conf`): a Content-Security-Policy, `X-Frame-Options: DENY`,
+  `X-Content-Type-Options`, `Referrer-Policy` and `Permissions-Policy` on every response, gzip for
+  text assets, and `index.html` served `no-cache`. The CSP allows API calls to any `https:` origin
+  (the API URL is baked in at build time); to lock it down, replace `https:` in `connect-src` with
+  your API origin. If you serve images or fonts from somewhere new, add the host to the CSP.
+- **Auth** uses bearer tokens (no cookies), so CORS doesn't allow credentials.
 - CI (`.github/workflows/ci.yml`) spins a Postgres service and runs typecheck, lint, unit
   tests, build, and API e2e on every push/PR.

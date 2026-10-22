@@ -6,11 +6,14 @@ const DEV_SECRET = 'bizznex-dev-only-secret';
 /** One place for the signing secret: a real secret is mandatory outside development. */
 export function jwtSecret(config: ConfigService): string {
   const secret = config.get<string>('JWT_SECRET');
-  if (secret) return secret;
   if (config.get<string>('NODE_ENV') === 'production') {
-    throw new Error('JWT_SECRET must be set in production.');
+    if (!secret) throw new Error('JWT_SECRET must be set in production.');
+    if (secret.length < 32 || /change-me/i.test(secret)) {
+      throw new Error('JWT_SECRET is too weak for production: use a random value of at least 32 characters (for example `openssl rand -hex 32`), not the example placeholder.');
+    }
+    return secret;
   }
-  return DEV_SECRET;
+  return secret || DEV_SECRET;
 }
 
 export function jwtOptions(config: ConfigService): JwtModuleOptions {

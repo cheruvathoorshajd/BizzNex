@@ -16,17 +16,23 @@ async function bootstrap() {
   const production = config.get<string>('NODE_ENV') === 'production';
 
   app.disable('x-powered-by');
+  // behind a proxy (nginx, a load balancer) the throttler must key on the client, not the proxy
+  // (a hop count, or any Express "trust proxy" value; 0 or false turns it off)
+  const trustProxy = config.get<string>('TRUST_PROXY') ?? (production ? '1' : '0');
+  if (!['0', 'false', ''].includes(trustProxy)) app.set('trust proxy', /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy);
   app.use(helmet());
   app.useBodyParser('json', { limit: '256kb' });
 
   const configured = config.get<string>('CORS_ORIGIN');
   if (production && !configured) throw new Error('CORS_ORIGIN must be set in production.');
   const origin = configured ? configured.split(',').map((o) => o.trim()) : DEV_ORIGINS;
-  app.enableCors({ origin, credentials: true });
+  app.enableCors({ origin }); // bearer tokens, no cookies: credentials stay off
   app.useGlobalFilters(new AllExceptionsFilter());
   app.enableShutdownHooks();
 
-  if (config.get<string>('SWAGGER_ENABLED') !== 'false') {
+  // API docs are on in development and opt-in in production
+  const docsOn = (config.get<string>('ENABLE_DOCS') ?? (production ? 'false' : 'true')) === 'true';
+  if (docsOn) {
     const swagger = new DocumentBuilder()
       .setTitle('BizzNex API')
       .setDescription('Business management suite: projects, tasks, CRM, marketing tools, onboarding and account')
@@ -39,7 +45,7 @@ async function bootstrap() {
   const port = Number(config.get('PORT') ?? 3001);
   await app.listen(port);
   // eslint-disable-next-line no-console
-  console.log(`BizzNex API listening on http://localhost:${port} (docs: /docs)`);
+  console.log(`BizzNex API listening on http://localhost:${port}${docsOn ? ' (docs: /docs)' : ''}`);
 }
 
 void bootstrap();

@@ -8,7 +8,7 @@ import { changePasswordSchema, deleteAccountSchema, updatePreferencesSchema, upd
 import type { ChangePasswordInput, DeleteAccountInput, UpdatePreferencesInput, UpdateProfileInput } from '@bizznex/shared';
 import { AccountService } from './account.service';
 
-/** The signed-in user's own account: profile, preferences, password, and deletion. */
+/** The signed-in user's own account: profile, preferences, password, sessions, and deletion. */
 @ApiTags('account')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -31,6 +31,12 @@ export class AccountController {
   @Post('password')
   password(@CurrentUser() userId: string, @Body(new ZodValidationPipe(changePasswordSchema)) body: ChangePasswordInput) {
     return this.account.changePassword(userId, body);
+  }
+
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Post('sessions/revoke')
+  revokeSessions(@CurrentUser() userId: string) {
+    return this.account.revokeSessions(userId);
   }
 
   @Throttle({ default: { limit: 10, ttl: 60_000 } })

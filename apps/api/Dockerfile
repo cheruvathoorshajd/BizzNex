@@ -25,7 +25,9 @@ RUN apk add --no-cache openssl
 WORKDIR /repo
 ENV NODE_ENV=production
 
-COPY --from=build /repo/node_modules ./node_modules
+# root owns the code (read-only to the app); only the Prisma engine cache under node_modules
+# is written at runtime, so that tree belongs to the unprivileged `node` user
+COPY --from=build --chown=node:node /repo/node_modules ./node_modules
 COPY --from=build /repo/package.json ./package.json
 COPY --from=build /repo/packages/shared/dist ./packages/shared/dist
 COPY --from=build /repo/packages/shared/package.json ./packages/shared/package.json
@@ -34,6 +36,8 @@ COPY --from=build /repo/apps/api/package.json ./apps/api/package.json
 COPY --from=build /repo/apps/api/prisma ./apps/api/prisma
 
 WORKDIR /repo/apps/api
+# never run as root
+USER node
 EXPOSE 3001
 
 # Apply any pending migrations (never drops data), then boot.
