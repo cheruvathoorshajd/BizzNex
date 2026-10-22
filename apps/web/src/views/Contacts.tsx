@@ -91,7 +91,7 @@ export default function Contacts({ query = '' }: { query?: string }) {
         <div>
           <div className="sublab" style={{ marginTop: 0 }}>§ All contacts</div>
           {isError ? <LoadError what="contacts" error={error} onRetry={refetch} /> : isLoading && <p className="loading">Loading…</p>}
-          {!isLoading && shown.length === 0 && <div className="cap" style={{ padding: '16px 0' }}>No contacts yet.</div>}
+          {!isLoading && shown.length === 0 && <div className="cap" style={{ padding: '16px 0' }}>{q ? `No matches for “${query.trim()}”.` : 'No contacts yet.'}</div>}
           {shown.length > 0 && (
             <div className="scroll-x">
               <table className="ledger">
@@ -138,7 +138,7 @@ function ContactModal({ editing, companies, onClose, onSave }: {
   editing: Contact;
   companies: Company[];
   onClose: () => void;
-  onSave: (v: { name: string; email: string; phone: string; title: string; companyId: string | null }) => void;
+  onSave: (v: { name: string; email: string; phone: string; title: string; companyId: string | null }) => Promise<void>;
 }) {
   const [name, setName] = useState(editing.name);
   const [title, setTitle] = useState(editing.title);
@@ -146,6 +146,7 @@ function ContactModal({ editing, companies, onClose, onSave }: {
   const [phone, setPhone] = useState(editing.phone);
   const [companyId, setCompanyId] = useState(editing.companyId ?? '');
   const valid = name.trim().length > 0;
+  const [saving, setSaving] = useState(false);
 
   return (
     <Modal
@@ -155,11 +156,16 @@ function ContactModal({ editing, companies, onClose, onSave }: {
         <button className="btn ghost" onClick={onClose}>Cancel</button>
         <button
           className="btn primary"
-          disabled={!valid}
-          onClick={() => onSave({
-            name: name.trim(), email: email.trim(), phone: phone.trim(), title: title.trim(),
-            companyId: companyId || null,
-          })}
+          disabled={!valid || saving}
+          onClick={async () => {
+            setSaving(true);
+            try {
+              await onSave({
+                name: name.trim(), email: email.trim(), phone: phone.trim(), title: title.trim(),
+                companyId: companyId || null,
+              });
+            } finally { setSaving(false); }
+          }}
         >Save</button>
       </>}
     >

@@ -6,15 +6,14 @@ import {
 import { useT } from '../i18n/useT';
 import { useToast } from '../ui/Toast';
 import Modal from '../ui/Modal';
+import TaskModal from './TaskModal';
 import Icon from '../ui/Icon';
-import { cx, fmtShort, toDateInput, fromDateInput, dotClass } from '../utils';
-import type { Project, Task, Status, ViewId } from '../types';
+import { cx, fmtShort, dotClass } from '../utils';
+import type { Project, Task, ViewId } from '../types';
 import { errorText } from '../services/errors';
 import { useConfirm } from '../ui/Confirm';
 import LoadError from '../ui/LoadError';
 import { rows } from '../ui/motion';
-
-const STATUSES: Status[] = ['Pending', 'In Progress', 'Completed'];
 
 export default function Projects({ query, onNavigate }: { query: string; onNavigate: (v: ViewId) => void }) {
   const t = useT();
@@ -126,11 +125,12 @@ export default function Projects({ query, onNavigate }: { query: string; onNavig
       {tModal && (
         <TaskModal
           editing={tModal.editing}
+          projectId={tModal.projectId}
           onClose={() => setTModal(null)}
-          onSave={async (v) => {
+          onSave={async (projectId, v) => {
             try {
-              if (tModal.editing) { await updateTask({ projectId: tModal.projectId, taskId: tModal.editing.id, body: v }).unwrap(); toast(t('action.save')); }
-              else { await addTask({ projectId: tModal.projectId, body: v }).unwrap(); toast(t('action.create') + ' · ' + v.name); }
+              if (tModal.editing) { await updateTask({ projectId, taskId: tModal.editing.id, body: v }).unwrap(); toast(t('action.save')); }
+              else { await addTask({ projectId, body: v }).unwrap(); toast(t('action.create') + ' · ' + v.name); }
               setTModal(null);
             } catch (err) { toast(errorText(err)); }
           }}
@@ -168,48 +168,7 @@ function ProjectModal({ editing, onClose, onSave }: {
         <div className="fields">
           <div className="field full"><label>{t('field.name')}</label><input className="inp" value={name} onChange={(e) => setName(e.target.value)} autoFocus /></div>
           <div className="field wide"><label>{t('field.owner')}</label><input className="inp" value={owner} onChange={(e) => setOwner(e.target.value)} /></div>
-          <div className="field"><label>{t('field.spend')}</label><input className="inp num" type="number" value={spend} onChange={(e) => setSpend(e.target.value)} /></div>
-        </div>
-      </div>
-    </Modal>
-  );
-}
-
-/* ── Task modal ── */
-function TaskModal({ editing, onClose, onSave }: {
-  editing?: Task; onClose: () => void;
-  onSave: (v: { name: string; description: string; startDate: string | null; endDate: string | null; status: Status }) => void;
-}) {
-  const t = useT();
-  const [name, setName] = useState(editing?.name ?? '');
-  const [description, setDescription] = useState(editing?.description ?? '');
-  const [start, setStart] = useState(toDateInput(editing?.startDate));
-  const [end, setEnd] = useState(toDateInput(editing?.endDate));
-  const [status, setStatus] = useState<Status>(editing?.status ?? 'Pending');
-  const valid = name.trim().length > 0;
-  const [saving, setSaving] = useState(false);
-
-  return (
-    <Modal
-      title={editing ? t('action.edit') : t('action.newTask')}
-      onClose={onClose}
-      footer={<>
-        <button className="btn ghost" onClick={onClose}>{t('action.cancel')}</button>
-        <button className="btn primary" disabled={!valid || saving} onClick={async () => { setSaving(true); try { await onSave({ name: name.trim(), description: description.trim(), startDate: fromDateInput(start), endDate: fromDateInput(end), status }); } finally { setSaving(false); } }}>{editing ? t('action.save') : t('action.create')}</button>
-      </>}
-    >
-      <div className="modal-body">
-        <div className="fields">
-          <div className="field full"><label>{t('field.name')}</label><input className="inp" value={name} onChange={(e) => setName(e.target.value)} autoFocus /></div>
-          <div className="field full"><label>{t('field.description')}</label><textarea className="inp" value={description} onChange={(e) => setDescription(e.target.value)} /></div>
-          <div className="field wide"><label>{t('field.start')}</label><input className="inp" type="date" value={start} onChange={(e) => setStart(e.target.value)} /></div>
-          <div className="field wide"><label>{t('field.end')}</label><input className="inp" type="date" value={end} onChange={(e) => setEnd(e.target.value)} /></div>
-          <div className="field full">
-            <label>{t('field.status')}</label>
-            <div className="seg">
-              {STATUSES.map((s) => <button key={s} className={s === status ? 'on' : ''} onClick={() => setStatus(s)}>{t('status.' + s)}</button>)}
-            </div>
-          </div>
+          <div className="field"><label>{t('field.spend')}</label><input className="inp num" type="number" min={0} value={spend} onChange={(e) => setSpend(e.target.value)} /></div>
         </div>
       </div>
     </Modal>

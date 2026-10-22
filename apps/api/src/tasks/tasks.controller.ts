@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../common/current-user.decorator';
@@ -13,11 +13,6 @@ import { TasksService } from './tasks.service';
 @Controller()
 export class TasksController {
   constructor(private readonly tasks: TasksService) {}
-
-  @Get('tasks')
-  all(@CurrentUser() userId: string) {
-    return this.tasks.listAll(userId);
-  }
 
   @Post('projects/:projectId/tasks')
   add(
