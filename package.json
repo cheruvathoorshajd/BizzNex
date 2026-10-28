@@ -27,7 +27,7 @@
     "typescript-eslint": "^8.71.2"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "overrides": {
     "multer": "^2.5.0",

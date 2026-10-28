@@ -1,5 +1,5 @@
 # ---------- build ----------
-FROM node:20-alpine AS build
+FROM node:22-alpine AS build
 WORKDIR /repo
 
 # every workspace manifest, so `npm ci` can verify the lockfile

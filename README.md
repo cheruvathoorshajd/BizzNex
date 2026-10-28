@@ -425,7 +425,7 @@ docker compose up --build
 A self-contained PostgreSQL is bundled for local use — no Docker, no cloud, no install.
 
 ```bash
-npm ci                                       # Node 20+ (see .nvmrc)
+npm ci                                       # Node 22+ (see .nvmrc)
 
 cp apps/api/.env.example apps/api/.env       # then set DATABASE_URL to port 5433 (see the file)
 cp apps/web/.env.example apps/web/.env       # VITE_API_URL=http://localhost:3001
@@ -517,7 +517,7 @@ API with a dead DB is visible rather than silently green.
 
 See **[DEPLOYMENT.md](./DEPLOYMENT.md)**. Primary target **Railway** (managed Postgres +
 GitHub-driven deploys), with **Fly.io** and **Render** appendices. Three pieces: managed
-Postgres, the API (`apps/api/Dockerfile`, multi-stage Node 20 Alpine), and the web app
+Postgres, the API (`apps/api/Dockerfile`, multi-stage Node 22 Alpine), and the web app
 (`apps/web/Dockerfile`, built then served by nginx with SPA fallback and immutable
 asset caching).
 

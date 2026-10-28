@@ -1,5 +1,5 @@
 # ---------- build ----------
-FROM node:20-alpine AS build
+FROM node:22-alpine AS build
 RUN apk add --no-cache openssl
 WORKDIR /repo
 
@@ -20,7 +20,7 @@ RUN npm run build -w @bizznex/shared \
  && npm prune --omit=dev --workspace @bizznex/api --workspace @bizznex/shared --include-workspace-root=false
 
 # ---------- runtime ----------
-FROM node:20-alpine AS runtime
+FROM node:22-alpine AS runtime
 RUN apk add --no-cache openssl
 WORKDIR /repo
 ENV NODE_ENV=production
