@@ -25,6 +25,13 @@ describe('BizzNex API (e2e)', () => {
     expect(res.body.status).toBe('ok');
   });
 
+  it('GET /health/live → ok without a database field (keep-awake pings must not wake the DB)', async () => {
+    const res = await request(app.getHttpServer()).get('/health/live').expect(200);
+    expect(res.body.status).toBe('ok');
+    expect(res.body.db).toBeUndefined();
+    expect(typeof res.body.ip).toBe('string');
+  });
+
   it('register → login → create/list project', async () => {
     const email = `e2e_${Date.now()}@bizznex.test`;
 
