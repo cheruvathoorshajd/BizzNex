@@ -12,7 +12,6 @@
     "test": "jest --passWithNoTests",
     "test:e2e": "jest --config ./test/jest-e2e.json --passWithNoTests",
     "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate deploy",
     "prisma:migrate:dev": "prisma migrate dev",
     "seed": "ts-node prisma/seed.ts",
