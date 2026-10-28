@@ -3,6 +3,7 @@ import type { Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'node:path'
 import fs from 'node:fs'
+import crypto from 'node:crypto'
 
 const root = path.resolve(__dirname, '../..')
 
@@ -49,9 +50,44 @@ function designDocs(): Plugin {
   }
 }
 
+/** The app's Content-Security-Policy, shipped as a <meta> in the built index.html so it holds on
+ *  any host (nginx, a static host) without per-host header rules. Inline scripts are allowed by
+ *  sha256, computed here from the final HTML, so editing the theme script needs no hash upkeep.
+ *  connect-src: the API is a separate origin baked in at build time (VITE_API_URL), so any https
+ *  origin is allowed, plus localhost for docker compose. img-src: company logos from the business
+ *  lookup (Wikimedia Commons). frame-ancestors can't be set from a <meta>; hosts send
+ *  X-Frame-Options: DENY instead. Build only: the dev server injects its own inline scripts. */
+function contentSecurityPolicy(): Plugin {
+  return {
+    name: 'bizznex-csp',
+    apply: 'build',
+    transformIndexHtml: {
+      order: 'post',
+      handler(html) {
+        const hashes = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)]
+          .filter((m) => m[1].trim()) // an empty inline script needs no hash
+          .map((m) => `'sha256-${crypto.createHash('sha256').update(m[1]).digest('base64')}'`)
+        const policy = [
+          "default-src 'self'",
+          ['script-src', "'self'", ...hashes].join(' '),
+          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+          "font-src 'self' https://fonts.gstatic.com",
+          "img-src 'self' data: blob: https://commons.wikimedia.org https://upload.wikimedia.org",
+          "connect-src 'self' https: http://localhost:* http://127.0.0.1:*",
+          "object-src 'none'",
+          "base-uri 'self'",
+          "form-action 'self'",
+        ].join('; ')
+        const meta = `<meta http-equiv="Content-Security-Policy" content="${policy}" />`
+        return html.replace('<meta charset="UTF-8" />', `<meta charset="UTF-8" />\n    ${meta}`)
+      },
+    },
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), designDocs()],
+  plugins: [react(), designDocs(), contentSecurityPolicy()],
   resolve: {
     alias: {
       '@bizznex/shared': path.resolve(__dirname, '../../packages/shared/src/index.ts'),

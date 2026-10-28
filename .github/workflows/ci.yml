@@ -113,4 +113,6 @@ jobs:
           docker run -d --name web -p 8080:80 bizznex-web
           sleep 2
           curl -fsS http://localhost:8080/ | grep -q '<div id="root"'
-          curl -fsSI http://localhost:8080/ | grep -qi 'content-security-policy'
+          curl -fsS http://localhost:8080/ | grep -q 'http-equiv="Content-Security-Policy"'
+          curl -fsSI http://localhost:8080/ | grep -qi 'x-frame-options: deny'
+          curl -fsSI http://localhost:8080/case-study.html | grep -qi 'content-security-policy'

@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- theme before first paint (persisted choice, else the OS setting); CSP: keep its sha256 in sync -->
+    <!-- theme before first paint (persisted choice, else the OS setting); the build hashes it into the CSP -->
     <script>try{var u=JSON.parse(localStorage.getItem('bizznex-ui'))||{}}catch(e){u={}}document.documentElement.dataset.theme=u.theme&&!u.followSystem?u.theme:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'</script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
