@@ -1,0 +1,63 @@
+# Render Blueprint: the free, always-live setup (see DEPLOYMENT.md → "Free and always live").
+# The database is not here: it is a Neon free Postgres, passed in as DATABASE_URL.
+# Values marked `sync: false` are asked for when the Blueprint is created.
+services:
+  # NestJS API, built from the same Dockerfile CI boots. Free instances sleep after 15 min without
+  # requests, so an external pinger calls /health/live (no database query) every 10 min.
+  - type: web
+    name: bizznex-api
+    runtime: docker
+    plan: free
+    region: oregon # keep next to the Neon database (AWS us-west-2), or every query crosses the country
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false # Neon *direct* (not pooled) connection string, ending in ?sslmode=require
+      - key: JWT_SECRET
+        generateValue: true # random, well past the 32-character production minimum
+      - key: CORS_ORIGIN
+        sync: false # the web site's URL, e.g. https://bizznex-web.onrender.com
+      - key: TRUST_PROXY
+        value: "1" # Render's proxy; check with GET /health/live that `ip` is your own address
+
+  # React app as a static site: served from Render's CDN, never sleeps, uses no instance hours.
+  - type: web
+    name: bizznex-web
+    runtime: static
+    buildCommand: npm ci --workspace @bizznex/web --workspace @bizznex/shared --include-workspace-root=false && npm run build -w @bizznex/shared && npm run build -w @bizznex/web
+    staticPublishPath: ./apps/web/dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false # the API's URL, e.g. https://bizznex-api.onrender.com (baked in at build time)
+      - key: NODE_VERSION
+        value: "22"
+    # the same headers nginx sends (apps/web/nginx.conf); the app's CSP is a <meta> in index.html
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /*
+        name: Permissions-Policy
+        value: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /case-study.html
+        name: Content-Security-Policy
+        value: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+      - path: /brand/*
+        name: Content-Security-Policy
+        value: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    routes:
+      # SPA fallback; files that exist (assets, case study, brand pages) are served as they are
+      - type: rewrite
+        source: /*
+        destination: /index.html
