@@ -143,6 +143,48 @@ repos with no activity for 60 days.)
 | `curl -sI https://<web-url>/case-study.html` | Has **one** `content-security-policy` header. |
 | cron-job.org history after an hour | Six successful runs. |
 
+### Step 6 — Use your own domain (optional)
+
+Serve both pieces from subdomains of a domain you own, so the address bar shows your domain
+instead of `onrender.com`. Use custom domains (a CNAME record), not your registrar's URL
+redirect or forwarding: a redirect just sends visitors on to the `onrender.com` address. Render's free
+(Hobby) workspace includes **2 custom domains**, enough for the web site and the API, and
+issues their HTTPS certificates for free. Do this after the `onrender.com` URLs work (step 5).
+
+This example uses `cheruvathoor.com` with DNS at Namecheap; any domain and registrar work the
+same way.
+
+| Piece | Custom domain | Points to |
+|-------|---------------|-----------|
+| web | `bizznex.cheruvathoor.com` | `bizznex-web.onrender.com` |
+| api | `bizznex-api.cheruvathoor.com` | `bizznex-api.onrender.com` |
+
+1. **Add the domains in Render.** Web service → **Settings → Custom Domains** → add
+   `bizznex.cheruvathoor.com`. API service → **Settings → Custom Domains** → add
+   `bizznex-api.cheruvathoor.com`. Render shows the DNS record each one needs.
+2. **Create the DNS records** (Namecheap → *Domain List* → the domain → **Advanced DNS** →
+   *Add new record*):
+
+   | Type | Host | Value |
+   |------|------|-------|
+   | CNAME | `bizznex` | `bizznex-web.onrender.com` |
+   | CNAME | `bizznex-api` | `bizznex-api.onrender.com` |
+
+   If Render shows a different target, use Render's. Don't change the domain's other records.
+3. **Wait for verification.** Back in Render, each domain should turn **Verified** with a
+   certificate issued. That usually takes minutes, and up to an hour while DNS updates.
+4. **Point the services at the new addresses:**
+   - API → **Environment**: `CORS_ORIGIN` = `https://bizznex.cheruvathoor.com`
+   - Web → **Environment**: `VITE_API_URL` = `https://bizznex-api.cheruvathoor.com`, then
+     **Manual Deploy → Clear build cache & deploy** (the API URL is baked in at build time).
+   - cron-job.org: change the job's URL to `https://bizznex-api.cheruvathoor.com/health/live`.
+5. **Check again:** open `https://bizznex.cheruvathoor.com` and try the demo. Repeat the step 5
+   checks with the new addresses.
+
+The `onrender.com` addresses keep working. Once `CORS_ORIGIN` names only the custom domain,
+the API rejects sign-ins from the old web address, so share the custom one. To accept both, set
+`CORS_ORIGIN` to a comma-separated list.
+
 ### After go-live
 
 - **Deploying changes:** push to `main`. Render rebuilds both services. Run the
@@ -158,12 +200,11 @@ repos with no activity for 60 days.)
   PostgreSQL client tools, and its version must be at least the server's.
 - **Usage to watch** (both free tiers stop the service when exhausted, until the next month):
   Neon → *Usage* (compute-hours) and Render → *Workspace → Usage/Billing* (instance hours).
-  With the pinger on `/health/live`, both stay inside their limits.
+  With the pinger on `/health/live`, both stay inside their limits. Render's Hobby workspace
+  also includes 5 GB of outbound bandwidth a month (plenty for a demo; beyond it is billed).
 - **Changing a secret:** setting a new `JWT_SECRET` on the API signs every user out, which is
   expected.
-- **Custom domain (optional):** add it under each service's **Settings → Custom Domains** and
-  create the DNS records Render shows. Then set `CORS_ORIGIN` and `VITE_API_URL` to the new
-  domains, and rebuild the web site.
+- **Custom domain:** see [step 6](#step-6--use-your-own-domain-optional).
 
 ### Troubleshooting
 
