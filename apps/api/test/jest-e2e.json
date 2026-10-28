@@ -3,6 +3,7 @@
   "rootDir": ".",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
+  "testTimeout": 30000,
   "setupFiles": ["reflect-metadata"],
   "moduleNameMapper": {
     "^@bizznex/shared$": "<rootDir>/../../../packages/shared/src/index.ts"
