@@ -1,8 +1,5 @@
 # BizzNex
 
-[![CI](https://github.com/cheruvathoorshajd/BizzNex/actions/workflows/ci.yml/badge.svg)](https://github.com/cheruvathoorshajd/BizzNex/actions/workflows/ci.yml)
-![TypeScript](https://img.shields.io/badge/TypeScript-end--to--end-3178C6)
-![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 **A business workspace for small teams.** Projects and tasks, a CRM with a deal pipeline,
 marketing tools and a built-in assistant, in one calm interface. Full-stack TypeScript:
@@ -600,6 +597,10 @@ bizznex/
 ├── scripts/local-db.mjs  # embedded Postgres, no Docker needed
 ├── docker-compose.yml · DEPLOYMENT.md · .github/workflows/ci.yml
 ```
+
+[![CI](https://github.com/cheruvathoorshajd/BizzNex/actions/workflows/ci.yml/badge.svg)](https://github.com/cheruvathoorshajd/BizzNex/actions/workflows/ci.yml)
+![TypeScript](https://img.shields.io/badge/TypeScript-end--to--end-3178C6)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 ---
 
