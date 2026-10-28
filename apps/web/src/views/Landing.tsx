@@ -51,7 +51,7 @@ const GROUPS = [
   {
     k: 'CRM', t: 'Know the customer', items: [
       ['Contacts & Companies', 'People linked to the companies they work for.'],
-      ['Deals', 'A pipeline board from lead to won, with a total for each stage.'],
+      ['Deals', 'A pipeline board from lead to won or lost, with a total for each stage.'],
       ['Activities', 'Calls, emails, meetings and follow-ups, linked to contacts and deals.'],
     ],
   },
@@ -117,7 +117,7 @@ export default function Landing() {
           <div className="lp-rows">
             <div className="row"><span className="l">Active projects</span><span className="v">2</span></div>
             <div className="row"><span className="l">Open tasks</span><span><span className="v">3</span><span className="d">1 in progress</span></span></div>
-            <div className="row"><span className="l">Pipeline</span><span><span className="v">$86.1k</span><span className="d">4 deals</span></span></div>
+            <div className="row"><span className="l">Pipeline</span><span><span className="v">$77.5k</span><span className="d">3 open deals</span></span></div>
             <div className="row"><span className="l">Completion</span><span><span className="v">40%</span><span className="d">2 of 5 tasks</span></span></div>
           </div>
         </section>
@@ -148,7 +148,7 @@ export default function Landing() {
           <div className="lp-split">
             <div>
               <p className="sublab">Sales pipeline</p>
-              <p className="lp-p">Move each deal through Lead → Qualified → Proposal → Won or Lost. Each column shows its total, and winning a deal adds a notification.</p>
+              <p className="lp-p">Move each deal through Lead → Qualified → Proposal, then mark it Won or Lost. Each column shows its total, and winning a deal adds a notification.</p>
             </div>
             <PipelineArt />
           </div>
