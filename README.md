@@ -7,9 +7,10 @@ React + NestJS + PostgreSQL, with one shared Zod contract between them.
 
 ![The BizzNex dashboard](docs/screenshots/dashboard.webp)
 
-**Try it:** run it locally ([§ 8](#8--running-it)) and click **Explore the demo** on the
-landing page, or sign in as `demo@bizznex.app` / `password`. The demo workspace is rebuilt
-on the first demo sign-in once its last reset is 30 minutes old. *(A hosted demo isn't deployed yet.)*
+**Try it live:** **[bizznex.cheruvathoor.com](https://bizznex.cheruvathoor.com)** → click
+**Explore the demo**, or sign in as `demo@bizznex.app` / `password`. It runs free and always on
+(Render + Neon, see [§ 11](#11--deployment)). The demo workspace is rebuilt on the first demo
+sign-in once its last reset is 30 minutes old. To run it yourself, see [§ 8](#8--running-it).
 
 | | |
 |---|---|
@@ -388,6 +389,10 @@ chunk so it never blocks first paint.
 | UI libraries | None | Aurora can't be expressed in someone else's primitives |
 | State | RTK Query + 2 slices | Server state and UI state are different problems |
 | Local DB | Embedded Postgres on `:5433` | Docker isn't required to run this |
+| Hosting | Render (API + static site) and Neon Postgres, free | Always live at $0; Railway is paid, and Render's free Postgres is deleted after 30 days |
+| Keep-awake | cron-job.org pings `/health/live` every 10 min | Render's free API sleeps after 15 min; this endpoint skips the DB, so Neon can still scale to zero |
+| Content-Security-Policy | A `<meta>` written at build, inline script hashed | Holds on any host (nginx or a static CDN) and never goes stale |
+| Client IP behind proxies | `TRUST_PROXY=3` on Render, measured | Cloudflare + two Render proxies; anything lower makes every visitor share one rate limit |
 
 ---
 
@@ -395,10 +400,10 @@ chunk so it never blocks first paint.
 
 | Layer | Tech |
 |---|---|
-| **Web** | React 18.3, TypeScript 5.6, Vite 6, Redux Toolkit 2.4 + RTK Query, react-intl 7, Sass, three.js 0.160, @formkit/auto-animate |
-| **API** | NestJS 10, Prisma 5.22, PostgreSQL, Passport JWT, bcryptjs, Zod, Swagger, helmet, @nestjs/throttler |
+| **Web** | React 18.3, TypeScript 5.6, Vite 6, Redux Toolkit 2 + RTK Query, react-intl 7, Sass, three.js 0.160, @formkit/auto-animate |
+| **API** | NestJS 11 (Express 5), Prisma 5.22, PostgreSQL, Passport JWT, bcryptjs, Zod 4, Swagger, helmet, @nestjs/throttler, on Node 22 |
 | **Shared** | TypeScript types + Zod schemas |
-| **Infra** | Docker multi-stage, docker-compose, nginx, GitHub Actions, Render, Neon (serverless Postgres) |
+| **Infra** | Docker multi-stage, docker-compose, nginx, GitHub Actions, Render (Blueprint in `render.yaml`), Neon (serverless Postgres), cron-job.org |
 
 **Data model (12 Prisma models):** `User` · `Project` · `Task` · `Note` · `Company` ·
 `Contact` · `Deal` · `Activity` · `Campaign` · `Post` · `Event` · `Notification`
@@ -489,35 +494,79 @@ GET/POST /notifications · PATCH/DELETE /notifications/:id
 
 POST   /assistant/ask
 GET    /health          → { status, db, timestamp }
+GET    /health/live     → { status, ip, timestamp }   (never touches the database)
 ```
 
 `/health` reports database reachability separately from process liveness, so a running
-API with a dead DB is visible rather than silently green.
+API with a dead DB is visible rather than silently green (503). `/health/live` is liveness only:
+the keep-awake pinger calls it so it doesn't wake the database, and it echoes the caller's IP as
+the API sees it, which is how `TRUST_PROXY` was verified on Render.
 
 ---
 
 ## 10 · Testing & CI
 
-- **Unit** (38): Jest for the API (auth, account, ownership checks, error mapping, company lookup,
-  demo reset, projects) and Vitest for the web app (date handling, the calculator, error text).
-- **E2E** (5): `apps/api/test/app.e2e-spec.ts` runs against a live PostgreSQL via
-  supertest. It covers register → create → list, cross-account isolation (another
-  user's records can't be read, edited, deleted or *linked*), and session revocation
+- **Unit** (82): Jest for the API, 61 (auth, account, assistant, campaigns, ownership checks,
+  error mapping, company lookup, demo reset, onboarding, projects), and Vitest for the web app,
+  21 (date handling, the calculator, error text).
+- **E2E** (6): `apps/api/test/app.e2e-spec.ts` runs against a live PostgreSQL via
+  supertest. It covers health and liveness, register → create → list, cross-account isolation
+  (another user's records can't be read, edited, deleted or *linked*), and session revocation
   after a password change.
-- **CI**: `.github/workflows/ci.yml` runs `npm ci`, applies the migrations to a
-  Postgres 16 service, then typecheck → lint (all workspaces) → unit tests → build → e2e
-  on every push and PR.
+- **CI** (`.github/workflows/ci.yml`, every push and PR), two jobs:
+  - **build-test**: `npm ci`, migrations on a Postgres 16 service, then typecheck → lint (all
+    workspaces) → unit tests → build → e2e.
+  - **docker**: builds both production images, boots the API image in production mode against
+    Postgres (migrations on start, then `/health`), and checks the web image serves the app with
+    its CSP and security headers. Render deploys from the same Dockerfile, so a broken image fails
+    here first.
 
 ---
 
 ## 11 · Deployment
 
-See **[DEPLOYMENT.md](./DEPLOYMENT.md)**. Primary target is **free and always live**: a **Neon**
-Postgres, the API as a **Render** free web service kept awake by a pinger on `/health/live`, and
-the web app as a Render static site, all defined in `render.yaml`. Railway (paid) and Fly.io are
-appendices. Three pieces: managed Postgres, the API (`apps/api/Dockerfile`, multi-stage Node 22 Alpine), and the web app
-(`apps/web/Dockerfile`, built then served by nginx with SPA fallback and immutable
-asset caching).
+BizzNex is **live, free and always on**:
+
+| Piece | Where | Address |
+|---|---|---|
+| Web app | Render static site (CDN, never sleeps) | **[bizznex.cheruvathoor.com](https://bizznex.cheruvathoor.com)** |
+| API | Render free web service, Docker (`apps/api/Dockerfile`, Node 22) | [bizznex-api.cheruvathoor.com/health](https://bizznex-api.cheruvathoor.com/health) |
+| Database | Neon serverless Postgres (free plan) | private; only the API connects |
+| Keep-awake | cron-job.org, `GET /health/live` every 10 minutes | — |
+
+```
+browser ──► Render CDN (web app, static)
+   │
+   └──────► Cloudflare ──► Render proxies ──► NestJS API ──► Neon Postgres
+                                                  ▲
+                cron-job.org, every 10 min ───────┘  (/health/live: no DB query)
+```
+
+How it fits together:
+- **`render.yaml`** is a Render Blueprint that creates both services. `JWT_SECRET` is generated by
+  Render; `DATABASE_URL`, `CORS_ORIGIN` and `VITE_API_URL` are set in the dashboard. Every push
+  to `main` redeploys both.
+- **Migrations** run on every API start (`prisma migrate deploy`), so a schema change ships with
+  the commit that makes it.
+- **Keep-awake:** Render's free API sleeps after 15 minutes without requests. The pinger hits
+  `/health/live`, which skips the database, so Neon still suspends between real visits and stays
+  inside its free compute.
+- **`TRUST_PROXY=3`:** requests reach the API through Cloudflare and two Render proxies. Measured on
+  the live service: at 1 the API saw a Render `10.x` address, at 2 a Cloudflare edge, at 3 the
+  visitor, and forged `X-Forwarded-For` values were ignored.
+- **`VITE_API_URL`** is baked into the web build, so changing it needs a cache-clearing rebuild;
+  **`CORS_ORIGIN`** must match the web address exactly.
+- **Free-tier limits:** Render 750 instance hours (one always-on service) and 5 GB bandwidth a
+  month, Neon about 100 compute hours. With the pinger on `/health/live`, both stay inside them.
+- **Custom domains:** two CNAME records point `bizznex` and `bizznex-api` at the Render services,
+  which issue the HTTPS certificates ([DEPLOYMENT.md, step 6](./DEPLOYMENT.md#step-6--use-your-own-domain-optional)).
+  `CORS_ORIGIN` names only `https://bizznex.cheruvathoor.com`, so the `onrender.com` web address
+  still loads but can't sign in; share the custom domain.
+
+The full runbook, from creating the database to troubleshooting, is in
+**[DEPLOYMENT.md](./DEPLOYMENT.md)**. It also covers Docker Compose, Railway (paid) and Fly.io,
+and the web app's own `apps/web/Dockerfile` (nginx with SPA fallback and immutable asset caching)
+for hosts other than Render.
 
 `DEPLOYMENT.md` carries a **pre-deploy checklist**, including refreshing
 `bizznex-case-study.html` — it's a living document that must be re-diffed against the
@@ -527,9 +576,11 @@ shipped tokens, components and tool inventory before each production deploy.
 
 ## 12 · Honest status
 
-**Working and verified:** typecheck and lint clean in all three workspaces, 38 unit
-tests, 5 e2e tests against Postgres, a clean production build, and browser runs of the
-onboarding, settings and CRUD flows (including dates in a US time zone).
+**Working and verified:** typecheck and lint clean in all three workspaces, 82 unit
+tests, 6 e2e tests against Postgres, both production Docker images built and booted in CI, a
+clean production build, and browser runs of the onboarding, settings and CRUD flows (including
+dates in a US time zone). **Deployed** on Render + Neon and checked live: `/health` reports the
+database up, the client IP is the visitor's own, and forged forwarding headers are ignored.
 
 **Simulated by necessity** (needs third-party credentials, labelled with `PreviewBadge`
 in-product): real email sending and real social posting. The in-app
@@ -595,6 +646,7 @@ bizznex/
 ├── packages/shared/      # types + Zod schemas — one contract, both sides
 ├── design-style-guides/  # every explored direction, preserved
 ├── scripts/local-db.mjs  # embedded Postgres, no Docker needed
+├── render.yaml          # Render Blueprint: API (Docker) + web (static site)
 ├── docker-compose.yml · DEPLOYMENT.md · .github/workflows/ci.yml
 ```
 
