@@ -12,6 +12,19 @@ services:
     dockerfilePath: ./apps/api/Dockerfile
     dockerContext: .
     healthCheckPath: /health
+    # Rebuild only when something the API image is built from changes (see apps/api/Dockerfile);
+    # docs, the web app and tests don't redeploy it. Free workspaces have limited build minutes.
+    buildFilter:
+      paths:
+        - apps/api/**
+        - packages/shared/**
+        - package.json
+        - package-lock.json
+        - apps/web/package.json # copied into the image so npm ci can check the lockfile
+        - .dockerignore
+      ignoredPaths:
+        - apps/api/test/**
+        - "**/*.spec.ts"
     envVars:
       - key: DATABASE_URL
         sync: false # Neon *direct* (not pooled) connection string, ending in ?sslmode=require
@@ -30,6 +43,21 @@ services:
     runtime: static
     buildCommand: npm ci --workspace @bizznex/web --workspace @bizznex/shared --include-workspace-root=false && npm run build -w @bizznex/shared && npm run build -w @bizznex/web
     staticPublishPath: ./apps/web/dist
+    # Rebuild only for the app and the design documents it ships (designDocs() in
+    # apps/web/vite.config.ts); README, DEPLOYMENT.md, docs/ and API-only changes don't.
+    buildFilter:
+      paths:
+        - apps/web/**
+        - packages/shared/**
+        - package.json
+        - package-lock.json
+        - bizznex-case-study.html
+        - image.png
+        - design-style-guides/bizznex-identity-skyline.html
+        - design-style-guides/bizznex-identity.html
+        - design-style-guides/bizznex-logo-options.html
+      ignoredPaths:
+        - "apps/web/src/**/*.test.ts"
     envVars:
       - key: VITE_API_URL
         sync: false # the API's URL, e.g. https://bizznex-api.onrender.com (baked in at build time)
