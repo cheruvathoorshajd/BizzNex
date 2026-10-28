@@ -62,3 +62,55 @@ jobs:
 
       - name: E2E (API)
         run: npm run test:e2e -w @bizznex/api
+
+  # Build both production images and boot the API image the way a host would (production mode,
+  # migrations on start), so a broken Dockerfile fails here and not on the first deploy.
+  docker:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: bizznex
+          POSTGRES_PASSWORD: bizznex
+          POSTGRES_DB: bizznex
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bizznex"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build API image
+        run: docker build -f apps/api/Dockerfile -t bizznex-api .
+
+      - name: Build web image
+        run: docker build -f apps/web/Dockerfile --build-arg VITE_API_URL=http://localhost:3001 -t bizznex-web .
+
+      - name: Boot the API image and check /health
+        run: |
+          docker run -d --name api --network host \
+            -e NODE_ENV=production \
+            -e DATABASE_URL=postgresql://bizznex:bizznex@localhost:5432/bizznex?schema=public \
+            -e JWT_SECRET=$(openssl rand -hex 32) \
+            -e CORS_ORIGIN=http://localhost:8080 \
+            -e PORT=3001 \
+            bizznex-api
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:3001/health; then exit 0; fi
+            sleep 2
+          done
+          docker logs api
+          exit 1
+
+      - name: Boot the web image and check it serves the app
+        run: |
+          docker run -d --name web -p 8080:80 bizznex-web
+          sleep 2
+          curl -fsS http://localhost:8080/ | grep -q '<div id="root"'
+          curl -fsSI http://localhost:8080/ | grep -qi 'content-security-policy'
