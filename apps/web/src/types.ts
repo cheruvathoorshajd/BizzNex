@@ -1,9 +1,8 @@
 /** Domain types come from the shared contract; client-only types stay local. */
 export type {
-  Project, Task, Note, Status, User,
-  Company, Contact, Deal, DealStage, Activity, ActivityType,
-  Campaign, CampaignStatus, Post, PostStatus, EventItem, NotificationItem,
-  AssistantReply,
+  Project, Task, Note, Status,
+  Company, Contact, Deal, DealStage, ActivityType,
+  EventItem,
 } from '@bizznex/shared';
 
 export type Language = 'en' | 'es' | 'fr';
