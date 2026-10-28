@@ -12,8 +12,8 @@ import type {
   Contact, CreateContactInput, UpdateContactInput,
   Deal, CreateDealInput, UpdateDealInput,
   Activity, CreateActivityInput, UpdateActivityInput,
-  Campaign, CreateCampaignInput, UpdateCampaignInput,
-  Post, CreatePostInput, UpdatePostInput,
+  Campaign, CreateCampaignInput,
+  Post, CreatePostInput,
   EventItem, CreateEventInput, UpdateEventInput,
   NotificationItem, UpdateNotificationInput,
   AssistantReply, AssistantAskInput,
@@ -253,10 +253,6 @@ export const api = createApi({
       query: (body) => ({ url: '/campaigns', method: 'POST', body }),
       invalidatesTags: ['Campaigns', 'Notifications'], // sending/publishing adds a notification on the server
     }),
-    updateCampaign: b.mutation<Campaign, { id: string; body: UpdateCampaignInput }>({
-      query: ({ id, body }) => ({ url: `/campaigns/${id}`, method: 'PATCH', body }),
-      invalidatesTags: ['Campaigns', 'Notifications'], // sending/publishing adds a notification on the server
-    }),
     deleteCampaign: b.mutation<{ ok: boolean }, string>({
       query: (id) => ({ url: `/campaigns/${id}`, method: 'DELETE' }),
       invalidatesTags: ['Campaigns'],
@@ -266,10 +262,6 @@ export const api = createApi({
     getPosts: b.query<Post[], void>({ query: () => '/posts', providesTags: ['Posts'] }),
     createPost: b.mutation<Post, CreatePostInput>({
       query: (body) => ({ url: '/posts', method: 'POST', body }),
-      invalidatesTags: ['Posts', 'Notifications'], // sending/publishing adds a notification on the server
-    }),
-    updatePost: b.mutation<Post, { id: string; body: UpdatePostInput }>({
-      query: ({ id, body }) => ({ url: `/posts/${id}`, method: 'PATCH', body }),
       invalidatesTags: ['Posts', 'Notifications'], // sending/publishing adds a notification on the server
     }),
     deletePost: b.mutation<{ ok: boolean }, string>({
@@ -323,8 +315,8 @@ export const {
   useGetContactsQuery, useCreateContactMutation, useUpdateContactMutation, useDeleteContactMutation,
   useGetDealsQuery, useCreateDealMutation, useUpdateDealMutation, useDeleteDealMutation,
   useGetActivitiesQuery, useCreateActivityMutation, useUpdateActivityMutation, useDeleteActivityMutation,
-  useGetCampaignsQuery, useCreateCampaignMutation, useUpdateCampaignMutation, useDeleteCampaignMutation,
-  useGetPostsQuery, useCreatePostMutation, useUpdatePostMutation, useDeletePostMutation,
+  useGetCampaignsQuery, useCreateCampaignMutation, useDeleteCampaignMutation,
+  useGetPostsQuery, useCreatePostMutation, useDeletePostMutation,
   useGetEventsQuery, useCreateEventMutation, useUpdateEventMutation, useDeleteEventMutation,
   useGetNotificationsQuery, useUpdateNotificationMutation, useDeleteNotificationMutation,
   useAskAssistantMutation,
