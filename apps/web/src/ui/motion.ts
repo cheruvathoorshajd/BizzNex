@@ -13,7 +13,6 @@ import type { AutoAnimationPlugin } from '@formkit/auto-animate';
 
 export const MOTION_SCALE = 1.5;
 export const EASE = 'cubic-bezier(.2, .8, .2, 1)';
-export const SPRING = 'cubic-bezier(.34, 1.56, .64, 1)';
 
 /** A duration from the study, scaled. */
 export const dur = (ms: number) => Math.round(ms * MOTION_SCALE);
