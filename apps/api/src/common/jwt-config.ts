@@ -1,5 +1,5 @@
 import type { ConfigService } from '@nestjs/config';
-import type { JwtModuleOptions } from '@nestjs/jwt';
+import type { JwtModuleOptions, JwtSignOptions } from '@nestjs/jwt';
 
 const DEV_SECRET = 'bizznex-dev-only-secret';
 
@@ -19,7 +19,8 @@ export function jwtSecret(config: ConfigService): string {
 export function jwtOptions(config: ConfigService): JwtModuleOptions {
   return {
     secret: jwtSecret(config),
-    signOptions: { expiresIn: config.get<string>('JWT_EXPIRES_IN') || '7d' },
+    // a duration such as "7d" or "12h" (the `ms` format jsonwebtoken reads)
+    signOptions: { expiresIn: (config.get<string>('JWT_EXPIRES_IN') || '7d') as NonNullable<JwtSignOptions['expiresIn']> },
   };
 }
 
