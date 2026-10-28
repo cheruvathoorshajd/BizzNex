@@ -401,7 +401,7 @@ chunk so it never blocks first paint.
 | **Web** | React 18.3, TypeScript 5.6, Vite 6, Redux Toolkit 2.4 + RTK Query, react-intl 7, Sass, three.js 0.160, @formkit/auto-animate |
 | **API** | NestJS 10, Prisma 5.22, PostgreSQL, Passport JWT, bcryptjs, Zod, Swagger, helmet, @nestjs/throttler |
 | **Shared** | TypeScript types + Zod schemas |
-| **Infra** | Docker multi-stage, docker-compose, nginx, GitHub Actions, Railway |
+| **Infra** | Docker multi-stage, docker-compose, nginx, GitHub Actions, Render, Neon (serverless Postgres) |
 
 **Data model (12 Prisma models):** `User` · `Project` · `Task` · `Note` · `Company` ·
 `Contact` · `Deal` · `Activity` · `Campaign` · `Post` · `Event` · `Notification`
@@ -515,9 +515,10 @@ API with a dead DB is visible rather than silently green.
 
 ## 11 · Deployment
 
-See **[DEPLOYMENT.md](./DEPLOYMENT.md)**. Primary target **Railway** (managed Postgres +
-GitHub-driven deploys), with **Fly.io** and **Render** appendices. Three pieces: managed
-Postgres, the API (`apps/api/Dockerfile`, multi-stage Node 22 Alpine), and the web app
+See **[DEPLOYMENT.md](./DEPLOYMENT.md)**. Primary target is **free and always live**: a **Neon**
+Postgres, the API as a **Render** free web service kept awake by a pinger on `/health/live`, and
+the web app as a Render static site, all defined in `render.yaml`. Railway (paid) and Fly.io are
+appendices. Three pieces: managed Postgres, the API (`apps/api/Dockerfile`, multi-stage Node 22 Alpine), and the web app
 (`apps/web/Dockerfile`, built then served by nginx with SPA fallback and immutable
 asset caching).
 

@@ -648,11 +648,12 @@ kill -9 <pid>
 
 ## 11 · Deployment
 
-Full instructions: [`DEPLOYMENT.md`](./DEPLOYMENT.md). Primary target **Railway**
-(managed Postgres + GitHub deploys); Fly.io and Render documented as appendices.
+Full instructions: [`DEPLOYMENT.md`](./DEPLOYMENT.md). Primary target is free and always live:
+**Neon** Postgres + **Render** (API web service kept awake by a pinger, web as a static site),
+defined in `render.yaml`. Railway (paid) and Fly.io are documented as appendices.
 
 Three pieces: managed **Postgres**, the **API** (`apps/api/Dockerfile`, multi-stage Node
-20 Alpine, runs `prisma migrate deploy` on boot), and the **web** app (`apps/web/Dockerfile`,
+22 Alpine, runs `prisma migrate deploy` on boot), and the **web** app (`apps/web/Dockerfile`,
 built then served by nginx with SPA fallback).
 
 ### Required environment variables
