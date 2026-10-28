@@ -1,5 +1,8 @@
 # Deploying BizzNex
 
+**Live:** [bizznex.cheruvathoor.com](https://bizznex.cheruvathoor.com) (web) · [bizznex-api.cheruvathoor.com/health](https://bizznex-api.cheruvathoor.com/health) (API),
+deployed with the free Neon + Render setup below.
+
 BizzNex is a monorepo with three deployable pieces:
 
 | Piece | What | Dockerfile |

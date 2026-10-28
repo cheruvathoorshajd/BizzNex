@@ -385,7 +385,7 @@ tr.pick td:first-child { color: var(--accent); }
     <a class="opt" href="#logo">Logo</a>
     <button class="tgl" id="tgl" type="button"><span id="tgld">◑</span> <span id="tglt">Dark</span></button>
     <!-- the running app; change if it is hosted elsewhere -->
-    <a class="btn primary sm" data-app href="http://localhost:3005/?start=signup" style="color:var(--paper)">Open BizzNex</a>
+    <a class="btn primary sm" data-app href="https://bizznex.cheruvathoor.com/?start=signup" style="color:var(--paper)">Open BizzNex</a>
   </nav>
 </header>
 
@@ -399,7 +399,7 @@ tr.pick td:first-child { color: var(--accent); }
     <div class="hero-grid">
       <p class="lede">One quiet surface for projects, customers, deals, marketing and the tools in between — set like a page, not stacked in boxes. This is the story of how it was designed, and how it ships.</p>
       <div class="cta">
-        <a data-app href="http://localhost:3005/?start=signup" class="link">Open the app <span>→</span></a>
+        <a data-app href="https://bizznex.cheruvathoor.com/?start=signup" class="link">Open the app <span>→</span></a>
         <a href="#platform" class="link muted">Read the case study <span>↓</span></a>
       </div>
     </div>
@@ -408,6 +408,7 @@ tr.pick td:first-child { color: var(--accent); }
       <span>Layout <b>Studio</b></span>
       <span>Set in <b>Fraunces</b> &amp; <b>IBM Plex</b></span>
       <span>Updated <b>2026-10-28</b></span>
+      <span>Live <b><a href="https://bizznex.cheruvathoor.com" style="color:inherit">bizznex.cheruvathoor.com</a></b></span>
     </div>
   </section>
 
@@ -906,7 +907,7 @@ tr.pick td:first-child { color: var(--accent); }
     <header class="sec-h"><span class="folio">12</span><div><p class="spec"><span class="k">§ Maintenance</span><span>Living document</span></p><h2 class="sec-t">Keeping this current</h2></div></header>
     <div class="status">
       <span class="badge">Living document · last updated 2026-10-28</span>
-      <p class="small" style="margin:12px 0 0">This file is the full case study, served by the app at <code>/case-study.html</code>. The app’s opening page (<code>apps/web/src/views/Landing.tsx</code>) tells the product half of the same story and links here. Update both before every production deploy:</p>
+      <p class="small" style="margin:12px 0 0">This file is the full case study, served by the app at <code>/case-study.html</code> (live: <a href="https://bizznex.cheruvathoor.com/case-study.html">bizznex.cheruvathoor.com/case-study.html</a>). The app’s opening page (<code>apps/web/src/views/Landing.tsx</code>) tells the product half of the same story and links here. Update both before every production deploy:</p>
       <ul>
         <li><span class="bx"></span><span>Re-diff the tokens against <code>apps/web/src/styles/aurora.scss</code> — palette, type, radius, spacing, motion.</span></li>
         <li><span class="bx"></span><span>Check the page inventory against <code>apps/web/src/nav.ts</code> and each tool in <code>views/tools/*</code>.</span></li>
@@ -925,7 +926,7 @@ tr.pick td:first-child { color: var(--accent); }
     </div>
     <div>
       <b>Changelog</b><br>
-      2026-10-28 — Brought up to date with the product before the first public deploy: the pipeline figure (open deals only, $77.5k), Won and Lost as end states, the company lookup and the five-step demo wizard, the Spatial motion system, light Muted darkened to #686357 for WCAG AA, server-side notifications, i18n coverage, accessibility, the stack (NestJS 11, Zod 4) and how it ships (Docker, CI, Neon + Render, the CSP built into the page).<br>
+      2026-10-28 — Brought up to date with the product for the first public deploy, now live at https://bizznex.cheruvathoor.com: the pipeline figure (open deals only, $77.5k), Won and Lost as end states, the company lookup and the five-step demo wizard, the Spatial motion system, light Muted darkened to #686357 for WCAG AA, server-side notifications, i18n coverage, accessibility, the stack (NestJS 11, Zod 4) and how it ships (Docker, CI, Neon + Render, the CSP built into the page).<br>
       2026-10-16 — Kept the name BizzNex and adopted the Skyline logo (new section 11): mark, wordmark and favicon across the app; brand pages linked from the landing page and the Help menu.<br>
       2026-10-15 — Merged the design case study and the Aurora style guide into one document; updated for the CRM, the local assistant, onboarding and the landing page.<br>
       2026-09-17 — Initial case study: directions, tokens, components, Studio, build.
@@ -952,8 +953,8 @@ tr.pick td:first-child { color: var(--accent); }
     root.setAttribute('data-theme', dark ? 'light' : 'dark');
     d.textContent = dark ? '◑' : '◐'; tt.textContent = dark ? 'Dark' : 'Light';
   });
-  // served by the app at /case-study.html → links go to the app itself; opened from disk → the local dev server.
-  var app = (location.protocol.indexOf('http') === 0 ? '/' : 'http://localhost:3005/') + '?start=signup'; // opens on Create account
+  // served by the app at /case-study.html → links go to the app itself; opened from disk → the live app.
+  var app = (location.protocol.indexOf('http') === 0 ? '/' : 'https://bizznex.cheruvathoor.com/') + '?start=signup'; // opens on Create account
   document.querySelectorAll('a[data-app]').forEach(function (a) { a.setAttribute('href', app); });
   if (location.protocol.indexOf('http') === 0) {
     document.querySelectorAll('a[data-brand]').forEach(function (a) { a.setAttribute('href', '/brand/skyline.html'); });

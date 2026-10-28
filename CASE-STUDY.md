@@ -5,6 +5,9 @@ application was rebuilt on top of it. The canonical, interactive style guide liv
 alongside this file as **[`BizzNex-Style-Guide.html`](./BizzNex-Style-Guide.html)**
 (open it in any browser).
 
+**See it live:** the app is at **[bizznex.cheruvathoor.com](https://bizznex.cheruvathoor.com)** (click *Explore the demo*), and the
+full interactive case study is at [bizznex.cheruvathoor.com/case-study.html](https://bizznex.cheruvathoor.com/case-study.html).
+
 ---
 
 ## 1. The design journey

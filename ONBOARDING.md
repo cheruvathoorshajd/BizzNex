@@ -648,7 +648,7 @@ kill -9 <pid>
 
 ## 11 · Deployment
 
-Full instructions: [`DEPLOYMENT.md`](./DEPLOYMENT.md). Primary target is free and always live:
+**Live:** [bizznex.cheruvathoor.com](https://bizznex.cheruvathoor.com). Full instructions: [`DEPLOYMENT.md`](./DEPLOYMENT.md). Primary target is free and always live:
 **Neon** Postgres + **Render** (API web service kept awake by a pinger, web as a static site),
 defined in `render.yaml`. Railway (paid) and Fly.io are documented as appendices.
 

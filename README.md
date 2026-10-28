@@ -40,7 +40,7 @@ sign-in once its last reset is 30 minutes old. To run it yourself, see [§ 8](#8
 > onboarding is the *how*.
 
 > **Design artefacts:** canonical style guide → [`BizzNex-Style-Guide.html`](./BizzNex-Style-Guide.html) ·
-> full design story → [`bizznex-case-study.html`](./bizznex-case-study.html) ·
+> full design story → [`bizznex-case-study.html`](./bizznex-case-study.html) ([read it live](https://bizznex.cheruvathoor.com/case-study.html)) ·
 > condensed write-up → [`CASE-STUDY.md`](./CASE-STUDY.md)
 
 ---
@@ -604,7 +604,7 @@ teams and roles, CSV import, and the ERP modules (finance, inventory, orders, HR
 | File | What it is |
 |---|---|
 | [`BizzNex-Style-Guide.html`](./BizzNex-Style-Guide.html) | **Canonical** interactive style guide — *Aurora, Edition 2026*. Theme toggle, click-to-copy swatches. |
-| [`bizznex-case-study.html`](./bizznex-case-study.html) | Full design case study — thesis, three directions, v1→v4 history, token reference, component gallery, windowing paradigms, decision log. Renders itself in Aurora. **Living document.** |
+| [`bizznex-case-study.html`](./bizznex-case-study.html) | Full design case study — thesis, three directions, v1→v4 history, token reference, component gallery, windowing paradigms, decision log. Renders itself in Aurora. **Living document.** Live at [bizznex.cheruvathoor.com/case-study.html](https://bizznex.cheruvathoor.com/case-study.html). |
 | [`CASE-STUDY.md`](./CASE-STUDY.md) | Condensed markdown write-up |
 | `design-style-guides/index.html` | Index of the visual direction options |
 | `design-style-guides/option-1-aurora.html` | **Aurora ✅** (identical to the root style guide) |
