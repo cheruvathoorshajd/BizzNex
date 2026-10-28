@@ -226,9 +226,9 @@ export const INTROS: Record<ViewId, FeatureIntro> = {
   deals: {
     kicker: 'CRM · Deals',
     title: 'Your sales pipeline',
-    lede: 'Move each deal through Lead → Qualified → Proposal → Won (or Lost). Each column shows its total value.',
+    lede: 'Move each deal through Lead → Qualified → Proposal, then mark it Won or Lost. Each column shows its total value.',
     tips: [
-      'Use ◀ and ▶ on a card to move it to the previous or next stage.',
+      'Use ◀ and ▶ to move a deal between Lead, Qualified and Proposal. Mark won or Mark lost closes it, and Reopen brings it back.',
       'When you win a deal, BizzNex adds a notification for it.',
       'Link a contact and a company so the assistant can report on the deal.',
     ],
