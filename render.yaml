@@ -20,7 +20,9 @@ services:
       - key: CORS_ORIGIN
         sync: false # the web site's URL, e.g. https://bizznex-web.onrender.com
       - key: TRUST_PROXY
-        value: "1" # Render's proxy; check with GET /health/live that `ip` is your own address
+        # Cloudflare, then two Render proxies (measured 2026-10-28: 1 showed a 10.x Render address,
+        # 2 a Cloudflare edge, 3 the visitor). GET /health/live must show your own IP.
+        value: "3"
 
   # React app as a static site: served from Render's CDN, never sleeps, uses no instance hours.
   - type: web

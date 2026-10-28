@@ -136,7 +136,7 @@ repos with no activity for 60 days.)
 | Check | Expect |
 |-------|--------|
 | `https://<api-url>/health` | `{"status":"ok","db":"up",…}` |
-| `https://<api-url>/health/live` | `"ip"` is **your own public IP**. If it is a private address (`10.x`, `172.16–31.x`, `192.168.x`), raise `TRUST_PROXY` by one and redeploy; otherwise every visitor shares one sign-in rate limit. |
+| `https://<api-url>/health/live` | `"ip"` is **your own public IP**. `render.yaml` sets `TRUST_PROXY` to `3` (Cloudflare, then two Render proxies, as measured). If `ip` is a private address (`10.x`) or a Cloudflare one (`104.16–27.x`, `172.64–71.x`), raise `TRUST_PROXY` by one and redeploy; otherwise every visitor shares one sign-in rate limit. Then send a fake `X-Forwarded-For` (`curl -H "X-Forwarded-For: 203.0.113.9" https://<api-url>/health/live`): `ip` must still be yours, or the setting is too high. |
 | Open the web URL, click **Explore the demo** | The onboarding wizard opens with the sample business. |
 | Register a new account | You land in your own empty workspace. |
 | `curl -sI https://<web-url>/` | Has `x-frame-options: DENY`; the page source has a `Content-Security-Policy` `<meta>`. |
