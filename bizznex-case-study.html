@@ -30,7 +30,7 @@
 }
 :root[data-theme="light"] {
   --paper: #F5F1E9; --paper-2: #EDE7DA; --paper-3: #E7E0D0;
-  --ink: #211D16; --ink-soft: #4E4A40; --muted: #8B8474; --faint: #C0B9A6;
+  --ink: #211D16; --ink-soft: #4E4A40; --muted: #686357; --faint: #C0B9A6;
   --rule: rgba(33, 29, 22, .18); --rule-soft: rgba(33, 29, 22, .09);
   --accent: #5B41E0; --accent-tint: rgba(91, 65, 224, .10);
   --ok: #2E8F60; --warn: #B67A16; --bad: #C24A3E;
@@ -407,7 +407,7 @@ tr.pick td:first-child { color: var(--accent); }
       <span>System <b>Aurora · v4 editorial</b></span>
       <span>Layout <b>Studio</b></span>
       <span>Set in <b>Fraunces</b> &amp; <b>IBM Plex</b></span>
-      <span>Updated <b>2026-10-16</b></span>
+      <span>Updated <b>2026-10-28</b></span>
     </div>
   </section>
 
@@ -421,7 +421,7 @@ tr.pick td:first-child { color: var(--accent); }
     <div class="lrows">
       <div class="row"><span class="l">Active projects</span><span><span class="v">2</span></span></div>
       <div class="row"><span class="l">Open tasks</span><span><span class="v">3</span><span class="d">1 in progress</span></span></div>
-      <div class="row"><span class="l">Pipeline</span><span><span class="v">$86.1k</span><span class="d">4 deals</span></span></div>
+      <div class="row"><span class="l">Pipeline</span><span><span class="v">$77.5k</span><span class="d">3 open deals</span></span></div>
       <div class="row"><span class="l">Completion</span><span><span class="v">40%</span><span class="d">2 of 5 tasks</span></span></div>
     </div>
   </section>
@@ -449,7 +449,7 @@ tr.pick td:first-child { color: var(--accent); }
       </ul></div>
       <div class="grp"><span class="gk">CRM</span><h5>Know the customer</h5><ul>
         <li><b>Contacts &amp; Companies</b>People linked to the companies they work for.</li>
-        <li><b>Deals</b>A pipeline board: Lead → Qualified → Proposal → Won or Lost, with a total per stage.</li>
+        <li><b>Deals</b>A pipeline board: Lead → Qualified → Proposal, then <i>Mark won</i> or <i>Mark lost</i>. Each stage shows its total; the pipeline counts open deals only.</li>
         <li><b>Activities</b>Calls, emails, meetings, notes and follow-ups, linked to contacts and deals.</li>
       </ul></div>
       <div class="grp"><span class="gk">Tools</span><h5>Everything in between</h5><ul>
@@ -560,7 +560,7 @@ tr.pick td:first-child { color: var(--accent); }
       <button class="sw" data-copy="#E7E0D0"><span class="chip-c" style="background:#E7E0D0"></span><span class="lab"><span class="nm">Paper-3</span><span class="hex">#E7E0D0</span></span></button>
       <button class="sw" data-copy="#211D16"><span class="chip-c" style="background:#211D16"></span><span class="lab"><span class="nm">Ink</span><span class="hex">#211D16</span></span></button>
       <button class="sw" data-copy="#4E4A40"><span class="chip-c" style="background:#4E4A40"></span><span class="lab"><span class="nm">Ink-soft</span><span class="hex">#4E4A40</span></span></button>
-      <button class="sw" data-copy="#8B8474"><span class="chip-c" style="background:#8B8474"></span><span class="lab"><span class="nm">Muted</span><span class="hex">#8B8474</span></span></button>
+      <button class="sw" data-copy="#686357"><span class="chip-c" style="background:#686357"></span><span class="lab"><span class="nm">Muted</span><span class="hex">#686357</span></span></button>
       <button class="sw" data-copy="#C0B9A6"><span class="chip-c" style="background:#C0B9A6"></span><span class="lab"><span class="nm">Faint</span><span class="hex">#C0B9A6</span></span></button>
       <button class="sw" data-copy="#5B41E0"><span class="chip-c" style="background:#5B41E0"></span><span class="lab"><span class="nm">Accent</span><span class="hex">#5B41E0</span></span></button>
       <button class="sw" data-copy="#2E8F60"><span class="chip-c" style="background:#2E8F60"></span><span class="lab"><span class="nm">OK</span><span class="hex">#2E8F60</span></span></button>
@@ -610,10 +610,10 @@ tr.pick td:first-child { color: var(--accent); }
       <div>
         <h4>Motion</h4>
         <ul class="clean">
-          <li>One curve: <code>cubic-bezier(.22, 1, .36, 1)</code>.</li>
-          <li>120ms press · 200ms hover · 250ms transform · 500ms theme.</li>
-          <li>Set-pieces: hero rise 1s · aurora drift 34s · toast 300ms.</li>
-          <li>Static blocks never animate; <code>prefers-reduced-motion</code> is honoured.</li>
+          <li><b>Spatial:</b> things travel to and from where they belong. Pages slide the way you navigate, dialogs grow out of the button you pressed, windows come from the sidebar and go into the dock, and dark mode spreads from its switch.</li>
+          <li>Three curves: <code>--ease</code> <code>cubic-bezier(.22, 1, .36, 1)</code> for states, <code>--ease-sp</code> <code>cubic-bezier(.2, .8, .2, 1)</code> for travel, <code>--spring</code> for the toast.</li>
+          <li>One speed dial: every duration is multiplied by <code>--m: 1.5</code> (<code>MOTION_SCALE</code> in <code>ui/motion.ts</code>), so the whole product calms down or speeds up together.</li>
+          <li>Static blocks never animate; <code>prefers-reduced-motion</code> turns all of it into instant changes.</li>
         </ul>
       </div>
     </div>
@@ -766,14 +766,14 @@ tr.pick td:first-child { color: var(--accent); }
     <div class="scroll-x"><table class="ledger spec-t">
       <thead><tr><th></th><th>New account</th><th>Demo</th><th>Returning sign-in</th></tr></thead>
       <tbody>
-        <tr><td>Setup wizard</td><td>6 steps — business, goals, look, sample data</td><td>4 steps — no business or data steps</td><td class="no">None</td></tr>
+        <tr><td>Setup wizard</td><td>6 steps — business (with company lookup), goals, look, sample data</td><td>5 steps — the same lookup, no data step; answers stay in this browser</td><td class="no">None</td></tr>
         <tr><td>Product tour</td><td>Offered · 8 stops</td><td>Offered · 8 stops</td><td>On request · 7 stops</td></tr>
         <tr><td>Checklist &amp; page guides</td><td class="yes">Yes — ticks off from real records</td><td class="yes">Yes — counts this visit only</td><td class="no">None</td></tr>
         <tr><td>Progress saved</td><td>On the account (any device)</td><td>In this browser — the demo is shared</td><td>—</td></tr>
-        <tr class="pick"><td>Help (?) menu</td><td>Tour · page guide · feature guide · checklist · setup · sample data</td><td>Tour · page guide · feature guide · checklist · setup · create your own account</td><td>Tour · page guide · feature guide · sample data</td></tr>
+        <tr class="pick"><td>Help (?) menu</td><td>Tour · page guide · feature guide · brand · checklist · setup · sample data</td><td>Tour · page guide · feature guide · brand · checklist · setup · create your own account</td><td>Tour · page guide · feature guide · brand · sample data</td></tr>
       </tbody>
     </table></div>
-    <p class="small">Sample data is a real example business (2 projects, 3 companies, 4 deals, activities, notes, a post, a newsletter, events). Its record ids are remembered, so the checklist never counts it and one click removes it without touching anything the user created.</p>
+    <p class="small"><b>Company lookup.</b> Typing a company name in the business step looks it up in Wikidata (no key, no account) and fills in the website, industry, team size, country and, when listed, a logo. Sample data is a real example business (2 projects, 3 companies, 4 deals, activities, notes, a post, a newsletter, events). Its record ids are remembered, so the checklist never counts it and one click removes it without touching anything the user created.</p>
   </section>
 
   <!-- 09 · BUILD -->
@@ -785,7 +785,7 @@ tr.pick td:first-child { color: var(--accent); }
         <h4>Stack</h4>
         <ul class="clean">
           <li><b>Web</b> — React 18, TypeScript, Vite; Redux Toolkit and RTK Query; react-intl; one hand-written <code>aurora.scss</code>; three.js for the dashboard globe.</li>
-          <li><b>API</b> — NestJS, Prisma, PostgreSQL, JWT auth; shared Zod contracts in <code>@bizznex/shared</code>.</li>
+          <li><b>API</b> — NestJS 11, Prisma, PostgreSQL, JWT auth with revocable sessions; shared Zod 4 contracts in <code>@bizznex/shared</code>.</li>
           <li><b>Dropped</b> Fluent UI, MUI, framer-motion and styled-components — they impose the card idiom the brief rejects.</li>
           <li><b>No outside AI service.</b> Brenda answers from the user’s own records with no API key and no network calls.</li>
         </ul>
@@ -793,7 +793,7 @@ tr.pick td:first-child { color: var(--accent); }
         <ul class="clean">
           <li><b>Workspace</b> — Project, Task, Note.</li>
           <li><b>CRM</b> — Company, Contact, Deal (Lead · Qualified · Proposal · Won · Lost), Activity (Call · Email · Meeting · Note · Task).</li>
-          <li><b>Tools</b> — Post, Campaign, Event, Notification. Winning a deal writes a real notification.</li>
+          <li><b>Tools</b> — Post, Campaign, Event, Notification. Only the server writes notifications: a deal won, a campaign sent, a post published. Scheduled campaigns go out when they're next read, so no job runner is needed.</li>
           <li><b>Onboarding</b> — one JSON field on the user, merged by <code>PATCH /onboarding</code>; sample data via <code>POST / DELETE /onboarding/sample</code>.</li>
         </ul>
       </div>
@@ -807,10 +807,17 @@ tr.pick td:first-child { color: var(--accent); }
         </ul>
         <h4>Cross-cutting</h4>
         <ul class="clean">
-          <li><b>Theming</b> — <code>data-theme</code> on <code>&lt;html&gt;</code> flips the token set, saved per browser.</li>
-          <li><b>i18n</b> — navigation and app chrome in English, Spanish and French; CRM and onboarding copy is English for now.</li>
+          <li><b>Theming</b> — <code>data-theme</code> on <code>&lt;html&gt;</code> flips the token set, set before first paint; Light, Dark or Auto (follows the OS), saved per browser.</li>
+          <li><b>i18n</b> — navigation, the dashboard, projects and tasks in English, Spanish and French; the CRM, tools, settings, landing, sign-in and onboarding are English for now.</li>
           <li><b>Responsive</b> — breakpoints at 900 / 860 / 640 / 480px; the sidebar becomes a drawer, windows go full-width.</li>
-          <li><b>Accessibility</b> — visible focus rings, labelled icon buttons, keyboard-driven tour (← → Esc), dialogs with focus placement.</li>
+          <li><b>Accessibility</b> — visible focus rings, labelled icon buttons, keyboard-driven tour (← → Esc), dialogs and tool windows that take and return focus, muted text at WCAG AA contrast, and error boundaries around every page and window.</li>
+        </ul>
+        <h4>Delivery</h4>
+        <ul class="clean">
+          <li><b>Images</b> — multi-stage Docker builds on Node 22: the API runs as a non-root user and applies migrations on start; the web app is static files.</li>
+          <li><b>CI</b> — every push runs the typecheck, lint, unit and end-to-end tests against PostgreSQL, then builds both images and boots the API in production mode.</li>
+          <li><b>Hosting</b> — free and always live: Neon Postgres, the API on Render kept awake by a ping on <code>/health/live</code>, the web app on Render’s CDN (<code>render.yaml</code>).</li>
+          <li><b>Security</b> — the Content-Security-Policy ships inside the page with its script hash computed at build; rate-limited sign-in; sessions revocable everywhere.</li>
         </ul>
       </div>
     </div>
@@ -836,6 +843,10 @@ tr.pick td:first-child { color: var(--accent); }
         <tr><td>Sample data remembered by id</td><td>So the checklist counts only real work, and removal never touches the user’s own records.</td></tr>
         <tr><td>Clear the cache on account switch</td><td>One account must never see another’s cached data.</td></tr>
         <tr><td>A local assistant</td><td>Answers from your own data with no keys, no cost and nothing leaving the product.</td></tr>
+        <tr><td>Won and Lost are end states</td><td>A closed deal is reached by “Mark won” or “Mark lost” and left by “Reopen”, so ◀ ▶ can’t close a deal by accident, and the pipeline total counts open deals only.</td></tr>
+        <tr><td>Notifications only from the server</td><td>A notification means something happened (a deal won, a campaign sent), so the client can’t invent one.</td></tr>
+        <tr><td>The security policy is built into the page</td><td>The build writes the Content-Security-Policy into <code>index.html</code> and hashes its one inline script, so it holds on any host and never goes stale.</td></tr>
+        <tr><td>Free and always live</td><td>Neon Postgres and Render, kept awake by a ping on <code>/health/live</code>, which skips the database so the database can still sleep between visits.</td></tr>
         <tr><td>The Skyline logo</td><td>Three towers on one baseline with one lit window, the light that says the business is open. Developed from the founder’s own reference sketch, then drawn with one stroke on a 48-unit grid so it holds from a 16px tab to a sign. <a href="/brand/skyline.html">Full identity →</a></td></tr>
       </tbody>
     </table></div>
@@ -894,7 +905,7 @@ tr.pick td:first-child { color: var(--accent); }
   <section class="sec">
     <header class="sec-h"><span class="folio">12</span><div><p class="spec"><span class="k">§ Maintenance</span><span>Living document</span></p><h2 class="sec-t">Keeping this current</h2></div></header>
     <div class="status">
-      <span class="badge">Living document · last updated 2026-10-16</span>
+      <span class="badge">Living document · last updated 2026-10-28</span>
       <p class="small" style="margin:12px 0 0">This file is the full case study, served by the app at <code>/case-study.html</code>. The app’s opening page (<code>apps/web/src/views/Landing.tsx</code>) tells the product half of the same story and links here. Update both before every production deploy:</p>
       <ul>
         <li><span class="bx"></span><span>Re-diff the tokens against <code>apps/web/src/styles/aurora.scss</code> — palette, type, radius, spacing, motion.</span></li>
@@ -914,6 +925,7 @@ tr.pick td:first-child { color: var(--accent); }
     </div>
     <div>
       <b>Changelog</b><br>
+      2026-10-28 — Brought up to date with the product before the first public deploy: the pipeline figure (open deals only, $77.5k), Won and Lost as end states, the company lookup and the five-step demo wizard, the Spatial motion system, light Muted darkened to #686357 for WCAG AA, server-side notifications, i18n coverage, accessibility, the stack (NestJS 11, Zod 4) and how it ships (Docker, CI, Neon + Render, the CSP built into the page).<br>
       2026-10-16 — Kept the name BizzNex and adopted the Skyline logo (new section 11): mark, wordmark and favicon across the app; brand pages linked from the landing page and the Help menu.<br>
       2026-10-15 — Merged the design case study and the Aurora style guide into one document; updated for the CRM, the local assistant, onboarding and the landing page.<br>
       2026-09-17 — Initial case study: directions, tokens, components, Studio, build.
