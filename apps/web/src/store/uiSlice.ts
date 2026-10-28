@@ -36,7 +36,6 @@ const slice = createSlice({
     },
     /** The OS scheme changed (or was first read) while following it. */
     systemThemeChanged: (s, a: PayloadAction<'light' | 'dark'>) => { if (s.followSystem) s.theme = a.payload; },
-    toggleTheme: (s) => { s.followSystem = false; s.theme = s.theme === 'dark' ? 'light' : 'dark'; },
     setIntroSeen: (s, a: PayloadAction<boolean>) => { s.introSeen = a.payload; },
     setAuthMode: (s, a: PayloadAction<AuthMode>) => { s.authMode = a.payload; },
   },
@@ -44,7 +43,7 @@ const slice = createSlice({
   extraReducers: (b) => { b.addCase(logout, (s) => { s.authMode = 'signin'; s.introSeen = true; }); },
 });
 
-export const { setLanguage, setTheme, systemThemeChanged, toggleTheme, setIntroSeen, setAuthMode } = slice.actions;
+export const { setLanguage, setTheme, systemThemeChanged, setIntroSeen, setAuthMode } = slice.actions;
 /** The theme choice as the switch shows it. */
 export const themeMode = (s: { ui: UIState }): ThemeMode => (s.ui.followSystem ? 'system' : s.ui.theme);
 export default slice.reducer;
