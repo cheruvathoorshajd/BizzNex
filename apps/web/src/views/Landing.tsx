@@ -7,6 +7,7 @@ import Icon from '../ui/Icon';
 import { BRAND_DOCS } from '../onboarding/BrandGuide';
 import Logo from '../ui/Logo';
 import { useThemeSwitch } from '../ui/useThemeSwitch';
+import TransitionsPlayer from './TransitionsPlayer';
 
 /**
  * The platform's opening page: a product page in the Aurora landing style (masthead, big serif
@@ -78,6 +79,7 @@ export default function Landing() {
         <a className="brand" href="#top" style={{ padding: 0, textDecoration: 'none' }}><Logo /></a>
         <nav className="lp-nav" aria-label="Sections">
           <a className="opt" href="#features">Features</a>
+          <a className="opt" href="#transitions">Transitions</a>
           <a className="opt" href="/brand/skyline.html" target="_blank" rel="noopener">Brand ↗</a>
           <a className="opt" href="/case-study.html" target="_blank" rel="noopener">Case study ↗</a>
           <button type="button" className="tgl" onClick={switchTheme} aria-label="Toggle theme">
@@ -176,6 +178,14 @@ export default function Landing() {
             </ul>
             <ToolsArt />
           </div>
+        </section>
+
+        {/* TRANSITIONS: the seven moments, played by the app's own transition component */}
+        <section className="lp-sec" id="transitions">
+          <header className="lp-sec-h"><div><p className="spec"><span className="k">Transitions</span></p><h2 className="sec-t">Every move has its moment</h2></div></header>
+          <p className="lp-p">Coming in, the BizzNex mark draws itself and its window lights: signing in, opening the demo, finishing setup. Everything else gets the aurora glow, which fades through paper into the next page: signing out, a session ending, switching between features. Play all seven below, with the same screens and timings as the app.</p>
+          <TransitionsPlayer />
+          <p className="lp-p"><a className="link" href="/case-study.html#transitions">Why these, and what was set aside →</a></p>
         </section>
 
         {/* HOW IT WORKS */}
