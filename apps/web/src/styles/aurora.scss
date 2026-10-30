@@ -481,7 +481,13 @@ tr:hover .row-act, .titem:hover .row-act { opacity: 1; }
   .gsearch .top-search { display: flex; }               /* the dashboard search stays on phones */
   .gsearch .top-search-inp { width: 100%; max-width: none; }
   .gsearch-kbd { display: none; }
-  .gsearch-pop { left: auto; right: 0; }
+  /* phones: menu, title and controls on one row, the dashboard search full-width under them */
+  .topbar:has(.gsearch) { flex-wrap: wrap; row-gap: 12px; column-gap: 10px; }
+  .crumb-home { display: none; }                         /* phones: just the page name */
+  .topbar:has(.gsearch) .top-actions { display: contents; }
+  .topbar:has(.gsearch) .top-prefs { margin-left: auto; }
+  .topbar .gsearch { order: 9; flex: 1 0 100%; }
+  .gsearch-pop { left: 0; right: 0; width: auto; }
   .tgl-text { display: none; }
   .lang button { padding: 8px 10px; }
   .topbar { padding: 14px 16px; }

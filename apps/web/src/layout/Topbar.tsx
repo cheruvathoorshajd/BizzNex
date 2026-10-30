@@ -39,7 +39,7 @@ export default function Topbar({ title, query, onQuery, onMenu, menuOpen, showSe
     <header className="topbar">
       <div className="row gap-3">
         <button className="icon-btn menu-btn" onClick={onMenu} aria-label="Menu" aria-expanded={!!menuOpen} aria-controls="app-sidebar"><Icon name="menu" /></button>
-        <span className="crumb">BizzNex / <b>{title}</b></span>
+        <span className="crumb"><span className="crumb-home">BizzNex / </span><b>{title}</b></span>
       </div>
 
       <div className="top-actions">
