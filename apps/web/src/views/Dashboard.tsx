@@ -5,6 +5,7 @@ import { useT } from '../i18n/useT';
 import { fmtMoney, fmtShort, sparkPoints, cx, dotClass, todayInput, toDateInput } from '../utils';
 import type { Status, Task, ViewId } from '../types';
 import CountUp from '../ui/CountUp';
+import { dayPart } from '../ui/transitions';
 
 const Globe = lazy(() => import('./Globe'));
 
@@ -22,7 +23,6 @@ function weekEnd(today: string) {
 }
 
 /** Morning until noon, afternoon until 6 pm, in the viewer's own time. */
-const dayPart = (h = new Date().getHours()) => (h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening');
 
 export default function Dashboard({ onNavigate }: { onNavigate: (v: ViewId) => void }) {
   const t = useT();

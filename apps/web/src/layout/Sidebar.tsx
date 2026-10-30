@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { NAV } from '../nav';
 import type { ViewId } from '../types';
-import { useAppDispatch, useAppSelector } from '../store';
-import { logout } from '../store/authSlice';
+import { useAppSelector } from '../store';
+import { useSignOut } from '../session';
 import { useGetProjectsQuery } from '../services/api';
 import { useT } from '../i18n/useT';
 import { cx } from '../utils';
@@ -25,7 +25,7 @@ const initials = (name?: string) =>
 
 export default function Sidebar({ view, onNavigate, onOpenWindow, openWindowIds, open, onClose, onOpenSettings }: Props) {
   const t = useT();
-  const dispatch = useAppDispatch();
+  const signOut = useSignOut();
   const user = useAppSelector((s) => s.auth.user);
   const { data: projects = [] } = useGetProjectsQuery();
   const openTasks = projects.reduce((n, p) => n + p.tasks.filter((tk) => tk.status !== 'Completed').length, 0);
@@ -84,7 +84,7 @@ export default function Sidebar({ view, onNavigate, onOpenWindow, openWindowIds,
               <span className="em" style={{ display: 'block' }}>{user?.email ?? ''}</span>
             </span>
           </button>
-          <button className="icon-btn" style={{ width: 32, height: 32 }} onClick={() => dispatch(logout())} title={t('auth.logout')} aria-label={t('auth.logout')}>
+          <button className="icon-btn" style={{ width: 32, height: 32 }} onClick={signOut} title={t('auth.logout')} aria-label={t('auth.logout')}>
             <Icon name="arrow" size={15} />
           </button>
         </div>

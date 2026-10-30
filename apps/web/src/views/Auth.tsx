@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent, KeyboardEvent } from 'react';
 import { useAppDispatch, useAppSelector } from '../store';
-import { setCredentials } from '../store/authSlice';
+import { dismissEnded, setCredentials } from '../store/authSlice';
 import { setAuthMode, setIntroSeen } from '../store/uiSlice';
 import type { AuthMode } from '../store/uiSlice';
 import { useLoginMutation, useRegisterMutation } from '../services/api';
-import { DEMO, useEnterDemo } from '../onboarding/useEnterDemo';
+import { DEMO, DEMO_SCREEN, useEnterDemo } from '../onboarding/useEnterDemo';
+import { greeting, playTransition } from '../ui/transitions';
 import { errorText } from '../services/errors';
 import { cx } from '../utils';
 import Icon from '../ui/Icon';
@@ -56,6 +57,7 @@ export default function Auth() {
   const dispatch = useAppDispatch();
   const switchTheme = useThemeSwitch();
   const theme = useAppSelector((s) => s.ui.theme);
+  const ended = useAppSelector((s) => s.auth.ended);
   const mode: Mode = useAppSelector((s) => s.ui.authMode) ?? 'signup';
   const setMode = (m: Mode) => dispatch(setAuthMode(m));
   const demo = useEnterDemo();
@@ -99,7 +101,13 @@ export default function Auth() {
         : await register({ email: creds.email, password: creds.password, name: creds.name ?? '' }).unwrap();
       // the shared demo account is always a demo session, however it was entered
       const kind = res.user.email === DEMO.email ? 'demo' : m;
-      dispatch(setCredentials({ token: res.token, user: res.user, kind }));
+      const first = res.user.name?.trim().split(/\s+/)[0];
+      void playTransition(
+        kind === 'demo' ? DEMO_SCREEN
+          : m === 'signup' ? { kind: 'skyline', t: first ? `Welcome, ${first}.` : 'Welcome to BizzNex.', s: 'Creating your workspace' }
+          : { kind: 'skyline', t: greeting(res.user.name), s: 'Loading your projects, customers and deals' },
+        { swap: () => dispatch(setCredentials({ token: res.token, user: res.user, kind })) },
+      );
     } catch (err) {
       setErrors(describe(err, m));
       setTouched((t) => ({ ...t, submit: true }));
@@ -159,6 +167,12 @@ export default function Auth() {
           <h1>{mode === 'signup' ? 'Create your workspace' : 'Welcome back'}</h1>
           <p className="auth2-sub">{mode === 'signup' ? 'It takes about two minutes to set up.' : 'Sign in to pick up where you left off.'}</p>
 
+          {ended && !errors.form && (
+            <p className="auth2-ended" role="status">
+              You were signed out: the demo was refreshed, or this account signed out everywhere. Sign in again to continue.
+              <button type="button" className="link" onClick={() => dispatch(dismissEnded())} aria-label="Dismiss">Dismiss</button>
+            </p>
+          )}
           {(errors.form || demo.error) && <div className="auth2-alert" role="alert"><Icon name="x" size={14} />{errors.form || demo.error}</div>}
 
           {mode === 'signup' && (

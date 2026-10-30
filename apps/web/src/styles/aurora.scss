@@ -509,20 +509,7 @@ tr:hover .row-act, .titem:hover .row-act { opacity: 1; }
 .draw { stroke-dasharray: 1; animation: draw calc(900ms * var(--m)) var(--ease-sp) both; }
 @keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 
-/* page switch: the view slides the way you move through the sidebar */
-html[data-vt^="nav"] .view { view-transition-name: page; }
-html[data-vt^="nav"] .topbar { view-transition-name: topbar; }
-html[data-vt^="nav"]::view-transition-old(root), html[data-vt^="nav"]::view-transition-new(root),
-html[data-vt^="nav"]::view-transition-old(topbar), html[data-vt^="nav"]::view-transition-new(topbar) { animation: none; }
-::view-transition-group(page) { animation-duration: calc(340ms * var(--m)); animation-timing-function: var(--ease-sp); }
-html[data-vt="nav-fwd"]::view-transition-old(page) { animation: vt-out-left calc(220ms * var(--m)) var(--ease-sp) both; }
-html[data-vt="nav-fwd"]::view-transition-new(page) { animation: vt-in-right calc(340ms * var(--m)) var(--ease-sp) both; }
-html[data-vt="nav-back"]::view-transition-old(page) { animation: vt-out-right calc(220ms * var(--m)) var(--ease-sp) both; }
-html[data-vt="nav-back"]::view-transition-new(page) { animation: vt-in-left calc(340ms * var(--m)) var(--ease-sp) both; }
-@keyframes vt-out-left { to { opacity: 0; transform: translateX(-24px); } }
-@keyframes vt-out-right { to { opacity: 0; transform: translateX(24px); } }
-@keyframes vt-in-right { from { opacity: 0; transform: translateX(28px); } }
-@keyframes vt-in-left { from { opacity: 0; transform: translateX(-28px); } }
+/* page switch: an Aurora screen over the main column (styles/transitions.scss, ui/transitions.tsx) */
 
 /* theme: the new palette spreads from the switch (the clip is animated from themeReveal) */
 html[data-vt="theme"]::view-transition-old(root), html[data-vt="theme"]::view-transition-new(root) { animation: none; mix-blend-mode: normal; }

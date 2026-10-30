@@ -4,6 +4,7 @@ import { START_PAGES } from '@bizznex/shared';
 import type { Industry, OnboardingGoal, UserPreferences } from '@bizznex/shared';
 import { useAppDispatch, useAppSelector } from '../store';
 import { logout, refreshCredentials } from '../store/authSlice';
+import { useSignOut } from '../session';
 import { errorText } from '../services/errors';
 import { setAuthMode, setLanguage, setTheme, themeMode } from '../store/uiSlice';
 import {
@@ -71,6 +72,7 @@ export default function Settings({ section, onSection, onTour, onFeatureGuide, o
   const t = useT();
   const toast = useToast();
   const dispatch = useAppDispatch();
+  const signOut = useSignOut();
   const theme = useAppSelector(themeMode);
   const language = useAppSelector((s) => s.ui.language);
   const session = useAppSelector((s) => s.auth.session);
@@ -287,7 +289,7 @@ export default function Settings({ section, onSection, onTour, onFeatureGuide, o
         <Card title="Your session" sub="Where you’re signed in.">
           <div className="st-row"><div className="st-row-t"><b>This browser</b><span>{kindLabel}{session?.startedAt ? ` · since ${fmtDate(session.startedAt)}` : ''}</span></div><span className="tag soft">Current</span></div>
           <div className="st-row"><div className="st-row-t"><b>Sign out</b><span>End this session. Your data stays in your account.</span></div>
-            <button type="button" className="btn ghost sm" onClick={() => dispatch(logout())}>Sign out</button></div>
+            <button type="button" className="btn ghost sm" onClick={signOut}>Sign out</button></div>
           <div className="st-row"><div className="st-row-t"><b>Sign out of all devices</b><span>End every other session, for example on a lost or shared device. You stay signed in here.</span></div>
             <button type="button" className="btn ghost sm" onClick={signOutEverywhere} disabled={locked || revoking}>{revoking ? 'Signing out…' : 'Sign out everywhere'}</button></div>
         </Card>

@@ -7,19 +7,21 @@ import { cx } from '../utils';
  * Three towers drawn with one 2.6-unit stroke on a 48-unit grid, standing on a baseline,
  * with one lit window (the accent). Ink follows `currentColor`; the window uses --accent.
  */
-export function SkylineMark({ size, className, title }: { size?: number | string; className?: string; title?: string }) {
+export function SkylineMark({ size, className, title, drawn }: { size?: number | string; className?: string; title?: string; drawn?: boolean }) {
+  // `drawn`: each stroke gets a unit path length, so CSS can draw it on (the Skyline transition)
+  const pl = drawn ? 1 : undefined;
   return (
     <svg
       className={cx('sky-mark', className)} viewBox="0 0 48 48" width={size} height={size}
       role={title ? 'img' : undefined} aria-label={title} aria-hidden={title ? undefined : true}
     >
       <g fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinejoin="round" strokeLinecap="round">
-        <path d="M6 42V25H16" />
-        <path d="M16 42V11L28 6V42" />
-        <path d="M28 18H41V42" />
-        <path d="M32 24.5H37M32 29.5H37M32 34.5H37" />
-        <path d="M10 30V36" />
-        <path d="M3.5 42H44.5" />
+        <path pathLength={pl} d="M6 42V25H16" />
+        <path pathLength={pl} d="M16 42V11L28 6V42" />
+        <path pathLength={pl} d="M28 18H41V42" />
+        <path pathLength={pl} d="M32 24.5H37M32 29.5H37M32 34.5H37" />
+        <path pathLength={pl} d="M10 30V36" />
+        <path pathLength={pl} d="M3.5 42H44.5" />
       </g>
       <rect x="20.4" y="15.6" width="3.6" height="4.6" rx=".6" fill="var(--accent)" />
     </svg>

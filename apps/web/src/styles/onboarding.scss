@@ -56,6 +56,8 @@ kbd { font-family: var(--mono); font-size: 10.5px; padding: 1px 6px; border: 1px
 .auth2-switch { text-align: center; color: var(--muted); font-size: 13.5px; margin: var(--s3) 0 0; }
 .auth2-label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .auth2-label-row .inline-link { font-size: 12.5px; }
+.auth2-ended { display: flex; gap: 12px; align-items: baseline; justify-content: space-between; font-size: 13.5px; color: var(--ink-soft); margin: 0 0 16px; padding: 10px 13px; border-left: 2px solid var(--warn); background: color-mix(in srgb, var(--warn) 8%, transparent); }
+.auth2-ended .link { flex: none; font-size: 12.5px; }
 .auth2-note { font-size: 13px; color: var(--muted); margin: 8px 0 0; padding: 9px 12px; border: 1px solid var(--rule-soft); border-radius: var(--radius); background: var(--paper-2); }
 
 .pw-wrap { position: relative; }

@@ -12,6 +12,8 @@ interface AuthState {
   session: { kind: SessionKind; startedAt: string } | null;
   /** Demo visitors share one account, so their onboarding progress lives here instead of on the server. */
   demoOnboarding: OnboardingState;
+  /** The API ended the session (a demo reset, "Sign out everywhere", a password change elsewhere). */
+  ended?: boolean;
 }
 const initialState: AuthState = { token: null, user: null, session: null, demoOnboarding: {} };
 
@@ -26,6 +28,7 @@ const slice = createSlice({
       s.user = a.payload.user;
       s.session = { kind: a.payload.kind, startedAt: new Date().toISOString() };
       s.demoOnboarding = a.payload.kind === 'demo' ? { wizard: 'pending' } : {};
+      s.ended = false;
     },
     /** New token or user details for the same session (e.g. after changing your email). */
     refreshCredentials: (s, a: PayloadAction<{ token: string; user: User }>) => {
@@ -46,9 +49,19 @@ const slice = createSlice({
       s.user = null;
       s.session = null;
       s.demoOnboarding = {};
+      s.ended = false;
     },
+    /** Signed out by the API rather than by the user: sign-in says why. */
+    sessionEnded: (s) => {
+      s.token = null;
+      s.user = null;
+      s.session = null;
+      s.demoOnboarding = {};
+      s.ended = true;
+    },
+    dismissEnded: (s) => { s.ended = false; },
   },
 });
 
-export const { setCredentials, refreshCredentials, updateDemoOnboarding, logout } = slice.actions;
+export const { setCredentials, refreshCredentials, updateDemoOnboarding, logout, sessionEnded, dismissEnded } = slice.actions;
 export default slice.reducer;

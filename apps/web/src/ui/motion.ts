@@ -1,8 +1,9 @@
 /**
  * BizzNex motion: the "Spatial" direction from design-style-guides/bizznex-motion.html.
- * Things travel to and from where they belong. Pages slide the way you navigate,
- * dialogs grow out of the button you pressed, windows come from the sidebar and go
- * into the dock, and dark mode spreads from its switch.
+ * Things travel to and from where they belong: dialogs grow out of the button you
+ * pressed, windows come from the sidebar and go into the dock, and dark mode spreads
+ * from its switch. Switching pages and the big moments use transition screens
+ * (ui/transitions.tsx, decided 29 Oct 2026).
  *
  * MOTION_SCALE stretches every duration. 1.5 = the study's timings played half again
  * as slowly (picked 16 Oct 2026). CSS reads the same number as `--m` (aurora.scss).
@@ -87,14 +88,14 @@ export function ghostExit(node: HTMLElement | null, run: (ghost: HTMLElement) =>
   Promise.allSettled(anims.map((a) => a.finished)).then(() => ghost.remove());
 }
 
-/* ── View Transitions (pages, theme) ── */
+/* ── View Transitions (the theme switch) ── */
 type VTDoc = Document & { startViewTransition?: (cb: () => void) => { ready: Promise<void>; finished: Promise<void> } };
 
 /**
  * Run a state change as a view transition. `kind` selects the CSS in aurora.scss
  * (`html[data-vt=…]`). Browsers without the API, and reduced motion, just apply the change.
  */
-export function viewTransition(update: () => void, kind: 'nav-fwd' | 'nav-back' | 'theme', onReady?: () => void) {
+export function viewTransition(update: () => void, kind: 'theme', onReady?: () => void) {
   const doc = document as VTDoc;
   if (!doc.startViewTransition || reducedMotion()) { update(); return; }
   const root = document.documentElement;

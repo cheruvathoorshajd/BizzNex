@@ -1,0 +1,79 @@
+/* ============================================================
+   Transition screens (ui/transitions.tsx)
+   Skyline for the ways in, Aurora with a fade-through-paper exit for everything else.
+   Timings come from TypeScript as --txs-in / --txs-hold / --txs-out (already scaled ×1.5).
+   Sizes use container units, so the same screen works full-window and inside the landing
+   page's player.
+   ============================================================ */
+.txs {
+  position: fixed; inset: 0; z-index: 1000; container-type: size;
+  display: grid; place-items: center; align-content: center; gap: clamp(10px, 2.2cqmin, 22px);
+  text-align: center; padding: 24px; background: var(--paper); color: var(--ink); overflow: hidden;
+}
+.txs-contained { position: absolute; z-index: 5; }
+/* switching features covers the main column only; the sidebar stays */
+.txs-inline { left: var(--side-w, 248px); }
+@media (max-width: 860px) { .txs-inline { left: 0; } }
+.txs-contained.txs-inline { left: var(--txs-side, 22%); }
+/* a page still loading, in the main column */
+.txs-panel { position: relative; inset: auto; z-index: auto; height: 46vh; background: transparent; }
+
+.txs-t { position: relative; font-family: var(--serif); font-weight: 500; letter-spacing: -.03em; line-height: 1.05; font-size: clamp(24px, 5cqmin, 46px); text-wrap: balance; max-width: 22ch; }
+.txs-s { position: relative; font-family: var(--mono); font-size: clamp(10.5px, 1.6cqmin, 13px); letter-spacing: .04em; color: var(--muted); }
+
+/* ── Skyline: the mark draws itself, the window lights, the screen lifts ── */
+.txs-mark { width: clamp(44px, 11cqmin, 96px); height: clamp(44px, 11cqmin, 96px); color: var(--ink); }
+.txs-skyline .txs-t { font-family: 'Outfit', var(--sans); font-weight: 700; letter-spacing: -.02em; font-size: clamp(22px, 4.6cqmin, 42px); }
+.txs-mark path { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.txs-mark rect { opacity: 0; transform-box: fill-box; transform-origin: center; }
+.txs-skyline.is-in .txs-mark path { animation: txs-draw calc(var(--txs-in) * .62) cubic-bezier(.2, .8, .2, 1) forwards; }
+.txs-skyline.is-in .txs-mark path:nth-child(2) { animation-delay: calc(var(--txs-in) * .08); }
+.txs-skyline.is-in .txs-mark path:nth-child(3) { animation-delay: calc(var(--txs-in) * .16); }
+.txs-skyline.is-in .txs-mark path:nth-child(n+4) { animation-delay: calc(var(--txs-in) * .28); }
+.txs-skyline.is-in .txs-mark rect { animation: txs-lit calc(var(--txs-in) * .36) var(--ease) calc(var(--txs-in) * .62) forwards; }
+.txs-skyline.is-in .txs-t, .txs-skyline.is-in .txs-s { animation: txs-rise calc(var(--txs-in) * .5) var(--ease) calc(var(--txs-in) * .4) both; }
+.txs-skyline.is-in .txs-s { animation-delay: calc(var(--txs-in) * .55); }
+.txs-skyline:is(.is-hold, .is-out) .txs-mark path { stroke-dashoffset: 0; }
+.txs-skyline:is(.is-hold, .is-out) .txs-mark rect { opacity: 1; }
+.txs-skyline.is-hold .txs-mark rect { animation: txs-glow 1.6s ease-in-out infinite alternate; }
+.txs-skyline.is-out { animation: txs-lift var(--txs-out) cubic-bezier(.2, .8, .2, 1) forwards; }
+
+/* ── Aurora: the mesh blooms in; the exit fades through paper (words, then glow, then the page) ── */
+.txs-mesh {
+  position: absolute; left: 50%; top: 50%; width: 92cqmin; height: 92cqmin; margin: -46cqmin 0 0 -46cqmin;
+  border-radius: 50%; filter: blur(10cqmin); opacity: 0; pointer-events: none;
+  background:
+    radial-gradient(closest-side at 38% 42%, #7C6CF5, transparent),
+    radial-gradient(closest-side at 62% 50%, #34E0C4, transparent),
+    radial-gradient(closest-side at 50% 70%, #FF9EC0, transparent),
+    radial-gradient(closest-side at 52% 30%, #5FA8FF, transparent);
+}
+.txs-aurora.is-in .txs-mesh { animation: txs-bloom var(--txs-in) var(--ease) forwards; }
+.txs-aurora.is-in .txs-t, .txs-aurora.is-in .txs-s { animation: txs-rise calc(var(--txs-in) * .7) var(--ease) calc(var(--txs-in) * .25) both; }
+.txs-aurora:is(.is-hold, .is-out) .txs-mesh { opacity: var(--bloom-op); }
+.txs-aurora.is-hold .txs-mesh { animation: txs-breathe 3.6s ease-in-out infinite alternate; }
+.txs-aurora.is-out .txs-t, .txs-aurora.is-out .txs-s { animation: txs-words-out calc(var(--txs-out) * .34) var(--ease) forwards; }
+.txs-aurora.is-out .txs-mesh { animation: txs-fade-out calc(var(--txs-out) * .46) var(--ease) calc(var(--txs-out) * .18) forwards; }
+.txs-aurora.is-out { animation: txs-fade-out calc(var(--txs-out) * .52) linear calc(var(--txs-out) * .48) forwards; }
+
+/* switching features: smaller, words only, no subtitle */
+.txs-compact .txs-mesh { width: 70cqmin; height: 70cqmin; margin: -35cqmin 0 0 -35cqmin; }
+.txs-compact .txs-t { font-size: clamp(20px, 4.2cqmin, 36px); }
+.txs-compact .txs-s { display: none; }
+
+/* reduced motion (the OS setting): no movement, a short cross-fade with the same words */
+.txs-calm, .txs-calm * { animation: none !important; }
+.txs-calm .txs-mark path { stroke-dashoffset: 0; }
+.txs-calm .txs-mark rect { opacity: 1; }
+.txs-calm .txs-mesh { opacity: var(--bloom-op); }
+.txs-calm.is-out { opacity: 0; transition: opacity var(--txs-out) linear; }
+
+@keyframes txs-draw { to { stroke-dashoffset: 0; } }
+@keyframes txs-lit { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+@keyframes txs-glow { from { opacity: 1; } to { opacity: .55; } }
+@keyframes txs-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes txs-lift { to { opacity: 0; transform: translateY(-4%); } }
+@keyframes txs-bloom { from { opacity: 0; transform: scale(.35); } to { opacity: var(--bloom-op); transform: scale(1); } }
+@keyframes txs-breathe { from { transform: scale(1) rotate(0deg); } to { transform: scale(1.08) rotate(14deg); } }
+@keyframes txs-words-out { to { opacity: 0; transform: translateY(-6px); } }
+@keyframes txs-fade-out { to { opacity: 0; } }

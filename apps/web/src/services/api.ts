@@ -1,7 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import type { RootState } from '../store';
-import { logout } from '../store/authSlice';
+import { sessionEnded } from '../store/authSlice';
+import { playTransition } from '../ui/transitions';
 import type {
   Project, Task, Note, User, AuthResponse,
   RegisterInput, LoginInput,
@@ -38,11 +39,17 @@ const rawBaseQuery = fetchBaseQuery({
 const PASSWORD_CHECKS = ['/auth/login', '/auth/register'];
 
 /** A 401 anywhere else means the session expired or was revoked: sign out instead of failing every action. */
+let ending = false;
 const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (args, apiCtx, extra) => {
   const result = await rawBaseQuery(args, apiCtx, extra);
   const url = typeof args === 'string' ? args : args.url;
-  if (result.error?.status === 401 && (apiCtx.getState() as RootState).auth.token && !PASSWORD_CHECKS.includes(url)) {
-    apiCtx.dispatch(logout());
+  if (result.error?.status === 401 && (apiCtx.getState() as RootState).auth.token && !PASSWORD_CHECKS.includes(url) && !ending) {
+    // several requests can fail together: end the session once, behind an Aurora screen
+    ending = true;
+    void playTransition(
+      { kind: 'aurora', t: 'You were signed out.', s: 'The demo was refreshed, or this account signed out everywhere' },
+      { swap: () => apiCtx.dispatch(sessionEnded()) },
+    ).finally(() => { ending = false; });
   }
   return result;
 };

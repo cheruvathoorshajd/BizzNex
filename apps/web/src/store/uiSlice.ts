@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { Language } from '../types';
-import { logout } from './authSlice';
+import { logout, sessionEnded } from './authSlice';
 
 export type AuthMode = 'signup' | 'signin';
 /** What the person picked; 'system' follows the OS light/dark setting live. */

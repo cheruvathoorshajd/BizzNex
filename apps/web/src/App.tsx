@@ -1,4 +1,4 @@
-import { Suspense, lazy, useLayoutEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Provider } from 'react-redux';
 import { IntlProvider } from 'react-intl';
 import { store, useAppDispatch, useAppSelector } from './store';
@@ -14,8 +14,8 @@ import Topbar from './layout/Topbar';
 import WindowLayer from './layout/WindowLayer';
 import Dock from './layout/Dock';
 import { useWindows } from './layout/useWindows';
-import { LABELS, NAV } from './nav';
-import { viewTransition } from './ui/motion';
+import { LABELS } from './nav';
+import { PageLoading, TransitionHost, greeting, playTransition } from './ui/transitions';
 import type { ViewId } from './types';
 
 import Dashboard from './views/Dashboard';
@@ -42,8 +42,6 @@ const SetupWizard = lazy(() => import('./onboarding/SetupWizard'));
 const Tour = lazy(() => import('./onboarding/Tour'));
 const FeatureGuide = lazy(() => import('./onboarding/FeatureGuide'));
 const BrandGuide = lazy(() => import('./onboarding/BrandGuide'));
-
-const Loading = () => <p className="loading" role="status">Loading…</p>;
 
 export default function App() {
   return (
@@ -83,26 +81,38 @@ function Root() {
           <ErrorBoundary what="BizzNex">
             <Gate />
           </ErrorBoundary>
+          <TransitionHost />
         </ConfirmProvider>
       </ToastProvider>
     </IntlProvider>
   );
 }
 
+/** The cold-start Skyline plays once per page load (StrictMode runs effects twice in development). */
+let bootPlayed = false;
+
 function Gate() {
   const token = useAppSelector((s) => s.auth.token);
+  const name = useAppSelector((s) => s.auth.user?.name);
   // loading the account also validates a stored token: a 401 here signs out (see baseQuery in services/api)
-  useMeQuery(undefined, { skip: !token });
+  const me = useMeQuery(undefined, { skip: !token });
+
+  // opening BizzNex while signed in: Skyline until the account answers, if that takes over 300 ms
+  const settle = useRef<() => void>(undefined);
+  useEffect(() => { if (!me.isLoading) settle.current?.(); }, [me.isLoading]);
+  useEffect(() => {
+    if (bootPlayed || !token || !me.isLoading) return;
+    bootPlayed = true;
+    const ready = new Promise<void>((r) => { settle.current = r; });
+    void playTransition({ kind: 'skyline', t: greeting(name), s: 'Opening your workspace' }, { ready, showAfter: 300 });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- first mount only
 
   const introSeen = useAppSelector((s) => s.ui.introSeen);
 
   // signed out: the landing page opens every visit → create account / demo / sign in
-  if (!token) return <Suspense fallback={<Loading />}>{introSeen ? <Auth /> : <Landing />}</Suspense>;
+  if (!token) return <Suspense fallback={<PageLoading label="Opening BizzNex" />}>{introSeen ? <Auth /> : <Landing />}</Suspense>;
   return <Shell />;
 }
-
-/** Sidebar order, with Settings (the name at the bottom) last. */
-const NAV_ORDER: ViewId[] = [...NAV.flatMap((s) => s.items.map((i) => i.id)), 'settings'];
 
 function Shell() {
   const t = useT();
@@ -120,11 +130,12 @@ function Shell() {
   const openSettings = (s: SettingsSection = 'profile') => { setSettingsSection(s); navigate('settings'); };
 
   // each view starts unfiltered: a search typed on Contacts shouldn't silently filter Deals.
-  // Pages slide the way you move through the sidebar: down the list slides left, up slides right.
+  // Switching features plays a short Aurora over the main column (the sidebar stays), and the
+  // new page is uncovered by fading through paper.
   const navigate = (v: ViewId) => {
     const apply = () => { setView(v); setQuery(''); setMenuOpen(false); };
     if (v === view) { apply(); return; }
-    viewTransition(apply, NAV_ORDER.indexOf(v) >= NAV_ORDER.indexOf(view) ? 'nav-fwd' : 'nav-back');
+    void playTransition({ kind: 'aurora', t: t(LABELS[v]), inline: true, compact: true }, { swap: apply });
   };
   const openWindow = (id: ToolId) => { openWin(id); track('window'); };
   const openWindowFor = (v: ViewId) => { if (isToolId(v)) openWindow(v); };
@@ -208,7 +219,7 @@ function Shell() {
           <SampleBanner />
           {showIntro && <FeatureIntro key={view} view={view} onDismiss={dismissIntro} />}
           <ErrorBoundary key={`page-${view}`} what="this page">
-            <Suspense fallback={<Loading />}>{render()}</Suspense>
+            <Suspense fallback={<PageLoading label={`Opening ${t(LABELS[view])}`} />}>{render()}</Suspense>
           </ErrorBoundary>
         </div>
       </div>

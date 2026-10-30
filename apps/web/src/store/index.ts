@@ -2,7 +2,7 @@ import { configureStore, combineReducers, createListenerMiddleware, isAnyOf } fr
 import { useDispatch, useSelector } from 'react-redux';
 import type { TypedUseSelectorHook } from 'react-redux';
 import ui, { systemTheme } from './uiSlice';
-import auth, { logout, setCredentials } from './authSlice';
+import auth, { logout, sessionEnded, setCredentials } from './authSlice';
 import { api } from '../services/api';
 
 const rootReducer = combineReducers({
@@ -48,7 +48,7 @@ function load(): any {
 // Drop every cached query when the signed-in user changes, so one account never sees another's data.
 const session = createListenerMiddleware();
 session.startListening({
-  matcher: isAnyOf(logout, setCredentials),
+  matcher: isAnyOf(logout, sessionEnded, setCredentials),
   effect: (_action, api_) => { api_.dispatch(api.util.resetApiState()); },
 });
 

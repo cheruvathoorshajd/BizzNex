@@ -11,6 +11,7 @@ import BusinessFields, { FIELD_ORDER, profileFrom, validateBusiness } from './Bu
 import type { BusinessErrors, BusinessProfile } from './BusinessFields';
 import { useOnboarding } from './useOnboarding';
 import Logo from '../ui/Logo';
+import { playTransition } from '../ui/transitions';
 
 type StepId = 'welcome' | 'business' | 'goals' | 'look' | 'data' | 'ready';
 const LABELS: Record<StepId, string> = {
@@ -81,10 +82,13 @@ export default function SetupWizard({ onFinish }: Props) {
 
   const landing: ViewId = GOALS.find((g) => g.id === goals[0])?.view ?? 'dashboard';
 
+  // the wizard closes behind a Skyline screen, so the workspace appears whole, not mid-swap
   const finish = (tour: boolean) => {
     writeStep(stepKey, null);
-    update({ wizard: 'done' });
-    onFinish({ tour, landing });
+    void playTransition(
+      { kind: 'skyline', t: 'Your workspace is ready.', s: tour ? 'Starting the tour' : 'Applying your goals and your look' },
+      { swap: () => { update({ wizard: 'done' }); onFinish({ tour, landing }); } },
+    );
   };
 
   const next = async () => {
