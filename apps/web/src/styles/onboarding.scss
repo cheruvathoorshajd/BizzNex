@@ -82,6 +82,9 @@ kbd { font-family: var(--mono); font-size: 10.5px; padding: 1px 6px; border: 1px
   position: fixed; inset: 0; z-index: 120; background: var(--paper); overflow: hidden; overflow: clip;
   display: grid; grid-template-columns: 280px minmax(0, 1fr); animation: fade .3s var(--ease);
 }
+/* the workspace still renders under the full-screen wizard; without this the page behind it
+   shows a second scrollbar next to the wizard's own */
+html:has(.ob), html:has(.ob) body { overflow: hidden; }
 .ob .bloom { top: auto; bottom: -40%; right: -20%; width: 70vw; opacity: calc(var(--bloom-op) * .55); }
 .ob-progress { position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--rule-soft); z-index: 2; }
 .ob-progress i { display: block; height: 100%; background: var(--accent); transition: width .5s var(--ease); }
@@ -97,7 +100,10 @@ kbd { font-family: var(--mono); font-size: 10.5px; padding: 1px 6px; border: 1px
 .ob-rail-foot { margin-top: auto; }
 
 .ob-main { position: relative; z-index: 1; display: flex; flex-direction: column; min-height: 0; }
-.ob-body { flex: 1; overflow-y: auto; padding: clamp(34px, 7vh, 88px) clamp(22px, 6vw, 96px) var(--s4); max-width: 920px; width: 100%; animation: obIn .45s var(--ease); }
+/* the scroller spans the whole column, so its scrollbar sits at the window edge, not mid-screen;
+   the content keeps the 920px measure (920 minus the side padding) */
+.ob-body { flex: 1; overflow-y: auto; padding: clamp(34px, 7vh, 88px) clamp(22px, 6vw, 96px) var(--s4); width: 100%; animation: obIn .45s var(--ease); }
+.ob-body > * { max-width: calc(920px - 2 * clamp(22px, 6vw, 96px)); }
 @keyframes obIn { from { opacity: 0; transform: translateY(14px); } }
 .ob-h { font-family: var(--serif); font-weight: 500; font-size: clamp(2.1rem, 4.6vw, 3.4rem); line-height: 1.02; letter-spacing: -.035em; margin: var(--s3) 0 var(--s2); max-width: 20ch; }
 .ob-lede { color: var(--ink-soft); font-size: 16.5px; max-width: 56ch; margin: 0 0 var(--s4); }
