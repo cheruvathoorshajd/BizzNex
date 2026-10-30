@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState, useId } from 'react';
 import {
   useGetDealsQuery, useCreateDealMutation, useUpdateDealMutation, useDeleteDealMutation,
   useGetContactsQuery, useGetCompaniesQuery,
@@ -18,6 +18,7 @@ const OPEN_STAGES: DealStage[] = ['Lead', 'Qualified', 'Proposal'];
 const isClosed = (s: DealStage) => s === 'Won' || s === 'Lost';
 
 export default function Deals({ query = '' }: { query?: string }) {
+  const fid = useId(); // pairs each visible label with its field
   const toast = useToast();
   const confirm = useConfirm();
   const { data: deals = [], isLoading: fetching, isError, error, refetch } = useGetDealsQuery();
@@ -107,21 +108,21 @@ export default function Deals({ query = '' }: { query?: string }) {
       <div className="panel">
         <div className="sublab" style={{ marginTop: 0 }}>§ New deal</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, alignItems: 'end' }}>
-          <div className="field" style={{ margin: 0 }}><label>Title</label><input className="inp" value={title} onChange={(e) => setTitle(e.target.value)} /></div>
-          <div className="field" style={{ margin: 0 }}><label>Value ($)</label><input className="inp num" type="number" min={0} value={value} onChange={(e) => setValue(e.target.value)} /></div>
-          <div className="field" style={{ margin: 0 }}><label>Stage</label>
-            <select className="inp" value={stage} onChange={(e) => setStage(e.target.value as DealStage)}>
+          <div className="field" style={{ margin: 0 }}><label htmlFor={`${fid}-title`}>Title</label><input id={`${fid}-title`} className="inp" value={title} onChange={(e) => setTitle(e.target.value)} /></div>
+          <div className="field" style={{ margin: 0 }}><label htmlFor={`${fid}-value`}>Value ($)</label><input id={`${fid}-value`} className="inp num" type="number" min={0} value={value} onChange={(e) => setValue(e.target.value)} /></div>
+          <div className="field" style={{ margin: 0 }}><label htmlFor={`${fid}-stage`}>Stage</label>
+            <select id={`${fid}-stage`} className="inp" value={stage} onChange={(e) => setStage(e.target.value as DealStage)}>
               {DEAL_STAGES.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
-          <div className="field" style={{ margin: 0 }}><label>Contact</label>
-            <select className="inp" value={contactId} onChange={(e) => setContactId(e.target.value)}>
+          <div className="field" style={{ margin: 0 }}><label htmlFor={`${fid}-contact`}>Contact</label>
+            <select id={`${fid}-contact`} className="inp" value={contactId} onChange={(e) => setContactId(e.target.value)}>
               <option value="">— None —</option>
               {contacts.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
-          <div className="field" style={{ margin: 0 }}><label>Company</label>
-            <select className="inp" value={companyId} onChange={(e) => setCompanyId(e.target.value)}>
+          <div className="field" style={{ margin: 0 }}><label htmlFor={`${fid}-company`}>Company</label>
+            <select id={`${fid}-company`} className="inp" value={companyId} onChange={(e) => setCompanyId(e.target.value)}>
               <option value="">— None —</option>
               {companies.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>

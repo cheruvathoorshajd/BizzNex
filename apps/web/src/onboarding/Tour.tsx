@@ -96,7 +96,9 @@ export default function Tour({ onNavigate, onClose, onTarget }: Props) {
       {rect
         ? <div className="tour-spot" style={{ top: rect.top, left: rect.left, width: rect.width, height: rect.height }} />
         : <div className="tour-scrim" />}
-      <div className="tour-block" onMouseDown={(e) => e.preventDefault()} />
+      {/* a click shield over the page during the tour, not a control */}
+      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
+      <div className="tour-block" aria-hidden="true" onMouseDown={(e) => e.preventDefault()} />
 
       <div className="tour-card" ref={cardRef} style={place(rect, cardH)}>
         <div className="row between">

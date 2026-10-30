@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import {
   useGetActivitiesQuery, useCreateActivityMutation, useUpdateActivityMutation, useDeleteActivityMutation,
   useGetContactsQuery, useGetDealsQuery,
@@ -17,6 +17,7 @@ import { rows } from '../ui/motion';
 const typeLabel = (t: ActivityType) => (t === 'Task' ? 'Follow-up' : t);
 
 export default function Activities({ query = '' }: { query?: string }) {
+  const fid = useId(); // pairs each visible label with its field
   const toast = useToast();
   const confirm = useConfirm();
   const { data: activities = [], isLoading: fetching, isError, error, refetch } = useGetActivitiesQuery();
@@ -77,22 +78,22 @@ export default function Activities({ query = '' }: { query?: string }) {
       <div className="crm-cols">
         <div className="panel">
           <div className="sublab" style={{ marginTop: 0 }}>§ Log activity</div>
-          <div className="field"><label>Type</label>
-            <select className="inp" value={type} onChange={(e) => setType(e.target.value as ActivityType)}>
+          <div className="field"><label htmlFor={`${fid}-type`}>Type</label>
+            <select id={`${fid}-type`} className="inp" value={type} onChange={(e) => setType(e.target.value as ActivityType)}>
               {ACTIVITY_TYPES.map((t) => <option key={t} value={t}>{typeLabel(t)}</option>)}
             </select>
           </div>
-          <div className="field"><label>Subject</label><input className="inp" value={subject} onChange={(e) => setSubject(e.target.value)} /></div>
-          <div className="field"><label>Notes</label><textarea className="inp" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} /></div>
-          <div className="field"><label>Due date</label><input className="inp" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} /></div>
-          <div className="field"><label>Contact</label>
-            <select className="inp" value={contactId} onChange={(e) => setContactId(e.target.value)}>
+          <div className="field"><label htmlFor={`${fid}-subject`}>Subject</label><input id={`${fid}-subject`} className="inp" value={subject} onChange={(e) => setSubject(e.target.value)} /></div>
+          <div className="field"><label htmlFor={`${fid}-notes`}>Notes</label><textarea id={`${fid}-notes`} className="inp" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} /></div>
+          <div className="field"><label htmlFor={`${fid}-due-date`}>Due date</label><input id={`${fid}-due-date`} className="inp" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} /></div>
+          <div className="field"><label htmlFor={`${fid}-contact`}>Contact</label>
+            <select id={`${fid}-contact`} className="inp" value={contactId} onChange={(e) => setContactId(e.target.value)}>
               <option value="">— None —</option>
               {contacts.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
-          <div className="field"><label>Deal</label>
-            <select className="inp" value={dealId} onChange={(e) => setDealId(e.target.value)}>
+          <div className="field"><label htmlFor={`${fid}-deal`}>Deal</label>
+            <select id={`${fid}-deal`} className="inp" value={dealId} onChange={(e) => setDealId(e.target.value)}>
               <option value="">— None —</option>
               {deals.map((d) => <option key={d.id} value={d.id}>{d.title}</option>)}
             </select>

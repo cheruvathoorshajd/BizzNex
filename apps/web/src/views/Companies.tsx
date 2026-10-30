@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import {
   useGetCompaniesQuery, useCreateCompanyMutation, useUpdateCompanyMutation, useDeleteCompanyMutation,
   useGetContactsQuery, useGetDealsQuery,
@@ -13,6 +13,7 @@ import LoadError from '../ui/LoadError';
 import { rows } from '../ui/motion';
 
 export default function Companies({ query = '' }: { query?: string }) {
+  const fid = useId(); // pairs each visible label with its field
   const toast = useToast();
   const confirm = useConfirm();
   const { data: companies = [], isLoading: fetching, isError, error, refetch } = useGetCompaniesQuery();
@@ -68,9 +69,9 @@ export default function Companies({ query = '' }: { query?: string }) {
       <div className="crm-cols">
         <div className="panel">
           <div className="sublab" style={{ marginTop: 0 }}>§ New company</div>
-          <div className="field"><label>Name</label><input className="inp" value={name} onChange={(e) => setName(e.target.value)} /></div>
-          <div className="field"><label>Industry</label><input className="inp" value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder="e.g. Retail" /></div>
-          <div className="field"><label>Website</label><input className="inp" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="example.com" /></div>
+          <div className="field"><label htmlFor={`${fid}-name`}>Name</label><input id={`${fid}-name`} className="inp" value={name} onChange={(e) => setName(e.target.value)} /></div>
+          <div className="field"><label htmlFor={`${fid}-industry`}>Industry</label><input id={`${fid}-industry`} className="inp" value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder="e.g. Retail" /></div>
+          <div className="field"><label htmlFor={`${fid}-website`}>Website</label><input id={`${fid}-website`} className="inp" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="example.com" /></div>
           <button className="btn primary" onClick={add} disabled={!name.trim() || creating}>Add company</button>
         </div>
 
@@ -120,6 +121,7 @@ function CompanyModal({ editing, onClose, onSave }: {
   onClose: () => void;
   onSave: (v: { name: string; industry: string; website: string }) => Promise<void>;
 }) {
+  const fid = useId(); // pairs each visible label with its field
   const [name, setName] = useState(editing.name);
   const [industry, setIndustry] = useState(editing.industry);
   const [website, setWebsite] = useState(editing.website);
@@ -145,9 +147,9 @@ function CompanyModal({ editing, onClose, onSave }: {
     >
       <div className="modal-body">
         <div className="fields">
-          <div className="field full"><label>Name</label><input className="inp" value={name} onChange={(e) => setName(e.target.value)} autoFocus /></div>
-          <div className="field"><label>Industry</label><input className="inp" value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder="e.g. Retail" /></div>
-          <div className="field wide"><label>Website</label><input className="inp" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="example.com" /></div>
+          <div className="field full"><label htmlFor={`${fid}-name`}>Name</label><input id={`${fid}-name`} className="inp" value={name} onChange={(e) => setName(e.target.value)} autoFocus /></div>
+          <div className="field"><label htmlFor={`${fid}-industry`}>Industry</label><input id={`${fid}-industry`} className="inp" value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder="e.g. Retail" /></div>
+          <div className="field wide"><label htmlFor={`${fid}-website`}>Website</label><input id={`${fid}-website`} className="inp" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="example.com" /></div>
         </div>
       </div>
     </Modal>

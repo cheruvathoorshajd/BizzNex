@@ -198,6 +198,8 @@ function CompanySearch({ inputId, value, logoUrl, autoFocus, a11y, onType, onPic
             {status === 'done' && items.length > 0 && (
               <ul id={listId} role="listbox" aria-label="Matching companies">
                 {items.map((m, i) => (
+                  // keyboard is handled on the combobox input (aria-activedescendant); clicks land here
+                  // eslint-disable-next-line jsx-a11y/click-events-have-key-events
                   <li key={m.id} id={`${listId}-${i}`} role="option" aria-selected={i === active} className={cx('biz-opt-row', i === active && 'on')}
                     onMouseDown={(e) => e.preventDefault()} onMouseEnter={() => setActive(i)} onClick={() => choose(m)}>
                     <span className="biz-mark">{m.logoUrl ? <img src={m.logoUrl} alt="" onError={(e) => { e.currentTarget.style.display = 'none'; }} /> : null}{m.name.slice(0, 1)}</span>

@@ -26,12 +26,14 @@ export default tseslint.config(
       'react-hooks/set-state-in-effect': 'warn',
       'react-hooks/refs': 'warn',
       'react-hooks/purity': 'warn',
-      // existing patterns in views/onboarding (wrapper labels, autofocus in edit forms, row click targets): warn while they're fixed
-      'jsx-a11y/label-has-associated-control': 'warn',
+      // accessibility: labels must name their field, and clickable things need a keyboard path
+      // (a justified eslint-disable comment where a keyboard equivalent already exists)
+      'jsx-a11y/label-has-associated-control': 'error',
+      'jsx-a11y/click-events-have-key-events': 'error',
+      'jsx-a11y/no-static-element-interactions': 'error',
+      'jsx-a11y/no-noninteractive-element-interactions': 'error',
+      // autofocus is deliberate in dialogs and the setup wizard (focus goes to the first field)
       'jsx-a11y/no-autofocus': 'warn',
-      'jsx-a11y/click-events-have-key-events': 'warn',
-      'jsx-a11y/no-static-element-interactions': 'warn',
-      'jsx-a11y/no-noninteractive-element-interactions': 'warn',
     },
   },
 )

@@ -165,6 +165,8 @@ function NotificationsWidget() {
         : isLoading ? <p className="loading">Loading…</p>
         : notifs.length === 0 && <div className="cap">You're all caught up.</div>}
       {notifs.slice(0, 10).map((n) => (
+        // the row click is a mouse shortcut; the "Mark as read" button is the keyboard path
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
         <div className="titem" key={n.id} style={{ cursor: n.read ? 'default' : 'pointer' }} onClick={() => { if (!n.read) markRead(n.id); }}>
           <span className="tag soft">{n.kind}</span>
           <span className="nm" style={n.read ? { opacity: .6 } : { fontWeight: 600 }}>{n.message}</span>

@@ -67,6 +67,8 @@ export default function Notifications() {
           <div className="cap" style={{ padding: '16px 0' }}>You're all caught up.</div>
         )}
         {notifications.map((n) => (
+          // the row click is a mouse shortcut; the "Mark as read" button below is the keyboard path
+          // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
           <div
             className="titem"
             key={n.id}

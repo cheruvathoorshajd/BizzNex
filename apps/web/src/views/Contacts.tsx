@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import {
   useGetContactsQuery, useCreateContactMutation, useUpdateContactMutation, useDeleteContactMutation,
   useGetCompaniesQuery,
@@ -13,6 +13,7 @@ import LoadError from '../ui/LoadError';
 import { rows } from '../ui/motion';
 
 export default function Contacts({ query = '' }: { query?: string }) {
+  const fid = useId(); // pairs each visible label with its field
   const toast = useToast();
   const confirm = useConfirm();
   const { data: contacts = [], isLoading: fetching, isError, error, refetch } = useGetContactsQuery();
@@ -74,13 +75,13 @@ export default function Contacts({ query = '' }: { query?: string }) {
       <div className="crm-cols">
         <div className="panel">
           <div className="sublab" style={{ marginTop: 0 }}>§ New contact</div>
-          <div className="field"><label>Name</label><input className="inp" value={name} onChange={(e) => setName(e.target.value)} /></div>
-          <div className="field"><label>Title</label><input className="inp" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Head of Ops" /></div>
-          <div className="field"><label>Email</label><input className="inp" type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-          <div className="field"><label>Phone</label><input className="inp" value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
+          <div className="field"><label htmlFor={`${fid}-name`}>Name</label><input id={`${fid}-name`} className="inp" value={name} onChange={(e) => setName(e.target.value)} /></div>
+          <div className="field"><label htmlFor={`${fid}-title`}>Title</label><input id={`${fid}-title`} className="inp" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Head of Ops" /></div>
+          <div className="field"><label htmlFor={`${fid}-email`}>Email</label><input id={`${fid}-email`} className="inp" type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+          <div className="field"><label htmlFor={`${fid}-phone`}>Phone</label><input id={`${fid}-phone`} className="inp" value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
           <div className="field">
-            <label>Company</label>
-            <select className="inp" value={companyId} onChange={(e) => setCompanyId(e.target.value)}>
+            <label htmlFor={`${fid}-company`}>Company</label>
+            <select id={`${fid}-company`} className="inp" value={companyId} onChange={(e) => setCompanyId(e.target.value)}>
               <option value="">— None —</option>
               {companies.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
@@ -140,6 +141,7 @@ function ContactModal({ editing, companies, onClose, onSave }: {
   onClose: () => void;
   onSave: (v: { name: string; email: string; phone: string; title: string; companyId: string | null }) => Promise<void>;
 }) {
+  const fid = useId(); // pairs each visible label with its field
   const [name, setName] = useState(editing.name);
   const [title, setTitle] = useState(editing.title);
   const [email, setEmail] = useState(editing.email);
@@ -171,13 +173,13 @@ function ContactModal({ editing, companies, onClose, onSave }: {
     >
       <div className="modal-body">
         <div className="fields">
-          <div className="field full"><label>Name</label><input className="inp" value={name} onChange={(e) => setName(e.target.value)} autoFocus /></div>
-          <div className="field full"><label>Title</label><input className="inp" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Head of Ops" /></div>
-          <div className="field wide"><label>Email</label><input className="inp" type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-          <div className="field"><label>Phone</label><input className="inp" value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
+          <div className="field full"><label htmlFor={`${fid}-name`}>Name</label><input id={`${fid}-name`} className="inp" value={name} onChange={(e) => setName(e.target.value)} autoFocus /></div>
+          <div className="field full"><label htmlFor={`${fid}-title`}>Title</label><input id={`${fid}-title`} className="inp" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Head of Ops" /></div>
+          <div className="field wide"><label htmlFor={`${fid}-email`}>Email</label><input id={`${fid}-email`} className="inp" type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+          <div className="field"><label htmlFor={`${fid}-phone`}>Phone</label><input id={`${fid}-phone`} className="inp" value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
           <div className="field full">
-            <label>Company</label>
-            <select className="inp" value={companyId} onChange={(e) => setCompanyId(e.target.value)}>
+            <label htmlFor={`${fid}-company`}>Company</label>
+            <select id={`${fid}-company`} className="inp" value={companyId} onChange={(e) => setCompanyId(e.target.value)}>
               <option value="">— None —</option>
               {companies.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>

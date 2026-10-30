@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import { calc, calcInput, cx } from '../../utils';
 
 const MEM_KEYS = ['MC', 'MR', 'M+', 'M−'];
@@ -13,6 +13,7 @@ const BC_LABELS: Record<Mode, [string, string, string]> = {
 };
 
 export default function Calculator() {
+  const fid = useId(); // pairs each visible label with its field
   const [expr, setExpr] = useState('');
   /** The display shows a result from '=' (or MR): a digit starts over, an operator carries on. */
   const [fresh, setFresh] = useState(false);
@@ -84,8 +85,8 @@ export default function Calculator() {
 
           <div>
             <div className="sublab">§ Business quick-calc</div>
-            <div className="field"><label>Mode</label>
-              <select className="inp" value={mode} onChange={(e) => setMode(e.target.value as Mode)}>
+            <div className="field"><label htmlFor={`${fid}-mode`}>Mode</label>
+              <select id={`${fid}-mode`} className="inp" value={mode} onChange={(e) => setMode(e.target.value as Mode)}>
                 <option value="tax">Sales tax</option>
                 <option value="tip">Tip &amp; split (÷2)</option>
                 <option value="disc">Discount</option>
