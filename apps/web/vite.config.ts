@@ -9,9 +9,17 @@ const root = path.resolve(__dirname, '../..')
 
 /** Standalone design documents that live outside apps/web, served at fixed URLs (dev) and shipped
  *  with the build, so the app links to the one canonical copy of each instead of duplicating it. */
+/** The case study's transitions player gets the app's timings, so it can't drift from them
+ *  (its in-file copy is only the fallback for opening it from disk; designDrift.test.ts checks it). */
+const caseStudyTiming = (html: string) => {
+  const t = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'src/ui/transition-timing.json'), 'utf8')) as Record<string, { in: number; hold: number; out: number }>;
+  const arr = (k: string) => `[${t[k].in}, ${t[k].hold}, ${t[k].out}]`;
+  return html.replace(/var TIMING = \{[^}]*\};/, `var TIMING = { skyline: ${arr('skyline')}, aurora: ${arr('aurora')}, compact: ${arr('compact')}, calm: ${arr('calm')} };`);
+};
+
 const DOCS: { url: string; file: string; type: string; rewrite?: (html: string) => string }[] = [
   { url: '/case-study.html', file: 'bizznex-case-study.html', type: 'text/html; charset=utf-8',
-    rewrite: (h) => h.replace('src="image.png"', 'src="/brand/reference.png"') },
+    rewrite: (h) => caseStudyTiming(h.replace('src="image.png"', 'src="/brand/reference.png"')) },
   // the adopted logo and the two earlier explorations
   { url: '/brand/skyline.html', file: 'design-style-guides/bizznex-identity-skyline.html', type: 'text/html; charset=utf-8',
     rewrite: (h) => h.replace('src="../image.png"', 'src="reference.png"') },

@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react';
 import { SkylineMark } from './Logo';
 import { MOTION_SCALE, reducedMotion } from './motion';
 import { cx } from '../utils';
+import timing from './transition-timing.json';
 
 /**
  * Transition screens between the big moments (design-style-guides/bizznex-transitions.html,
@@ -27,14 +28,15 @@ export type TransitionPhase = 'in' | 'hold' | 'out';
 interface Playing extends TransitionScreen { id: number; phase: TransitionPhase; calm: boolean; ms: Timing }
 interface Timing { in: number; hold: number; out: number }
 
-/** Base timings (ms) before the motion scale. "in" covers the entrance, "out" the exit. */
-const TIMING: Record<'skyline' | 'aurora' | 'compact', Timing> = {
-  skyline: { in: 800, hold: 260, out: 480 },
-  aurora: { in: 480, hold: 200, out: 620 },
-  compact: { in: 200, hold: 333, out: 380 }, // the hold ≈ 0.5 s at ×1.5: the page name rests before the fade
-};
-/** Reduced motion: a short cross-fade with the same words. */
-const CALM: Timing = { in: 120, hold: 300, out: 160 };
+/**
+ * Base timings (ms) before the motion scale, from transition-timing.json: the one source the
+ * landing player imports and the case study's player is given at build (vite.config.ts), with
+ * designDrift.test.ts guarding the case study's own fallback copy. "in" covers the entrance,
+ * "out" the exit; compact (switching features) holds ≈0.5 s at ×1.5. calm = reduced motion,
+ * a short cross-fade with the same words.
+ */
+const TIMING: Record<'skyline' | 'aurora' | 'compact', Timing> = timing;
+const CALM: Timing = timing.calm;
 
 export function timingFor(screen: Pick<TransitionScreen, 'kind' | 'compact'>, calm = false): Timing {
   if (calm) return CALM;

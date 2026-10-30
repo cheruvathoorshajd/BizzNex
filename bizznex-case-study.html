@@ -1185,7 +1185,8 @@ tr.pick td:first-child { color: var(--accent); }
   var MARK = '<svg class="tpx-mark" viewBox="0 0 48 48" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"><path pathLength="1" d="M6 42V25H16"/><path pathLength="1" d="M16 42V11L28 6V42"/><path pathLength="1" d="M28 18H41V42"/><path pathLength="1" d="M32 24.5H37M32 29.5H37M32 34.5H37"/><path pathLength="1" d="M10 30V36"/><path pathLength="1" d="M3.5 42H44.5"/></g><rect x="20.4" y="15.6" width="3.6" height="4.6" rx=".6" fill="var(--accent)"/></svg>';
   stage.innerHTML = stage.innerHTML.replace(/__MARK_TX__/g, MARK).replace(/__MARK__/g, MARK.replace(' class="tpx-mark"', ''));
 
-  var TIMING = { skyline: [800, 260, 480], aurora: [480, 200, 620], compact: [200, 333, 380] };
+  // replaced with apps/web/src/ui/transition-timing.json when the app serves or builds this page
+  var TIMING = { skyline: [800, 260, 480], aurora: [480, 200, 620], compact: [200, 333, 380], calm: [120, 300, 160] };
   var MOMENTS = [
     { label: 'Open the app', kind: 'skyline', from: 'blank', to: 'dash', t: 'Good afternoon, Dennis.', s: 'Opening your workspace', note: 'Opening BizzNex while signed in. Shown only if loading the account takes over 300 ms.' },
     { label: 'Sign in', kind: 'skyline', from: 'auth', to: 'dash', t: 'Good afternoon, Dennis.', s: 'Loading your projects, customers and deals', note: 'After the password is accepted: greeted by name while the workspace loads.' },
@@ -1222,7 +1223,7 @@ tr.pick td:first-child { color: var(--accent); }
     started = true; clear();
     var m = MOMENTS[cur], calm = calmBtn.getAttribute('aria-pressed') === 'true';
     var base = TIMING[m.compact ? 'compact' : m.kind], f = 1.5 * slow;
-    var ms = calm ? [120, 300, 160] : [base[0] * f, base[1] * f, base[2] * f];
+    var ms = calm ? TIMING.calm : [base[0] * f, base[1] * f, base[2] * f];
     stage.querySelector('[data-notice]').hidden = !m.notice;
     show(m.from);
     tx.className = 'tpx';

@@ -1,0 +1,6 @@
+{
+  "skyline": { "in": 800, "hold": 260, "out": 480 },
+  "aurora": { "in": 480, "hold": 200, "out": 620 },
+  "compact": { "in": 200, "hold": 333, "out": 380 },
+  "calm": { "in": 120, "hold": 300, "out": 160 }
+}
