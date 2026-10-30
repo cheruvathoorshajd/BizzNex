@@ -11,6 +11,7 @@ import ErrorBoundary from './ui/ErrorBoundary';
 import { useMeQuery } from './services/api';
 import Sidebar from './layout/Sidebar';
 import Topbar from './layout/Topbar';
+import GlobalSearch from './layout/GlobalSearch';
 import WindowLayer from './layout/WindowLayer';
 import Dock from './layout/Dock';
 import { useWindows } from './layout/useWindows';
@@ -139,8 +140,9 @@ function Shell() {
   // each view starts unfiltered: a search typed on Contacts shouldn't silently filter Deals.
   // Switching features plays a short Aurora over the main column (the sidebar stays), and the
   // new page is uncovered by fading through paper.
-  const navigate = (v: ViewId) => {
-    const apply = () => { setView(v); setQuery(''); setMenuOpen(false); };
+  // `q` opens the page already filtered (the dashboard search uses it for projects, tasks and events).
+  const navigate = (v: ViewId, q = '') => {
+    const apply = () => { setView(v); setQuery(q); setMenuOpen(false); };
     if (v === view) { apply(); return; }
     void playTransition({ kind: 'aurora', t: t(LABELS[v]), inline: true, compact: true }, { swap: apply });
   };
@@ -172,7 +174,7 @@ function Shell() {
     setTouring(false);
     if (completed) { update({ tourDone: true }); setChecklistOpen(true); }
   };
-  const searchable: ViewId[] = ['projects', 'tasks', 'contacts', 'companies', 'deals', 'activities'];
+  const searchable: ViewId[] = ['projects', 'tasks', 'contacts', 'companies', 'deals', 'activities', 'events'];
 
   const render = () => {
     switch (view) {
@@ -193,7 +195,7 @@ function Shell() {
           onSetup={guided ? () => update({ wizard: 'pending' }) : undefined}
         />
       );
-      default: return isToolId(view) ? toolNode(view) : null;
+      default: return isToolId(view) ? toolNode(view, query) : null;
     }
   };
 
@@ -210,6 +212,7 @@ function Shell() {
           onMenu={openMenu}
           menuOpen={menuOpen}
           showSearch={searchable.includes(view)}
+          search={view === 'dashboard' ? <GlobalSearch onNavigate={navigate} onOpenWindow={openWindow} /> : undefined}
           onOpenWindow={isToolId(view) ? () => openWindow(view) : undefined}
           help={
             <HelpMenu

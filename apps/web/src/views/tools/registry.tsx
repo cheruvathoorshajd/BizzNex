@@ -23,7 +23,7 @@ export const isToolId = (id: ViewId): id is ToolId =>
   (TOOL_IDS as readonly string[]).includes(id);
 
 /** The full-page inline version of a tool (left-click). Windows use the compact `toolWidget`. */
-export function toolNode(id: ToolId): ReactNode {
+export function toolNode(id: ToolId, query = ''): ReactNode {
   switch (id) {
     case 'calculator': return <Calculator />;
     case 'chatbot': return <Chatbot />;
@@ -31,6 +31,6 @@ export function toolNode(id: ToolId): ReactNode {
     case 'publisher': return <Publisher />;
     case 'notifications': return <Notifications />;
     case 'newsletter': return <Newsletter />;
-    case 'events': return <Events />;
+    case 'events': return <Events query={query} />;
   }
 }

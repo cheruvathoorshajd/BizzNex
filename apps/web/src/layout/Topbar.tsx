@@ -16,6 +16,8 @@ interface Props {
   showSearch?: boolean;
   onOpenWindow?: () => void;
   help?: ReactNode;
+  /** Replaces the list filter with another search (the dashboard's global search). */
+  search?: ReactNode;
 }
 
 const LANGS: Language[] = ['en', 'es', 'fr'];
@@ -25,7 +27,7 @@ const THEME_UI: Record<ThemeMode, { icon: string; label: string }> = {
   light: { icon: 'sun', label: 'Light' }, dark: { icon: 'moon', label: 'Dark' }, system: { icon: 'monitor', label: 'Auto' },
 };
 
-export default function Topbar({ title, query, onQuery, onMenu, menuOpen, showSearch, onOpenWindow, help }: Props) {
+export default function Topbar({ title, query, onQuery, onMenu, menuOpen, showSearch, onOpenWindow, help, search }: Props) {
   const t = useT();
   const dispatch = useAppDispatch();
   const switchTheme = useThemeSwitch();
@@ -41,7 +43,8 @@ export default function Topbar({ title, query, onQuery, onMenu, menuOpen, showSe
       </div>
 
       <div className="top-actions">
-        {showSearch && (
+        {search}
+        {!search && showSearch && (
           <label className="top-search" data-tour="top-search">
             <Icon name="search" size={16} style={{ color: 'var(--muted)' }} />
             <input

@@ -151,6 +151,9 @@ rebuilding the scene.
   session ending, switching features): the glow blooms, then fades through paper. Switching
   features covers only the main column, so the sidebar stays put. Play all seven on the
   landing page or in the case study (§ 08).
+- **Dashboard search** — one box (`/` to focus) that finds pages and tools, projects, tasks and
+  events. Enter opens a page or tool (Shift+Enter, or ↗, opens a tool in a window); a project,
+  task or event opens its page already filtered to it.
 - **Foldable sidebar** — the sidebar folds to an icon rail (the toggle by the logo, or `[`), and
   while folded, hovering or tabbing into it pops the full sidebar out over the page without moving
   it. Kept per browser; phones keep the slide-in drawer.
