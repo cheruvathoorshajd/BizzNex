@@ -88,7 +88,6 @@ export default function Dashboard({ onNavigate }: { onNavigate: (v: ViewId) => v
           <div className="bloom d3-back" />
 
           <div className="d3-lift-1" style={{ position: 'relative' }}>
-            <p className="spec"><span className="k">BizzNex — Business Suite</span><span>Aurora · Edition 2026</span></p>
             <h1 className="view-title serif">{t('dash.greeting', { name: firstName, part: dayPart() })}</h1>
             <p style={{ color: 'var(--muted)', maxWidth: '44ch' }}>{t('dash.sub')}</p>
           </div>
