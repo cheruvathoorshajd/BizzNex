@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BizzNex Transitions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Outfit:wght@700&display=swap">
+<style>
+/* BizzNex transition screens: a study of the moments between screens (boot, sign-in, demo,
+   setup done, sign-out, session ended, page load), in three directions. Tokens are the shipped
+   Aurora values from apps/web/src/styles/aurora.scss; durations follow the ×1.5 motion scale. */
+:root {
+  --paper: #F5F1E9; --paper-2: #EDE7DA; --paper-3: #E7E0D0;
+  --ink: #211D16; --ink-soft: #4E4A40; --muted: #686357; --faint: #C0B9A6;
+  --rule: rgba(33, 29, 22, .18); --rule-soft: rgba(33, 29, 22, .09);
+  --accent: #5B41E0; --accent-tint: rgba(91, 65, 224, .10); --on-accent: #fff;
+  --ok: #2E8F60; --warn: #B67A16; --bad: #C24A3E;
+  --bloom-op: .40; --shadow: 0 12px 34px rgba(40, 30, 12, .16);
+  --serif: 'Fraunces', Georgia, serif; --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace; --brand: 'Outfit', var(--sans);
+  --radius: 3px; --ease: cubic-bezier(.22, 1, .36, 1); --ease-sp: cubic-bezier(.2, .8, .2, 1);
+  --m: 1.5;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #141210; --paper-2: #1C1915; --paper-3: #23201A;
+    --ink: #EDE8DD; --ink-soft: #C3BCAD; --muted: #8E877A; --faint: rgba(237, 232, 221, .34);
+    --rule: rgba(237, 232, 221, .16); --rule-soft: rgba(237, 232, 221, .07);
+    --accent: #A897FF; --accent-tint: rgba(168, 151, 255, .14); --on-accent: #17131F;
+    --ok: #46C98A; --warn: #E7B24E; --bad: #F0776B; --bloom-op: .55; --shadow: 0 16px 44px rgba(0, 0, 0, .5);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #141210; --paper-2: #1C1915; --paper-3: #23201A;
+  --ink: #EDE8DD; --ink-soft: #C3BCAD; --muted: #8E877A; --faint: rgba(237, 232, 221, .34);
+  --rule: rgba(237, 232, 221, .16); --rule-soft: rgba(237, 232, 221, .07);
+  --accent: #A897FF; --accent-tint: rgba(168, 151, 255, .14); --on-accent: #17131F;
+  --ok: #46C98A; --warn: #E7B24E; --bad: #F0776B; --bloom-op: .55; --shadow: 0 16px 44px rgba(0, 0, 0, .5);
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: clamp(28px, 5vw, 64px) 16px 120px; display: flex; flex-direction: column; gap: clamp(28px, 4vw, 52px); }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code { font-family: var(--mono); font-size: .88em; background: var(--accent-tint); color: var(--accent); padding: 1px 6px; border-radius: var(--radius); }
+
+/* ── header ── */
+.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.brand { display: inline-flex; align-items: center; gap: 10px; font-family: var(--brand); font-weight: 700; font-size: 19px; letter-spacing: -.02em; }
+.brand svg { width: 26px; height: 26px; }
+.tools { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--rule); background: transparent; padding: 6px 12px; border-radius: var(--radius); font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-tint); }
+.eyebrow { font-family: var(--mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; display: flex; gap: 12px; flex-wrap: wrap; }
+.eyebrow b { color: var(--accent); font-weight: 500; }
+h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(2.5rem, 6.5vw, 4.6rem); letter-spacing: -.035em; line-height: .95; margin: 14px 0 0; text-wrap: balance; }
+h1 i { font-style: italic; color: var(--accent); }
+.lead { max-width: 64ch; color: var(--ink-soft); margin: 18px 0 0; font-size: 16.5px; }
+h2 { font-family: var(--serif); font-weight: 500; font-size: clamp(1.6rem, 3.4vw, 2.3rem); letter-spacing: -.02em; line-height: 1.05; margin: 6px 0 0; }
+.sec-k { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0; }
+
+/* ── option picker ── */
+.opts { display: grid; grid-template-columns: 1.25fr repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--rule); }
+.opt.mix .t { color: var(--accent); }
+.opt.mix .d b { color: var(--ink); font-weight: 600; }
+.exits { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.exit { text-align: left; background: none; border: 1px solid var(--rule-soft); border-radius: var(--radius); padding: 12px 14px; display: grid; gap: 4px; }
+.exit .t { font-family: var(--serif); font-size: 1.15rem; letter-spacing: -.01em; }
+.exit .d { font-size: 13.5px; color: var(--ink-soft); }
+.exit[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-tint); }
+.exit[aria-pressed="true"] .t { color: var(--accent); }
+@media (max-width: 900px) { .exits { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .exits { grid-template-columns: 1fr; } }
+.mom .tag { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; margin-left: 6px; padding: 1px 5px; border-radius: 2px; border: 1px solid var(--rule); color: var(--muted); }
+.mom .tag.sky { border-color: var(--ink-soft); color: var(--ink-soft); }
+.mom .tag.aur { border-color: var(--accent); color: var(--accent); }
+.mapping { width: 100%; border-collapse: collapse; font-size: 14px; }
+.mapping td, .mapping th { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--rule-soft); }
+.mapping th { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.opt { text-align: left; background: none; border: 0; border-bottom: 1px solid var(--rule); padding: 18px 18px 20px 0; display: grid; gap: 6px; position: relative; }
+.opt + .opt { padding-left: 18px; border-left: 1px solid var(--rule-soft); }
+.opt .n { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; color: var(--muted); }
+.opt .t { font-family: var(--serif); font-size: 1.45rem; letter-spacing: -.015em; line-height: 1.1; }
+.opt .d { color: var(--ink-soft); font-size: 14px; }
+.opt[aria-pressed="true"] .n { color: var(--accent); }
+.opt[aria-pressed="true"]::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--accent); }
+.opt + .opt[aria-pressed="true"]::after { left: 18px; }
+@media (max-width: 760px) {
+  .opts { grid-template-columns: 1fr; }
+  .opts .opt.mix { padding-left: 0; }
+  .opt + .opt { padding-left: 0; border-left: 0; }
+  .opt + .opt[aria-pressed="true"]::after { left: 0; }
+}
+
+/* ── moments ── */
+.moments { display: flex; gap: 6px; flex-wrap: wrap; }
+.mom { border: 1px solid var(--rule-soft); background: none; padding: 7px 12px; border-radius: var(--radius); font-size: 13.5px; color: var(--ink-soft); }
+.mom[aria-pressed="true"] { border-color: var(--ink); color: var(--ink); }
+.mom .k { font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-right: 6px; }
+
+/* ── bench ── */
+.bench { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: clamp(18px, 3vw, 36px); align-items: start; }
+@media (max-width: 900px) { .bench { grid-template-columns: 1fr; } }
+.notes { display: flex; flex-direction: column; gap: 14px; font-size: 14px; color: var(--ink-soft); }
+.notes h3 { font-family: var(--serif); font-weight: 500; font-size: 1.35rem; color: var(--ink); margin: 0; letter-spacing: -.01em; line-height: 1.15; }
+.notes dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; border-top: 1px solid var(--rule-soft); padding-top: 12px; }
+.notes dt { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
+.notes dd { margin: 0; }
+.ctrl { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+.btn { border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent); padding: 8px 14px; border-radius: var(--radius); font-weight: 500; font-size: 14px; }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--rule); }
+.phase { font-family: var(--mono); font-size: 11.5px; color: var(--muted); letter-spacing: .06em; margin-left: auto; }
+
+/* ── the stage: a mini BizzNex window ── */
+.frame { border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; background: var(--paper-2); box-shadow: var(--shadow); }
+.bar { height: 30px; display: flex; align-items: center; gap: 6px; padding: 0 12px; border-bottom: 1px solid var(--rule-soft); background: var(--paper-2); }
+.bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--rule); }
+.bar span { margin-left: 10px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.stage { position: relative; aspect-ratio: 16 / 10; container-type: inline-size; overflow: hidden; background: var(--paper); }
+
+/* screens: each one fills the stage */
+.scr { position: absolute; inset: 0; display: none; }
+.scr.on { display: block; }
+.scr.blank { background: var(--paper); }
+
+.ws { display: grid; grid-template-columns: 22cqi minmax(0, 1fr); height: 100%; }
+.ws-side { border-right: 1px solid var(--rule-soft); background: var(--paper-2); padding: 3.2cqi 2.4cqi; display: flex; flex-direction: column; gap: 1.1cqi; }
+.ws-logo { display: flex; align-items: center; gap: .9cqi; font-family: var(--brand); font-weight: 700; font-size: 1.9cqi; margin-bottom: 2cqi; }
+.ws-logo svg { width: 2.6cqi; height: 2.6cqi; }
+.ws-grp { font-family: var(--mono); font-size: .95cqi; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-top: 1.4cqi; }
+.ws-nav { font-size: 1.45cqi; color: var(--ink-soft); display: flex; align-items: center; gap: 1cqi; }
+.ws-nav::before { content: ''; width: 1.3cqi; height: 1.3cqi; border: 1px solid var(--faint); border-radius: 2px; }
+.ws-nav.on { color: var(--ink); font-weight: 600; }
+.ws-nav.on::before { border-color: var(--accent); background: var(--accent-tint); }
+.ws-main { padding: 4cqi 5cqi; display: flex; flex-direction: column; gap: 1.6cqi; position: relative; }
+.ws-crumb { font-family: var(--mono); font-size: 1.05cqi; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
+.ws-h { font-family: var(--serif); font-size: 3.6cqi; letter-spacing: -.03em; line-height: 1; margin: 0; }
+.ws-big { font-family: var(--serif); font-size: 6.4cqi; letter-spacing: -.04em; line-height: 1; margin-top: 1cqi; }
+.ws-delta { font-family: var(--mono); font-size: 1.15cqi; color: var(--ok); }
+.ws-rows { margin-top: 1.6cqi; border-top: 1px solid var(--rule-soft); }
+.ws-row { display: flex; justify-content: space-between; padding: 1.15cqi 0; border-bottom: 1px solid var(--rule-soft); font-size: 1.4cqi; }
+.ws-row b { font-family: var(--mono); font-weight: 500; }
+.ws-cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.4cqi; margin-top: 1.4cqi; }
+.ws-col { border-top: 2px solid var(--rule); padding-top: 1cqi; display: grid; gap: .9cqi; font-size: 1.2cqi; color: var(--muted); }
+.ws-col.won { border-top-color: var(--ok); }
+.ws-card { border: 1px solid var(--rule-soft); border-radius: 3px; padding: .9cqi; color: var(--ink); font-size: 1.25cqi; background: var(--paper); }
+
+.auth { display: grid; grid-template-columns: 1fr 1fr; height: 100%; }
+.auth-l { background: var(--paper-2); border-right: 1px solid var(--rule-soft); padding: 4cqi; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
+.auth-l .ws-logo { margin: 0; }
+.auth-l p { font-family: var(--serif); font-size: 3.4cqi; letter-spacing: -.03em; line-height: 1.02; margin: 0; }
+.auth-r { padding: 6cqi 5cqi; display: flex; flex-direction: column; gap: 1.6cqi; }
+.auth-r .lab { font-family: var(--mono); font-size: 1cqi; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.auth-r .in { border: 1px solid var(--rule); border-radius: 3px; padding: 1.1cqi 1.3cqi; font-size: 1.45cqi; }
+.auth-r .go { align-self: start; background: var(--accent); color: var(--on-accent); border-radius: 3px; padding: 1.1cqi 2cqi; font-size: 1.4cqi; font-weight: 500; margin-top: .8cqi; }
+.auth-r h4 { font-family: var(--serif); font-weight: 500; font-size: 3cqi; margin: 0 0 1cqi; letter-spacing: -.02em; }
+.notice { border-left: 2px solid var(--warn); padding: .8cqi 1.2cqi; font-size: 1.3cqi; color: var(--ink-soft); background: color-mix(in srgb, var(--warn) 8%, transparent); }
+
+.land { padding: 5cqi 6cqi; height: 100%; position: relative; overflow: hidden; }
+.land .ws-logo { margin-bottom: 5cqi; }
+.land h5 { font-family: var(--serif); font-weight: 500; font-size: 6.2cqi; letter-spacing: -.04em; line-height: .95; margin: 0; max-width: 60%; }
+.land h5 i { color: var(--accent); }
+.land .row2 { display: flex; gap: 2cqi; margin-top: 3cqi; align-items: center; font-size: 1.5cqi; }
+.land .row2 b { background: var(--accent); color: var(--on-accent); padding: 1.1cqi 2cqi; border-radius: 3px; font-weight: 500; }
+.land .row2 span.pressed { color: var(--accent); text-decoration: underline; text-underline-offset: 4px; }
+.bloom { position: absolute; width: 55cqi; height: 55cqi; right: -12cqi; top: -14cqi; border-radius: 50%; filter: blur(7cqi); opacity: var(--bloom-op);
+  background: radial-gradient(closest-side at 35% 40%, #7C6CF5, transparent), radial-gradient(closest-side at 65% 55%, #34E0C4, transparent), radial-gradient(closest-side at 50% 75%, #FF9EC0, transparent); pointer-events: none; }
+
+.wiz { display: grid; grid-template-columns: 20cqi 1fr; height: 100%; }
+.wiz-rail { background: var(--paper-2); border-right: 1px solid var(--rule-soft); padding: 3.4cqi 2.4cqi; display: grid; align-content: start; gap: 1.6cqi; }
+.wiz-step { display: flex; gap: 1cqi; align-items: center; font-size: 1.35cqi; color: var(--muted); }
+.wiz-step::before { content: attr(data-n); font-family: var(--mono); font-size: .95cqi; width: 2.6cqi; height: 2.6cqi; border-radius: 50%; border: 1px solid var(--rule); display: grid; place-items: center; }
+.wiz-step.done::before { content: '✓'; background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.wiz-step.on { color: var(--ink); font-weight: 600; }
+.wiz-step.on::before { border-color: var(--accent); color: var(--accent); }
+.wiz-main { padding: 5cqi 6cqi; display: flex; flex-direction: column; gap: 1.6cqi; position: relative; }
+.wiz-main .k { font-family: var(--mono); font-size: 1.05cqi; letter-spacing: .14em; color: var(--accent); text-transform: uppercase; }
+.wiz-main h6 { font-family: var(--serif); font-weight: 500; font-size: 4.4cqi; letter-spacing: -.035em; line-height: 1; margin: 0; }
+.wiz-main p { font-size: 1.55cqi; color: var(--ink-soft); margin: 0; max-width: 70%; }
+.wiz-foot { position: absolute; left: 0; right: 0; bottom: 0; border-top: 1px solid var(--rule-soft); padding: 1.6cqi 6cqi; display: flex; justify-content: flex-end; }
+.wiz-foot b { background: var(--accent); color: var(--on-accent); border-radius: 3px; padding: 1cqi 2cqi; font-size: 1.35cqi; font-weight: 500; }
+
+/* "to" screens rise in (all options); option B staggers each block */
+.scr.enter { animation: scrIn calc(420ms * var(--m)) var(--ease) both; }
+@keyframes scrIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── transition overlay (shared structure; each option styles it) ── */
+.tx { position: absolute; inset: 0; z-index: 5; display: none; pointer-events: none; }
+.tx.on { display: block; }
+.tx .mark { width: 9cqi; height: 9cqi; color: var(--ink); }
+.tx .k { font-family: var(--mono); font-size: 1.1cqi; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+.tx .t { font-family: var(--serif); font-weight: 500; letter-spacing: -.035em; line-height: 1; color: var(--ink); }
+.tx .s { font-family: var(--mono); font-size: 1.15cqi; color: var(--muted); letter-spacing: .04em; }
+.tx .line { position: relative; height: 1px; background: var(--rule-soft); overflow: hidden; }
+.tx .line i { position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(0); }
+.tx .skel, .tx .mesh { display: none; }
+.stage[data-opt="b"] .tx .skel, .stage[data-opt="c"] .tx .mesh { display: block; }
+
+/* A · Skyline — the mark builds itself, the window lights, the page lifts away */
+.stage[data-opt="a"] .tx { background: var(--paper); display: none; }
+.stage[data-opt="a"] .tx.on { display: grid; place-items: center; align-content: center; gap: 2cqi; text-align: center; }
+.stage[data-opt="a"] .tx .t { font-size: 3.2cqi; font-family: var(--brand); font-weight: 700; letter-spacing: -.02em; }
+.stage[data-opt="a"] .tx .k, .stage[data-opt="a"] .tx .line { display: none; }
+.stage[data-opt="a"] .tx .mark path { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.stage[data-opt="a"] .tx .mark rect { opacity: 0; }
+.stage[data-opt="a"] .tx.in .mark path { animation: draw calc(700ms * var(--m)) var(--ease-sp) forwards; }
+.stage[data-opt="a"] .tx.in .mark path:nth-child(2) { animation-delay: calc(90ms * var(--m)); }
+.stage[data-opt="a"] .tx.in .mark path:nth-child(3) { animation-delay: calc(180ms * var(--m)); }
+.stage[data-opt="a"] .tx.in .mark path:nth-child(4), .stage[data-opt="a"] .tx.in .mark path:nth-child(5) { animation-delay: calc(300ms * var(--m)); }
+.stage[data-opt="a"] .tx.in .mark rect { animation: lit calc(380ms * var(--m)) var(--ease) calc(620ms * var(--m)) forwards; }
+.stage[data-opt="a"] .tx.in .t, .stage[data-opt="a"] .tx.in .s { animation: rise calc(500ms * var(--m)) var(--ease) calc(420ms * var(--m)) both; }
+.stage[data-opt="a"] .tx.in .s { animation-delay: calc(560ms * var(--m)); }
+.stage[data-opt="a"] .tx.hold .mark rect { opacity: 1; animation: glow calc(1100ms * var(--m)) ease-in-out infinite alternate; }
+.stage[data-opt="a"] .tx.hold .mark path { stroke-dashoffset: 0; }
+.stage[data-opt="a"] .tx.out { animation: lift calc(520ms * var(--m)) var(--ease-sp) forwards; }
+.stage[data-opt="a"] .tx.out .mark path { stroke-dashoffset: 0; }
+.stage[data-opt="a"] .tx.out .mark rect { opacity: 1; }
+.stage[data-opt="a"] .tx.inline { background: transparent; }
+
+/* B · Ledger — an editorial line on paper over the app's own hairlines; the page stays put */
+.stage[data-opt="b"] .tx { background: var(--paper); }
+.stage[data-opt="b"] .tx.on { display: flex; flex-direction: column; justify-content: center; gap: 1.8cqi; padding: 0 8cqi 0 calc(22cqi + 8cqi); } /* clear of the sidebar outline */
+.stage[data-opt="b"] .tx .mark { display: none; }
+.stage[data-opt="b"] .tx .t { font-size: 5.4cqi; max-width: 20ch; }
+.stage[data-opt="b"] .tx .line { width: 42cqi; margin-top: 1cqi; }
+.stage[data-opt="b"] .tx .skel { position: absolute; inset: 0; display: grid; grid-template-columns: 22cqi 1fr; z-index: -1; }
+.stage[data-opt="b"] .tx .skel::before { content: ''; border-right: 1px solid var(--rule-soft); background: var(--paper-2); }
+.stage[data-opt="b"] .tx.in .k, .stage[data-opt="b"] .tx.in .t, .stage[data-opt="b"] .tx.in .s, .stage[data-opt="b"] .tx.in .line { animation: rise calc(520ms * var(--m)) var(--ease) both; }
+.stage[data-opt="b"] .tx.in .t { animation-delay: calc(70ms * var(--m)); }
+.stage[data-opt="b"] .tx.in .line { animation-delay: calc(140ms * var(--m)); }
+.stage[data-opt="b"] .tx.in .s { animation-delay: calc(200ms * var(--m)); }
+.stage[data-opt="b"] .tx.in .skel, .stage[data-opt="b"] .tx.hold .skel { animation: fade calc(400ms * var(--m)) var(--ease) both; }
+.stage[data-opt="b"] .tx.hold .line i, .stage[data-opt="b"] .tx.in .line i { animation: fill calc(1500ms * var(--m)) var(--ease-sp) calc(200ms * var(--m)) forwards; }
+.stage[data-opt="b"] .tx.out { animation: fadeOut calc(360ms * var(--m)) var(--ease) forwards; }
+.stage[data-opt="b"] .tx.out .k, .stage[data-opt="b"] .tx.out .t, .stage[data-opt="b"] .tx.out .s, .stage[data-opt="b"] .tx.out .line { animation: leftOut calc(320ms * var(--m)) var(--ease-sp) forwards; }
+.stage[data-opt="b"] .tx.out .line i { transform: scaleX(1); }
+.stage[data-opt="b"] .scr.enter.stagger > * > *, .stage[data-opt="b"] .scr.enter.stagger .ws-main > * { animation: rise calc(460ms * var(--m)) var(--ease) both; }
+.stage[data-opt="b"] .scr.enter.stagger .ws-main > :nth-child(2) { animation-delay: calc(50ms * var(--m)); }
+.stage[data-opt="b"] .scr.enter.stagger .ws-main > :nth-child(3) { animation-delay: calc(100ms * var(--m)); }
+.stage[data-opt="b"] .scr.enter.stagger .ws-main > :nth-child(n+4) { animation-delay: calc(150ms * var(--m)); }
+
+/* C · Aurora — the mesh blooms from the middle and the app opens out of it */
+.stage[data-opt="c"] .tx { background: var(--paper); }
+.stage[data-opt="c"] .tx.on { display: grid; place-items: center; align-content: center; gap: 1.6cqi; text-align: center; }
+.stage[data-opt="c"] .tx .mark, .stage[data-opt="c"] .tx .line, .stage[data-opt="c"] .tx .k { display: none; }
+.stage[data-opt="c"] .tx .t { font-size: 3.4cqi; position: relative; }
+.stage[data-opt="c"] .tx .s { position: relative; }
+.stage[data-opt="c"] .tx .mesh { position: absolute; left: 50%; top: 50%; width: 70cqi; height: 70cqi; margin: -35cqi 0 0 -35cqi; border-radius: 50%; filter: blur(8cqi); opacity: 0;
+  background: radial-gradient(closest-side at 38% 42%, #7C6CF5, transparent), radial-gradient(closest-side at 62% 50%, #34E0C4, transparent), radial-gradient(closest-side at 50% 70%, #FF9EC0, transparent), radial-gradient(closest-side at 52% 30%, #5FA8FF, transparent); }
+.stage[data-opt="c"] .tx.in .mesh { animation: bloomIn calc(900ms * var(--m)) var(--ease) forwards; }
+.stage[data-opt="c"] .tx.hold .mesh { opacity: var(--bloom-op); transform: scale(1); animation: breathe calc(2400ms * var(--m)) ease-in-out infinite alternate; }
+.stage[data-opt="c"] .tx.in .t, .stage[data-opt="c"] .tx.in .s { animation: rise calc(560ms * var(--m)) var(--ease) calc(240ms * var(--m)) both; }
+.stage[data-opt="c"] .tx.in .s { animation-delay: calc(380ms * var(--m)); }
+/* Aurora exits (the old circle-closing exit is replaced). In every exit the words leave first. */
+.stage[data-opt="c"] .tx.out .t, .stage[data-opt="c"] .tx.out .s { animation: wordsOut calc(220ms * var(--m)) var(--ease) forwards; }
+.stage[data-opt="c"] .tx.out .mesh { opacity: var(--bloom-op); }
+/* Settle: the glow sinks and dims while the page comes up from beneath */
+.stage[data-opt="c"][data-exit="settle"] .tx.out { animation: fadeOut calc(600ms * var(--m)) var(--ease) calc(80ms * var(--m)) forwards; }
+.stage[data-opt="c"][data-exit="settle"] .tx.out .mesh { animation: sink calc(640ms * var(--m)) var(--ease) forwards; }
+.stage[data-opt="c"][data-exit="settle"] .scr.enter { animation: settleIn calc(640ms * var(--m)) var(--ease) both; }
+/* Lift: the glow rises off the top like a veil, soft at its lower edge */
+.stage[data-opt="c"][data-exit="lift"] .tx.out { -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent); mask-image: linear-gradient(to bottom, #000 72%, transparent);
+  animation: veilUp calc(620ms * var(--m)) var(--ease-sp) calc(60ms * var(--m)) forwards; }
+/* Gather: the glow condenses into the spot you land on next (--gx/--gy, set per moment) */
+.stage[data-opt="c"][data-exit="gather"] .tx.out { animation: paperOut calc(640ms * var(--m)) linear forwards; }
+.stage[data-opt="c"][data-exit="gather"] .tx.out .mesh { animation: gather calc(620ms * var(--m)) var(--ease-sp) forwards; }
+.stage[data-opt="c"][data-exit="gather"] .tx .pip { display: block; }
+.stage[data-opt="c"][data-exit="gather"] .tx.out .pip { animation: pip calc(640ms * var(--m)) var(--ease-sp) forwards; }
+/* Fade through paper: words, then glow, then the page; the calmest */
+.stage[data-opt="c"][data-exit="paper"] .tx.out { animation: fadeOut calc(300ms * var(--m)) linear calc(260ms * var(--m)) forwards; }
+.stage[data-opt="c"][data-exit="paper"] .tx.out .mesh { animation: fadeOut calc(300ms * var(--m)) var(--ease) calc(120ms * var(--m)) forwards; }
+.stage[data-opt="c"][data-exit="paper"] .scr.enter { animation: scrIn calc(300ms * var(--m)) var(--ease) calc(380ms * var(--m)) both; }
+.tx .pip { display: none; position: absolute; left: 50%; top: 50%; width: 1.4cqi; height: 1.4cqi; margin: -.7cqi 0 0 -.7cqi; border-radius: 50%; background: var(--accent); opacity: 0; }
+
+/* page loads stay inside the main column, under the sidebar — never a full-screen interruption */
+.tx.inline { left: 22cqi; }
+.stage[data-opt="b"] .tx.inline .skel { display: none; }
+.stage[data-opt="b"] .tx.inline.on { padding: 0 6cqi; }
+.stage[data-opt="b"] .tx.inline .t { font-size: 3.6cqi; }
+.stage[data-opt="a"] .tx.inline .mark { width: 6cqi; height: 6cqi; }
+.stage[data-opt="a"] .tx.inline .t { display: none; }
+.stage[data-opt="c"] .tx.inline .mesh { width: 46cqi; height: 46cqi; margin: -23cqi 0 0 -23cqi; }
+
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes lit { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+@keyframes glow { from { opacity: 1; } to { opacity: .55; } }
+@keyframes rise { from { opacity: 0; transform: translateY(1.6cqi); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeOut { to { opacity: 0; } }
+@keyframes lift { to { opacity: 0; transform: translateY(-4%); } }
+@keyframes leftOut { to { opacity: 0; transform: translateX(-3cqi); } }
+@keyframes fill { to { transform: scaleX(1); } }
+@keyframes bloomIn { from { opacity: 0; transform: scale(.35); } to { opacity: var(--bloom-op); transform: scale(1); } }
+@keyframes breathe { from { transform: scale(1) rotate(0deg); } to { transform: scale(1.08) rotate(14deg); } }
+@keyframes wordsOut { to { opacity: 0; transform: translateY(-.8cqi); } }
+@keyframes sink { to { opacity: 0; transform: translateY(14cqi) scale(.85); } }
+@keyframes settleIn { from { opacity: 0; transform: scale(1.015); } to { opacity: 1; transform: none; } }
+@keyframes veilUp { to { transform: translateY(-105%); } }
+/* the paper clears first; the overlay itself stays visible so the gathered point can land, then goes */
+@keyframes paperOut { 0% { background-color: var(--paper); opacity: 1; } 55% { background-color: transparent; opacity: 1; } 90% { background-color: transparent; opacity: 1; } 100% { background-color: transparent; opacity: 0; } }
+@keyframes gather { to { opacity: 0; transform: translate(var(--gx, 0), var(--gy, 0)) scale(.04); } }
+@keyframes pip { 0% { opacity: 0; transform: translate(var(--gx, 0), var(--gy, 0)) scale(4); } 55% { opacity: 1; transform: translate(var(--gx, 0), var(--gy, 0)) scale(1); } 100% { opacity: 0; transform: translate(var(--gx, 0), var(--gy, 0)) scale(1); } }
+
+/* reduced motion (the OS setting, or the toggle above): every transition is a short cross-fade */
+.stage.calm .tx *, .stage.calm .tx, .stage.calm .scr.enter, .stage.calm .scr.enter * { animation: none !important; }
+.stage.calm .tx.out { opacity: 0; transition: opacity 120ms linear; }
+.stage.calm .tx .mark path { stroke-dashoffset: 0 !important; }
+.stage.calm .tx .mark rect { opacity: 1 !important; }
+.stage.calm .tx .line i { transform: scaleX(1); }
+.stage.calm .tx .mesh { opacity: var(--bloom-op) !important; }
+
+/* ── comparison + recommendation ── */
+.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tbl th, .tbl td { text-align: left; padding: 11px 12px 11px 0; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+.tbl th { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.tbl td:first-child { color: var(--muted); }
+.tbl-wrap { overflow-x: auto; }
+.rec { border-left: 2px solid var(--accent); padding: 4px 0 4px 18px; max-width: 72ch; color: var(--ink-soft); }
+.rec p { margin: 8px 0 0; }
+.rec strong { color: var(--ink); }
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0 28px; }
+.rules div { border-top: 1px solid var(--rule-soft); padding: 14px 0; font-size: 14px; color: var(--ink-soft); }
+.rules b { display: block; color: var(--ink); font-weight: 600; margin-bottom: 4px; }
+footer { font-family: var(--mono); font-size: 11.5px; color: var(--muted); border-top: 1px solid var(--rule-soft); padding-top: 16px; }
+
+@media (prefers-reduced-motion: reduce) { .scr.enter, .tx, .tx * { animation-duration: 1ms !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <span class="brand"><svg viewBox="0 0 48 48" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"><path d="M6 42V25H16"/><path d="M16 42V11L28 6V42"/><path d="M28 18H41V42"/><path d="M32 24.5H37M32 29.5H37M32 34.5H37"/><path d="M10 30V36"/><path d="M3.5 42H44.5"/></g><rect x="20.4" y="15.6" width="3.6" height="4.6" rx=".6" fill="var(--accent)"/></svg>BizzNex</span>
+    <div class="tools">
+      <button class="chip" id="theme" aria-pressed="false">Dark</button>
+      <button class="chip" id="calm" aria-pressed="false">Reduced motion</button>
+      <button class="chip" id="slow" aria-pressed="false">Slow ×2</button>
+    </div>
+  </div>
+
+  <header>
+    <p class="eyebrow"><b>Design study</b><span>Transitions</span><span>2026-10-29</span><span>Decided: Skyline + Aurora, fade through paper ✓</span></p>
+    <h1>Between the <i>screens</i></h1>
+    <p class="lead">Today BizzNex jumps: a button spinner, then the workspace appears all at once, and signing out is a hard cut. These are the seven moments where a transition screen belongs. <b>Your direction:</b> Skyline for the four ways into the product, Aurora for everything else, with a new exit for Aurora. Pick the Aurora exit below, then play each moment. The three original directions stay here for reference. Everything follows the shipped motion scale (×1.5) and the Aurora tokens, in both themes. <b>Nothing in the app has changed yet.</b></p>
+  </header>
+
+  <section aria-labelledby="pick">
+    <p class="sec-k" id="pick">01 · Choose a direction</p>
+    <div class="opts" role="group" aria-label="Direction">
+      <button class="opt mix" data-opt="mix" aria-pressed="true"><span class="n">YOUR MIX</span><span class="t">Skyline + Aurora</span><span class="d"><b>Skyline</b> for opening the app, signing in, the demo and finishing setup. <b>Aurora</b> for signing out, a session ending and page loads.</span></button>
+      <button class="opt" data-opt="a" aria-pressed="false"><span class="n">OPTION A</span><span class="t">Skyline</span><span class="d">The logo builds itself, stroke by stroke, and its one window lights while the work loads. Branded and warm.</span></button>
+      <button class="opt" data-opt="b" aria-pressed="false"><span class="n">OPTION B</span><span class="t">Ledger</span><span class="d">One editorial sentence on paper over the app's own outline, with a hairline that fills. The page settles in place.</span></button>
+      <button class="opt" data-opt="c" aria-pressed="false"><span class="n">OPTION C</span><span class="t">Aurora</span><span class="d">The aurora mesh blooms from the centre and the app opens out of it, like dark mode spreading from its switch.</span></button>
+    </div>
+  </section>
+
+  <section aria-labelledby="exitk">
+    <p class="sec-k" id="exitk">02 · Choose Aurora's exit</p>
+    <p class="lead" style="margin-top:6px;font-size:15px">The old exit (the app opening out of a circle) is replaced. Each option below plays on the Aurora moments, 05–07. The words always leave first.</p>
+    <div class="exits" role="group" aria-label="Aurora exit" style="margin-top:14px">
+      <button class="exit" data-exit="settle" aria-pressed="false"><span class="t">Settle</span><span class="d">The glow sinks and dims while the page rises gently into place underneath.</span></button>
+      <button class="exit" data-exit="lift" aria-pressed="false"><span class="t">Lift</span><span class="d">The glow rises off the top like a veil, with a soft lower edge, uncovering the page.</span></button>
+      <button class="exit" data-exit="gather" aria-pressed="false"><span class="t">Gather</span><span class="d">The glow condenses into a violet point where you land next: the sign-in form, or the page title.</span></button>
+      <button class="exit" data-exit="paper" aria-pressed="true"><span class="t">Fade through paper ✓</span><span class="d">Words, then glow, then the page, one after another. The calmest and the plainest.</span></button>
+    </div>
+  </section>
+
+  <section aria-labelledby="moments">
+    <p class="sec-k" id="moments">03 · Play a moment</p>
+    <div class="moments" role="group" aria-label="Moment" id="momentBar"></div>
+  </section>
+
+  <section class="bench">
+    <div>
+      <div class="frame">
+        <div class="bar"><i></i><i></i><i></i><span id="url">bizznex.cheruvathoor.com</span></div>
+        <div class="stage" id="stage" data-opt="a">
+          <!-- screens -->
+          <div class="scr blank" data-s="blank"></div>
+
+          <div class="scr" data-s="land">
+            <div class="land"><span class="bloom"></span>
+              <div class="ws-logo">__MARK__BizzNex</div>
+              <h5>Business, run <i>beautifully.</i></h5>
+              <div class="row2"><b>Create your workspace</b><span class="pressed">Explore the demo →</span></div>
+            </div>
+          </div>
+
+          <div class="scr" data-s="auth">
+            <div class="auth">
+              <div class="auth-l"><span class="bloom" style="right:-26cqi;top:auto;bottom:-24cqi"></span><div class="ws-logo">__MARK__BizzNex</div><p>Welcome back.</p></div>
+              <div class="auth-r">
+                <h4>Sign in</h4>
+                <div class="notice" data-notice hidden>You were signed out. The demo was refreshed, or this account signed out everywhere.</div>
+                <span class="lab">Email</span><div class="in">dennis@northwind.example.com</div>
+                <span class="lab">Password</span><div class="in">••••••••••</div>
+                <span class="go">Sign in</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="scr" data-s="wiz">
+            <div class="wiz">
+              <div class="wiz-rail"><div class="ws-logo">__MARK__BizzNex</div>
+                <div class="wiz-step done" data-n="01">Welcome</div><div class="wiz-step done" data-n="02">Your business</div><div class="wiz-step done" data-n="03">Your goals</div><div class="wiz-step done" data-n="04">Preferences</div><div class="wiz-step on" data-n="05">Ready</div>
+              </div>
+              <div class="wiz-main"><span class="k">Step 5 of 5 · Ready</span><h6>You're all set, Dennis.</h6><p>Your workspace opens on the Dashboard, with the steps that match your goals first.</p><div class="wiz-foot"><b>Go to my workspace →</b></div></div>
+            </div>
+          </div>
+
+          <div class="scr" data-s="wizStart">
+            <div class="wiz">
+              <div class="wiz-rail"><div class="ws-logo">__MARK__BizzNex</div>
+                <div class="wiz-step on" data-n="01">Welcome</div><div class="wiz-step" data-n="02">Your business</div><div class="wiz-step" data-n="03">Your goals</div><div class="wiz-step" data-n="04">Preferences</div><div class="wiz-step" data-n="05">Ready</div>
+              </div>
+              <div class="wiz-main"><span class="k">Step 1 of 5 · Welcome</span><h6>Welcome to the BizzNex demo.</h6><p>An example business with real projects, customers and deals. Change anything you like.</p><div class="wiz-foot"><b>Get started →</b></div></div>
+            </div>
+          </div>
+
+          <div class="scr" data-s="dash">
+            <div class="ws">
+              <div class="ws-side"><div class="ws-logo">__MARK__BizzNex</div><span class="ws-grp">Workspace</span><span class="ws-nav on">Dashboard</span><span class="ws-nav">Projects</span><span class="ws-nav">Tasks</span><span class="ws-grp">CRM</span><span class="ws-nav">Contacts</span><span class="ws-nav">Deals</span><span class="ws-grp">Tools</span><span class="ws-nav">Assistant</span><span class="ws-nav">Newsletter</span></div>
+              <div class="ws-main"><span class="ws-crumb">BizzNex / Dashboard</span><h3 class="ws-h">Good afternoon, Dennis</h3><div class="ws-big">$27,600</div><span class="ws-delta">▲ 78.8%  across the six months</span><div class="ws-rows"><div class="ws-row"><span>Active projects</span><b>2</b></div><div class="ws-row"><span>Open tasks</span><b>3</b></div><div class="ws-row"><span>Pipeline</span><b>$77.5k</b></div></div></div>
+            </div>
+          </div>
+
+          <div class="scr" data-s="deals">
+            <div class="ws">
+              <div class="ws-side"><div class="ws-logo">__MARK__BizzNex</div><span class="ws-grp">Workspace</span><span class="ws-nav">Dashboard</span><span class="ws-nav">Projects</span><span class="ws-nav">Tasks</span><span class="ws-grp">CRM</span><span class="ws-nav">Contacts</span><span class="ws-nav on">Deals</span><span class="ws-grp">Tools</span><span class="ws-nav">Assistant</span><span class="ws-nav">Newsletter</span></div>
+              <div class="ws-main"><span class="ws-crumb">BizzNex / Deals</span><h3 class="ws-h">Deals</h3><span class="ws-delta" style="color:var(--muted)">4 DEALS · PIPELINE $77,500 · WON $8,600</span>
+                <div class="ws-cols"><div class="ws-col">LEAD<div class="ws-card">Fleet dashboard pilot</div></div><div class="ws-col">QUALIFIED<div class="ws-card">Packaging rollout</div></div><div class="ws-col">PROPOSAL<div class="ws-card">Brand refresh retainer</div></div><div class="ws-col won">WON<div class="ws-card">Seasonal campaign</div></div></div></div>
+            </div>
+          </div>
+
+          <!-- the transition overlay -->
+          <div class="tx" id="tx" aria-live="polite">
+            <span class="skel"></span><span class="mesh"></span><span class="pip"></span>
+            __MARK_TX__
+            <span class="k" id="txK"></span>
+            <span class="t" id="txT"></span>
+            <span class="line"><i></i></span>
+            <span class="s" id="txS"></span>
+          </div>
+        </div>
+      </div>
+      <div class="ctrl">
+        <button class="btn" id="play">▶ Replay</button>
+        <button class="btn ghost" id="all">Play all seven</button>
+        <span class="phase" id="phase">ready</span>
+      </div>
+    </div>
+
+    <aside class="notes" aria-live="polite">
+      <h3 id="nTitle"></h3>
+      <span id="nBody"></span>
+      <dl>
+        <dt>Plays as</dt><dd id="nDir"></dd>
+        <dt>Today</dt><dd id="nToday"></dd>
+        <dt>Where</dt><dd id="nWhere"></dd>
+        <dt>Shown</dt><dd id="nWhen"></dd>
+      </dl>
+    </aside>
+  </section>
+
+  <section aria-labelledby="cmp">
+    <p class="sec-k" id="cmp">04 · Compare</p>
+    <h2>How the three differ</h2>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th></th><th>A · Skyline</th><th>B · Ledger</th><th>C · Aurora</th></tr></thead>
+      <tbody>
+        <tr><td>Feels like</td><td>A brand moment: the business opening its doors</td><td>Turning a page in the same book</td><td>Light arriving; ambient and soft</td></tr>
+        <tr><td>Fits Aurora's rules</td><td>Good: one accent, the lit window</td><td>Best: type, space and hairlines, no boxes</td><td>Good, but the mesh is meant once per screen</td></tr>
+        <tr><td>Continuity with the app</td><td>Low: a separate splash</td><td>High: the app's outline is already there</td><td>Medium: opens like the theme reveal</td></tr>
+        <tr><td>Repeated daily</td><td>Can wear thin; best kept to cold starts</td><td>Stays quiet at the tenth sign-in</td><td>Pleasant, slightly heavy on every page load</td></tr>
+        <tr><td>Perceived wait</td><td>Short: the drawing occupies the eye</td><td>Honest: the line shows progress</td><td>Short: the bloom is calming</td></tr>
+        <tr><td>Cost to build</td><td>Low: SVG strokes, already the logo</td><td>Low: text, one line, the layout grid</td><td>Medium: blur on large layers costs GPU on phones</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section aria-labelledby="recommend">
+    <p class="sec-k" id="recommend">05 · Your decision</p>
+    <div class="rec">
+      <h2>Skyline to come in, Aurora for the rest</h2>
+      <p><strong>Skyline</strong> marks the moments someone arrives: the business opening its doors. <strong>Aurora</strong> carries the quieter moments that follow, so the brand beat isn't spent on a page load. Ledger stays here as a reference only.</p>
+    </div>
+    <div class="tbl-wrap" style="margin-top:18px"><table class="mapping">
+      <thead><tr><th>Moment</th><th>Direction</th><th>Exit</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>01 Open the app</td><td>Skyline</td><td>Lift</td><td>The first sight of BizzNex in a session</td></tr>
+        <tr><td>02 Sign in</td><td>Skyline</td><td>Lift</td><td>Arriving in your own workspace</td></tr>
+        <tr><td>03 Open the demo</td><td>Skyline</td><td>Lift</td><td>A visitor's first look at the product</td></tr>
+        <tr><td>04 Setup finished</td><td>Skyline</td><td>Lift</td><td>The workspace opening for the first time</td></tr>
+        <tr><td>05 Sign out</td><td>Aurora</td><td data-exit-name>Fade through paper</td><td>A quiet goodbye, kept short</td></tr>
+        <tr><td>06 Session ended</td><td>Aurora</td><td data-exit-name>Fade through paper</td><td>Explains the sign-out without alarm</td></tr>
+        <tr><td>07 Page loads</td><td>Aurora</td><td data-exit-name>Fade through paper</td><td>Inside the main column only; the sidebar stays</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section aria-labelledby="rules">
+    <p class="sec-k" id="rules">06 · Rules for any option</p>
+    <div class="rules">
+      <div><b>No flash</b>Only show a transition screen if the wait passes about 300 ms; once shown, keep it at least 600 ms so it never blinks.</div>
+      <div><b>Page loads stay in place</b>Loading a page swaps only the main column. The sidebar never disappears mid-session.</div>
+      <div><b>Say what is happening</b>Every screen names the action ("Signing in", "Opening the demo"). No bare spinners.</div>
+      <div><b>Reduced motion</b>With the OS setting on, every transition is a 120 ms cross-fade with the same words.</div>
+      <div><b>Announce it</b>The status line is an <code>aria-live</code> region, so screen readers hear it.</div>
+      <div><b>One scale</b>Durations multiply by <code>--m</code> / <code>MOTION_SCALE</code> (1.5), like the rest of BizzNex's motion.</div>
+    </div>
+  </section>
+
+  <footer>BizzNex · Transitions study · Aurora tokens from apps/web/src/styles/aurora.scss · Motion scale from apps/web/src/ui/motion.ts · See also bizznex-motion.html</footer>
+</div>
+
+<script>
+(function () {
+  var MARK = '<svg class="mark" viewBox="0 0 48 48" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"><path pathLength="1" d="M6 42V25H16"/><path pathLength="1" d="M16 42V11L28 6V42"/><path pathLength="1" d="M28 18H41V42"/><path pathLength="1" d="M32 24.5H37M32 29.5H37M32 34.5H37"/><path pathLength="1" d="M10 30V36"/><path pathLength="1" d="M3.5 42H44.5"/></g><rect x="20.4" y="15.6" width="3.6" height="4.6" rx=".6" fill="var(--accent)"/></svg>';
+  var stage = document.getElementById('stage');
+  stage.innerHTML = stage.innerHTML.replace(/__MARK_TX__/g, MARK).replace(/__MARK__/g, MARK.replace('class="mark"', ''));
+
+  // the seven moments: from-screen → transition → to-screen
+  var MOMENTS = [
+    { id: 'boot', label: 'Open the app', from: 'blank', to: 'dash', k: 'Welcome back', t: 'Opening your workspace', s: 'Restoring your session',
+      body: 'Opening bizznex.cheruvathoor.com while already signed in. The saved session is checked with the API before anything shows.',
+      today: 'A plain “Loading…” line, then the dashboard appears at once.', where: 'App.tsx, while /auth/me validates the stored token', when: 'Cold start only, if the check takes over 300 ms' },
+    { id: 'signin', label: 'Sign in', from: 'auth', to: 'dash', k: 'Signing in', t: 'Good afternoon, Dennis.', s: 'Loading your projects, customers and deals',
+      body: 'After the credentials are accepted, while the first workspace queries load.',
+      today: 'The button shows a spinner, then the workspace replaces the form instantly.', where: 'Auth.tsx → App.tsx after setCredentials', when: 'Every sign-in and sign-up' },
+    { id: 'demo', label: 'Open the demo', from: 'land', to: 'wizStart', k: 'Demo', t: 'Opening the demo business', s: 'A shared example workspace · resets every 30 minutes',
+      body: 'From “Explore the demo” on the landing page into the five-step demo wizard. A demo sign-in can rebuild the demo first, which takes longer.',
+      today: '“Opening the demo…” on the link, then a hard cut to the wizard.', where: 'Landing.tsx useEnterDemo → SetupWizard', when: 'Every demo entry' },
+    { id: 'ready', label: 'Setup finished', from: 'wiz', to: 'dash', k: 'Setup complete', t: 'Your workspace is ready.', s: 'Applying your goals and your look',
+      body: 'The last wizard step hands over to the workspace, landing on the page that fits the first goal.',
+      today: 'The wizard disappears and the workspace is simply there.', where: 'SetupWizard onFinish → App.navigate', when: 'Once per account' },
+    { id: 'signout', label: 'Sign out', from: 'dash', to: 'auth', k: 'Signed out', t: 'See you soon, Dennis.', s: 'Clearing this browser’s session',
+      body: 'Logging out clears the token and every cached query, then returns to sign-in.',
+      today: 'A hard cut to the sign-in page.', where: 'authSlice logout → uiSlice → Auth', when: 'Every sign-out (kept short: about 700 ms)' },
+    { id: 'expired', label: 'Session ended', from: 'dash', to: 'auth', notice: true, k: 'Session ended', t: 'You were signed out.', s: 'The demo was refreshed, or this account signed out everywhere',
+      body: 'A 401 from the API means the session is gone: a demo reset, “Sign out everywhere”, or a password change elsewhere.',
+      today: 'A hard cut to sign-in with no explanation.', where: 'services/api baseQuery 401 → logout', when: 'Whenever a stored session is rejected' },
+    { id: 'page', label: 'Page loads', from: 'dash', to: 'deals', inline: true, k: 'Deals', t: 'Opening Deals', s: 'Loading the pipeline',
+      body: 'A page whose code isn’t loaded yet (route-level code splitting). Only the main column changes; the sidebar stays.',
+      today: 'A “Loading…” line in the main column.', where: 'App.tsx <Suspense fallback>', when: 'First visit to a page, only past 300 ms' },
+  ];
+
+  // Your mix: Skyline for the four ways in, Aurora for the rest. Gather lands on `gather`.
+  var PRIMARY = { boot: 1, signin: 1, demo: 1, ready: 1 };
+  // where Gather lands: just before the heading or button you arrive at, like a marker
+  var GATHER = { signout: { sel: '[data-s="auth"] .go', at: 'before' }, expired: { sel: '[data-s="auth"] .go', at: 'before' }, page: { sel: '[data-s="deals"] .ws-h', at: 'before' } };
+  var EXITS = { settle: 'Settle', lift: 'Lift', gather: 'Gather', paper: 'Fade through paper' };
+  var mode = 'mix', exit = 'paper';
+  function optFor(m) { return mode === 'mix' ? (PRIMARY[m.id] ? 'a' : 'c') : mode; }
+
+  var bar = document.getElementById('momentBar');
+  MOMENTS.forEach(function (m, i) {
+    var b = document.createElement('button');
+    b.className = 'mom'; b.dataset.i = i; b.setAttribute('aria-pressed', i === 0);
+    b.innerHTML = '<span class="k">0' + (i + 1) + '</span>' + m.label + '<span class="tag"></span>';
+    b.addEventListener('click', function () { select(i); play(); });
+    bar.appendChild(b);
+  });
+  function renderTags() {
+    bar.querySelectorAll('.mom').forEach(function (b) {
+      var tag = b.querySelector('.tag'), sky = PRIMARY[MOMENTS[+b.dataset.i].id];
+      tag.hidden = mode !== 'mix';
+      tag.className = 'tag ' + (sky ? 'sky' : 'aur');
+      tag.textContent = sky ? 'Skyline' : 'Aurora';
+    });
+  }
+  renderTags();
+
+  var tx = document.getElementById('tx'), phaseEl = document.getElementById('phase');
+  var cur = 0, timers = [], slow = 1;
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) { stage.classList.add('calm'); document.getElementById('calm').setAttribute('aria-pressed', 'true'); }
+
+  function clear() { timers.forEach(clearTimeout); timers = []; }
+  function at(ms, fn) { timers.push(setTimeout(fn, ms)); }
+  function show(name, enter) {
+    stage.querySelectorAll('.scr').forEach(function (s) { s.classList.remove('on', 'enter', 'stagger'); });
+    var s = stage.querySelector('.scr[data-s="' + name + '"]');
+    s.classList.add('on');
+    if (enter) { void s.offsetWidth; s.classList.add('enter', 'stagger'); }
+  }
+  function setPhase(p) { phaseEl.textContent = p; }
+  function notes(m) {
+    document.getElementById('nTitle').textContent = m.label;
+    document.getElementById('nBody').textContent = m.body;
+    document.getElementById('nToday').textContent = m.today;
+    document.getElementById('nWhere').textContent = m.where;
+    document.getElementById('nWhen').textContent = m.when;
+    var o = optFor(m);
+    document.getElementById('nDir').textContent = o === 'a' ? 'Skyline · lifts away' : o === 'b' ? 'Ledger' : 'Aurora · exit: ' + EXITS[exit];
+  }
+  function select(i) {
+    cur = i;
+    bar.querySelectorAll('.mom').forEach(function (b) { b.setAttribute('aria-pressed', String(+b.dataset.i === i)); });
+    notes(MOMENTS[i]);
+  }
+
+  // Phases: before → in (entrance animations) → hold (the wait) → out (reveal) → after.
+  // Base timings are the study's; f applies the ×1.5 motion scale and the Slow ×2 toggle.
+  // "in" lasts as long as the longest entrance (Skyline's window lights at 1000 × --m).
+  function play(done) {
+    clear();
+    var m = MOMENTS[cur], calm = stage.classList.contains('calm');
+    var f = 1.5 * slow;
+    stage.style.setProperty('--m', f);
+    stage.dataset.opt = optFor(m); stage.dataset.exit = exit;
+    var inDur = calm ? 120 : (m.inline ? 520 : 1000) * f;
+    var hold = calm ? 300 : (m.id === 'signout' ? 250 : m.inline ? 300 : 700) * f;
+    var outDur = calm ? 140 : 640 * f;
+    stage.querySelector('[data-notice]').hidden = !m.notice;
+    show(m.from, false);
+    tx.className = 'tx'; tx.classList.toggle('inline', !!m.inline);
+    document.getElementById('txK').textContent = m.k;
+    document.getElementById('txT').textContent = m.t;
+    document.getElementById('txS').textContent = m.s;
+    setPhase('before');
+    at(700 * slow, function () {
+      tx.classList.add('on', 'in'); setPhase('transition');
+      at(inDur, function () {
+        tx.classList.remove('in'); tx.classList.add('hold'); setPhase('waiting');
+        at(hold, function () {
+          show(m.to, true);
+          var g = GATHER[m.id], target = g && stage.querySelector(g.sel);
+          if (target) {                                 // aim Gather at the spot you land on
+            var a = target.getBoundingClientRect(), t = tx.getBoundingClientRect();
+            var x = g.at === 'before' ? a.left - t.width * 0.03 : a.left + a.width / 2;
+            tx.style.setProperty('--gx', (x - (t.left + t.width / 2)) + 'px');
+            tx.style.setProperty('--gy', (a.top + a.height / 2 - (t.top + t.height / 2)) + 'px');
+          }
+          tx.classList.remove('hold'); tx.classList.add('out'); setPhase('reveal');
+          at(outDur, function () {
+            tx.className = 'tx'; setPhase('done · press Replay');
+            if (done) at(900 * slow, done);
+          });
+        });
+      });
+    });
+  }
+
+  document.getElementById('play').addEventListener('click', function () { play(); });
+  document.getElementById('all').addEventListener('click', function () {
+    var i = 0;
+    (function next() { if (i >= MOMENTS.length) return; select(i++); play(next); })();
+  });
+  document.querySelectorAll('.opt').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.opt').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      mode = b.dataset.opt; renderTags(); notes(MOMENTS[cur]); play();
+    });
+  });
+  document.querySelectorAll('.exit').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.exit').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      exit = b.dataset.exit;
+      document.querySelectorAll('[data-exit-name]').forEach(function (td) { td.textContent = EXITS[exit]; });
+      // exits only apply to Aurora: show one on the first Aurora moment of the mix
+      if (optFor(MOMENTS[cur]) !== 'c') { mode = mode === 'c' ? 'c' : 'mix'; select(MOMENTS.findIndex(function (m) { return !PRIMARY[m.id]; })); }
+      document.querySelectorAll('.opt').forEach(function (x) { x.setAttribute('aria-pressed', String(x.dataset.opt === mode)); });
+      renderTags(); notes(MOMENTS[cur]); play();
+    });
+  });
+  var themeBtn = document.getElementById('theme'), root = document.documentElement;
+  function isDark() { return root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; }
+  function syncTheme() { themeBtn.textContent = isDark() ? 'Light' : 'Dark'; }
+  themeBtn.addEventListener('click', function () { root.dataset.theme = isDark() ? 'light' : 'dark'; syncTheme(); });
+  syncTheme();
+  document.getElementById('calm').addEventListener('click', function (e) {
+    var on = stage.classList.toggle('calm'); e.currentTarget.setAttribute('aria-pressed', String(on)); play();
+  });
+  document.getElementById('slow').addEventListener('click', function (e) {
+    slow = slow === 1 ? 2 : 1; e.currentTarget.setAttribute('aria-pressed', String(slow === 2)); play();
+  });
+
+  select(0);
+  show('blank', false);
+  at(400, function () { play(); });
+})();
+</script>
+</body>
+</html>

@@ -139,13 +139,19 @@ rebuilding the scene.
 - **Theme** — light/dark via `data-theme`. The new theme spreads in a circle from the
   switch (View Transitions); browsers without them get a 500 ms cross-fade.
 - **Motion** — the *Spatial* direction from [`design-style-guides/bizznex-motion.html`](./design-style-guides/bizznex-motion.html),
-  in `apps/web/src/ui/motion.ts`. Pages slide the way you move through the sidebar
-  (View Transitions API). Dialogs grow out of the button you pressed and shrink back
+  in `apps/web/src/ui/motion.ts`. Dialogs grow out of the button you pressed and shrink back
   into it. Studio windows grow from their control and shrink into the dock. Moved deals
   arc to their new column. Rows slide in and out (`@formkit/auto-animate`). Numbers count
   up and dark mode spreads from its switch. One token (`MOTION_SCALE` / `--m`, set to
   1.5) sets the pace.
-- **Responsive**, and honours `prefers-reduced-motion`: with it on, every change is instant.
+- **Transitions** — screens between the big moments (`ui/transitions.tsx`, decided from
+  [`design-style-guides/bizznex-transitions.html`](./design-style-guides/bizznex-transitions.html)).
+  **Skyline** for the ways in (opening the app, signing in, the demo, finishing setup): the
+  mark draws itself and its window lights. **Aurora** for everything else (signing out, a
+  session ending, switching features): the glow blooms, then fades through paper. Switching
+  features covers only the main column, so the sidebar stays put. Play all seven on the
+  landing page or in the case study (§ 08).
+- **Responsive**, and honours `prefers-reduced-motion`: with it on, movement becomes an instant change or a short cross-fade.
 
 ---
 
@@ -618,6 +624,7 @@ teams and roles, CSV import, and the ERP modules (finance, inventory, orders, HR
 | `design-style-guides/bizznex-identity-skyline.html` | **Skyline ✅** — the adopted logo and identity (served at `/brand/skyline.html`) |
 | `design-style-guides/bizznex-identity.html` · `bizznex-logo-options.html` | Earlier identity and logo explorations |
 | `design-style-guides/bizznex-motion.html` | Motion study — Quiet, Editorial, **Spatial ✅** (adopted at ×1.5) |
+| `design-style-guides/bizznex-transitions.html` | Transitions study — Skyline, Ledger, Aurora and five Aurora exits; **Skyline + Aurora, fade through paper ✅** |
 | `design-style-guides/archive/` | Dated snapshot of the earlier case study |
 | `docs/onboarding-flow.md` | Step-by-step map of signup, demo and sign-in onboarding |
 | `docs/screenshots/` | The screenshots in this README, taken from the demo workspace |
