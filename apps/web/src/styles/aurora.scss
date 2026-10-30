@@ -93,11 +93,15 @@ button { font-family: inherit; }
 .sec-t { font-family: var(--serif); font-weight: 500; font-size: clamp(1.6rem, 3vw, 2.3rem); letter-spacing: -.02em; margin: 0 0 5px; }
 
 /* ── app shell ── */
-.app { min-height: 100vh; display: grid; grid-template-columns: 248px 1fr; }
+:root { --side-w: 248px; }
+html[data-side="collapsed"] { --side-w: 64px; } /* the folded sidebar (layout/Sidebar.tsx) */
+.app { min-height: 100vh; display: grid; grid-template-columns: var(--side-w) 1fr; transition: grid-template-columns calc(220ms * var(--m)) var(--ease); }
 .sidebar {
   border-right: 1px solid var(--rule-soft); padding: 22px 14px 20px; display: flex; flex-direction: column; gap: 3px;
-  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  position: sticky; top: 0; height: 100vh; overflow: hidden;
 }
+/* the page list scrolls on short windows; the footer below it never leaves the screen */
+.side-scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; /* the folded rail clips its hidden labels: no sideways scrollbar */ display: flex; flex-direction: column; gap: 3px; margin: 0 -4px; padding: 0 4px; }
 .brand { display: flex; align-items: center; font-size: 21px; color: var(--ink); text-decoration: none; padding: 6px 10px var(--s3); }
 
 /* ── logo · "Skyline" (ui/Logo.tsx). Mark + name stand on ONE baseline; the rule continues the mark's own. ── */
@@ -111,7 +115,7 @@ button { font-family: inherit; }
 .logo-tag { font-family: var(--brand); font-weight: 500; font-size: .19em; letter-spacing: .26em; text-transform: uppercase; white-space: nowrap; margin-top: .55em; }
 .nav-grp { font-family: var(--mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin: var(--s3) 10px 8px; }
 .nav {
-  display: flex; align-items: center; gap: 11px; padding: 9px 11px; border-radius: var(--radius);
+  display: flex; align-items: center; gap: 11px; padding: 9px 11px 9px var(--nav-pad, 11px); border-radius: var(--radius);
   color: var(--ink-soft); font-size: 14px; font-weight: 500; cursor: pointer; border: 0; background: none; width: 100%; text-align: left;
   transition: background .18s var(--ease), color .18s;
 }
@@ -120,8 +124,32 @@ button { font-family: inherit; }
 .nav.active { color: var(--ink); }
 .nav.active svg { color: var(--accent); }
 .nav .count { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--muted); }
-.side-foot { margin-top: auto; padding-top: var(--s3); }
-.user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; }
+.nav { position: relative; white-space: nowrap; }
+.nav-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.brand { gap: 8px; }
+.side-toggle { margin-left: auto; width: 30px; height: 30px; flex: none; display: grid; place-items: center; border: 0; background: none; color: var(--muted); border-radius: var(--radius); cursor: pointer; transition: color .15s, background .15s, opacity .15s; }
+.side-toggle:hover { color: var(--ink); background: var(--hover); }
+
+/* ── folded sidebar (desktop): an icon rail; hovering or tabbing in pops the full sidebar out over the page ── */
+@media (min-width: 861px) {
+  .sidebar { width: var(--side-w); z-index: 35; background: var(--paper); overflow-x: hidden;
+    transition: width calc(220ms * var(--m)) var(--ease), box-shadow calc(220ms * var(--m)) var(--ease); }
+  .sidebar.collapsed { padding-inline: 10px; }
+  .sidebar.collapsed { --nav-pad: 13px; }                      /* icons (and the avatar) centred on the 64px rail, same place when popped out */
+  .sidebar.collapsed.peek { width: 248px; box-shadow: var(--shadow); }
+  /* nothing moves vertically: the words fade, so popping out only reveals them */
+  .sidebar.collapsed :is(.nav-label, .nav-grp, .nav .count, .logo-name, .side-toggle, .user-text, .side-out) { opacity: 0; transition: opacity calc(110ms * var(--m)) var(--ease); }
+  .sidebar.collapsed.peek :is(.nav-label, .nav-grp, .nav .count, .logo-name, .side-toggle, .user-text, .side-out) { opacity: 1; transition-delay: calc(80ms * var(--m)); }
+  .sidebar.collapsed:not(.peek) :is(.side-toggle, .side-out) { pointer-events: none; }
+  /* the folded rail scrolls without showing a bar (it would squeeze the icons); popped out, a thin one shows */
+  .sidebar.collapsed:not(.peek) .side-scroll { scrollbar-width: none; }
+  .sidebar.collapsed:not(.peek) .side-scroll::-webkit-scrollbar { display: none; }
+  .side-scroll { scrollbar-width: thin; }
+  .sidebar.collapsed:not(.peek) .win-dot { position: absolute; left: 31px; top: 7px; margin: 0; } /* open-window dot on the icon */
+}
+.side-foot { margin-top: auto; padding-top: var(--s3); flex: none; }
+/* the avatar's centre sits on the nav icons' centre: icon 17px at --nav-pad, avatar 34px */
+.user { display: flex; align-items: center; gap: 10px; padding: 8px 10px 8px calc(var(--nav-pad, 11px) - 8.5px); }
 .user .nm { font-size: 13px; font-weight: 600; } .user .em { font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
 
 .main-area { min-width: 0; display: flex; flex-direction: column; overflow-x: clip; } /* the dashboard bloom bleeds right; clip it so it never widens the page */
@@ -384,6 +412,7 @@ tr:hover .row-act, .titem:hover .row-act { opacity: 1; }
   .sidebar { position: fixed; z-index: 60; width: 248px; background: var(--paper); transform: translateX(-100%); visibility: hidden; transition: transform .3s var(--ease), visibility 0s .3s; box-shadow: var(--shadow); }
   .sidebar.open { transform: none; visibility: visible; transition: transform .3s var(--ease); }
   .menu-btn { display: grid; }
+  .side-toggle { display: none; }
   .scrim { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 55; }
 }
 

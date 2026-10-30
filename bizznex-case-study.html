@@ -1006,7 +1006,7 @@ tr.pick td:first-child { color: var(--accent); }
       <div>
         <h4>App shell</h4>
         <ul class="clean">
-          <li>248px sticky sidebar with three groups — <b>Workspace · CRM · Tools</b> — and a user footer.</li>
+          <li>248px sticky sidebar with three groups — <b>Workspace · CRM · Tools</b> — and a user footer. It folds to a 64px icon rail (the toggle by the logo, or <code>[</code>); while folded, hovering or tabbing into the rail pops the full sidebar out over the page without moving it. The choice is kept per browser.</li>
           <li>Top bar: breadcrumb, search on Projects, Tasks and every CRM page, “Open in window ↗”, EN / ES / FR, theme, and the <b>?</b> Help menu.</li>
           <li>Window state in <code>layout/useWindows.ts</code>; drag geometry stays inside each window to avoid re-renders.</li>
           <li>Each tool has a full page (<code>registry.tsx</code>) and a compact widget (<code>widgets.tsx</code>).</li>
@@ -1135,6 +1135,8 @@ tr.pick td:first-child { color: var(--accent); }
     </div>
     <div>
       <b>Changelog</b><br>
+      2026-10-29 — The sidebar can fold to an icon rail that pops out on hover (§ 10, App shell).<br>
+      2026-10-29 — New § 08, Between the screens: the transition decision (Skyline for the ways in, Aurora with a fade-through-paper exit for the rest, including switching features), the options set aside, the rules, and a player that replays all seven moments with the shipped timings. Sections 08–12 became 09–13.<br>
       2026-10-28 — Brought up to date with the product for the first public deploy, now live at https://bizznex.cheruvathoor.com: the pipeline figure (open deals only, $77.5k), Won and Lost as end states, the company lookup and the five-step demo wizard, the Spatial motion system, light Muted darkened to #686357 for WCAG AA, server-side notifications, i18n coverage, accessibility, the stack (NestJS 11, Zod 4) and how it ships (Docker, CI, Neon + Render, the CSP built into the page).<br>
       2026-10-16 — Kept the name BizzNex and adopted the Skyline logo (new section 11): mark, wordmark and favicon across the app; brand pages linked from the landing page and the Help menu.<br>
       2026-10-15 — Merged the design case study and the Aurora style guide into one document; updated for the CRM, the local assistant, onboarding and the landing page.<br>

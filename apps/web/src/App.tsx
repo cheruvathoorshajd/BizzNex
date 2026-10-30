@@ -116,6 +116,13 @@ function Gate() {
 
 function Shell() {
   const t = useT();
+  // the folded sidebar narrows the first column; --side-w (aurora.scss) also places the switch Aurora
+  const sideCollapsed = useAppSelector((s) => !!s.ui.sidebarCollapsed);
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    if (sideCollapsed) root.dataset.side = 'collapsed'; else delete root.dataset.side;
+    return () => { delete root.dataset.side; };
+  }, [sideCollapsed]);
   const [view, setView] = useState<ViewId>('dashboard');
   const [query, setQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);

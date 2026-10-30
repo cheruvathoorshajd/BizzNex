@@ -21,6 +21,8 @@ interface UIState {
   introSeen: boolean;
   /** Which tab the auth screen opens on. */
   authMode: AuthMode;
+  /** Desktop sidebar folded to an icon rail (hovering it pops the full sidebar out). Kept per browser. */
+  sidebarCollapsed?: boolean;
 }
 const initialState: UIState = { language: 'en', theme: systemTheme(), followSystem: true, introSeen: false, authMode: 'signup' };
 
@@ -38,12 +40,16 @@ const slice = createSlice({
     systemThemeChanged: (s, a: PayloadAction<'light' | 'dark'>) => { if (s.followSystem) s.theme = a.payload; },
     setIntroSeen: (s, a: PayloadAction<boolean>) => { s.introSeen = a.payload; },
     setAuthMode: (s, a: PayloadAction<AuthMode>) => { s.authMode = a.payload; },
+    setSidebarCollapsed: (s, a: PayloadAction<boolean>) => { s.sidebarCollapsed = a.payload; },
   },
   // someone who signs out is a returning user: go straight to Sign in, not back through the landing page
-  extraReducers: (b) => { b.addCase(logout, (s) => { s.authMode = 'signin'; s.introSeen = true; }); },
+  extraReducers: (b) => {
+    const toSignIn = (s: UIState) => { s.authMode = 'signin'; s.introSeen = true; };
+    b.addCase(logout, toSignIn).addCase(sessionEnded, toSignIn);
+  },
 });
 
-export const { setLanguage, setTheme, systemThemeChanged, setIntroSeen, setAuthMode } = slice.actions;
+export const { setLanguage, setTheme, systemThemeChanged, setIntroSeen, setAuthMode, setSidebarCollapsed } = slice.actions;
 /** The theme choice as the switch shows it. */
 export const themeMode = (s: { ui: UIState }): ThemeMode => (s.ui.followSystem ? 'system' : s.ui.theme);
 export default slice.reducer;

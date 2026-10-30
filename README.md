@@ -151,6 +151,9 @@ rebuilding the scene.
   session ending, switching features): the glow blooms, then fades through paper. Switching
   features covers only the main column, so the sidebar stays put. Play all seven on the
   landing page or in the case study (§ 08).
+- **Foldable sidebar** — the sidebar folds to an icon rail (the toggle by the logo, or `[`), and
+  while folded, hovering or tabbing into it pops the full sidebar out over the page without moving
+  it. Kept per browser; phones keep the slide-in drawer.
 - **Responsive**, and honours `prefers-reduced-motion`: with it on, movement becomes an instant change or a short cross-fade.
 
 ---
