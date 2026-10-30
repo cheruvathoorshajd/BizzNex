@@ -354,6 +354,137 @@ tr.pick td:first-child { color: var(--accent); }
 .mark-big svg { width: min(100%, 260px); height: auto; overflow: visible; }
 .toast { position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(16px); opacity: 0; pointer-events: none; background: var(--ink); color: var(--paper); padding: 11px 20px; border-radius: var(--radius); font-family: var(--mono); font-size: 12.5px; letter-spacing: .04em; transition: all .3s var(--ease); z-index: 100; box-shadow: var(--shadow); }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ============================================================
+   § 08 Transitions player: a mini BizzNex window replaying the seven moments.
+   The overlay (.tpx) mirrors apps/web/src/styles/transitions.scss; timings come from
+   the script as --tpx-in / --tpx-out, the same values as ui/transitions.tsx.
+   ============================================================ */
+.tp { margin: var(--s3) 0 var(--s4); }
+.tp-moments { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.tp-mom { border: 1px solid var(--rule-soft); background: none; padding: 6px 11px; border-radius: var(--radius); font: inherit; font-size: 13px; color: var(--ink-soft); cursor: pointer; }
+.tp-mom[aria-pressed="true"] { border-color: var(--ink); color: var(--ink); }
+.tp-mom .n { font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-right: 6px; }
+.tp-mom .tag { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; margin-left: 6px; padding: 1px 5px; border-radius: 2px; border: 1px solid var(--rule); color: var(--ink-soft); }
+.tp-mom .tag.aur { border-color: var(--accent); color: var(--accent); }
+.tp-frame { border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; background: var(--paper-2); box-shadow: var(--shadow); }
+.tp-bar { height: 28px; display: flex; align-items: center; gap: 6px; padding: 0 12px; border-bottom: 1px solid var(--rule-soft); }
+.tp-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--rule); }
+.tp-bar span { margin-left: 10px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.tp-stage { position: relative; aspect-ratio: 16 / 10; container-type: inline-size; overflow: hidden; background: var(--paper); }
+.tp-ctrl { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+.tp-chip { border: 1px solid var(--rule); background: transparent; padding: 6px 11px; border-radius: var(--radius); font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); cursor: pointer; }
+.tp-chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-tint); }
+.tp-phase { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .06em; }
+.tp-note { font-size: 14px; color: var(--ink-soft); margin: 10px 0 0; max-width: 72ch; }
+
+/* mini screens */
+.tp-scr { position: absolute; inset: 0; display: none; }
+.tp-scr.on { display: block; }
+.tp-scr[data-s="blank"] { background: var(--paper); }
+.tp-logo { display: flex; align-items: center; gap: .9cqi; font-family: 'Outfit', var(--sans); font-weight: 700; font-size: 1.9cqi; }
+.tp-logo svg { width: 2.6cqi; height: 2.6cqi; }
+.tp-ws { display: grid; grid-template-columns: 22cqi minmax(0, 1fr); height: 100%; }
+.tp-side { border-right: 1px solid var(--rule-soft); background: var(--paper-2); padding: 3.2cqi 2.4cqi; display: flex; flex-direction: column; gap: 1.1cqi; }
+.tp-side .tp-logo { margin-bottom: 2cqi; }
+.tp-grp { font-family: var(--mono); font-size: .95cqi; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-top: 1.4cqi; }
+.tp-nav { font-size: 1.45cqi; color: var(--ink-soft); display: flex; align-items: center; gap: 1cqi; }
+.tp-nav::before { content: ''; width: 1.3cqi; height: 1.3cqi; border: 1px solid var(--faint); border-radius: 2px; }
+.tp-nav.on { color: var(--ink); font-weight: 600; }
+.tp-nav.on::before { border-color: var(--accent); background: var(--accent-tint); }
+.tp-main { padding: 4cqi 5cqi; display: flex; flex-direction: column; gap: 1.6cqi; }
+.tp-crumb { font-family: var(--mono); font-size: 1.05cqi; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
+.tp-h { font-family: var(--serif); font-weight: 500; font-size: 3.6cqi; letter-spacing: -.03em; line-height: 1; margin: 0; }
+.tp-big { font-family: var(--serif); font-size: 6.4cqi; letter-spacing: -.04em; line-height: 1; margin-top: 1cqi; }
+.tp-delta { font-family: var(--mono); font-size: 1.15cqi; color: var(--ok); }
+.tp-rows { margin-top: 1.6cqi; border-top: 1px solid var(--rule-soft); }
+.tp-r { display: flex; justify-content: space-between; padding: 1.15cqi 0; border-bottom: 1px solid var(--rule-soft); font-size: 1.4cqi; }
+.tp-r b { font-family: var(--mono); font-weight: 500; }
+.tp-cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.4cqi; margin-top: 1.4cqi; }
+.tp-col { border-top: 2px solid var(--rule); padding-top: 1cqi; display: grid; gap: .9cqi; font-size: 1.2cqi; color: var(--muted); }
+.tp-col.won { border-top-color: var(--ok); }
+.tp-card { border: 1px solid var(--rule-soft); border-radius: 3px; padding: .9cqi; color: var(--ink); font-size: 1.25cqi; background: var(--paper); }
+.tp-auth { display: grid; grid-template-columns: 1fr 1fr; height: 100%; }
+.tp-auth-l { background: var(--paper-2); border-right: 1px solid var(--rule-soft); padding: 4cqi; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
+.tp-auth-l p { font-family: var(--serif); font-size: 3.4cqi; letter-spacing: -.03em; line-height: 1.02; margin: 0; position: relative; }
+.tp-auth-r { padding: 6cqi 5cqi; display: flex; flex-direction: column; gap: 1.6cqi; }
+.tp-h4 { font-family: var(--serif); font-weight: 500; font-size: 3cqi; margin: 0 0 1cqi; letter-spacing: -.02em; color: var(--ink); text-transform: none; }
+.tp-lab { font-family: var(--mono); font-size: 1cqi; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.tp-in { border: 1px solid var(--rule); border-radius: 3px; padding: 1.1cqi 1.3cqi; font-size: 1.45cqi; }
+.tp-go { align-self: start; background: var(--accent); color: var(--paper); border-radius: 3px; padding: 1.1cqi 2cqi; font-size: 1.4cqi; font-weight: 500; margin-top: .8cqi; }
+.tp-notice { border-left: 2px solid var(--warn); padding: .8cqi 1.2cqi; font-size: 1.3cqi; color: var(--ink-soft); background: color-mix(in srgb, var(--warn) 8%, transparent); }
+.tp-land { padding: 5cqi 6cqi; height: 100%; position: relative; overflow: hidden; }
+.tp-land .tp-logo { margin-bottom: 5cqi; }
+.tp-land h5 { font-family: var(--serif); font-weight: 500; font-size: 6.2cqi; letter-spacing: -.04em; line-height: .95; margin: 0; max-width: 60%; position: relative; }
+.tp-land h5 i { color: var(--accent); }
+.tp-row2 { display: flex; gap: 2cqi; margin-top: 3cqi; align-items: center; font-size: 1.5cqi; position: relative; }
+.tp-row2 b { background: var(--accent); color: var(--paper); padding: 1.1cqi 2cqi; border-radius: 3px; font-weight: 500; }
+.tp-row2 span { color: var(--accent); text-decoration: underline; text-underline-offset: 4px; }
+.tp-bloom { position: absolute; width: 55cqi; height: 55cqi; right: -12cqi; top: -14cqi; border-radius: 50%; filter: blur(7cqi); opacity: var(--bloom-op, .4); pointer-events: none;
+  background: radial-gradient(closest-side at 35% 40%, #7C6CF5, transparent), radial-gradient(closest-side at 65% 55%, #34E0C4, transparent), radial-gradient(closest-side at 50% 75%, #FF9EC0, transparent); }
+.tp-wiz { display: grid; grid-template-columns: 20cqi 1fr; height: 100%; }
+.tp-wiz-rail { background: var(--paper-2); border-right: 1px solid var(--rule-soft); padding: 3.4cqi 2.4cqi; display: grid; align-content: start; gap: 1.6cqi; }
+.tp-step { display: flex; gap: 1cqi; align-items: center; font-size: 1.35cqi; color: var(--muted); }
+.tp-step::before { content: attr(data-n); font-family: var(--mono); font-size: .95cqi; width: 2.6cqi; height: 2.6cqi; border-radius: 50%; border: 1px solid var(--rule); display: grid; place-items: center; }
+.tp-step.done::before { content: '✓'; background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.tp-step.on { color: var(--ink); font-weight: 600; }
+.tp-step.on::before { border-color: var(--accent); color: var(--accent); }
+.tp-wiz-main { padding: 5cqi 6cqi; display: flex; flex-direction: column; gap: 1.6cqi; position: relative; }
+.tp-k { font-family: var(--mono); font-size: 1.05cqi; letter-spacing: .14em; color: var(--accent); text-transform: uppercase; }
+.tp-wiz-main h6 { font-family: var(--serif); font-weight: 500; font-size: 4.4cqi; letter-spacing: -.035em; line-height: 1; margin: 0; }
+.tp-wiz-main p { font-size: 1.55cqi; color: var(--ink-soft); margin: 0; max-width: 70%; }
+.tp-wiz-foot { position: absolute; left: 0; right: 0; bottom: 0; border-top: 1px solid var(--rule-soft); padding: 1.6cqi 6cqi; display: flex; justify-content: flex-end; }
+.tp-wiz-foot b { background: var(--accent); color: var(--paper); border-radius: 3px; padding: 1cqi 2cqi; font-size: 1.35cqi; font-weight: 500; }
+
+/* the transition screen (mirrors styles/transitions.scss) */
+.tpx { position: absolute; inset: 0; z-index: 5; container-type: size; display: none; place-items: center; align-content: center; gap: 2.2cqmin; text-align: center; background: var(--paper); color: var(--ink); overflow: hidden; }
+.tpx.on { display: grid; }
+.tpx.inline { left: 22%; }
+.tpx-t { position: relative; font-family: var(--serif); font-weight: 500; letter-spacing: -.03em; line-height: 1.05; font-size: 5cqmin; max-width: 22ch; }
+.tpx-s { position: relative; font-family: var(--mono); font-size: 2cqmin; letter-spacing: .04em; color: var(--muted); }
+.tpx-mark { display: none; width: 11cqmin; height: 11cqmin; color: var(--ink); }
+.tpx-mesh { display: none; position: absolute; left: 50%; top: 50%; width: 92cqmin; height: 92cqmin; margin: -46cqmin 0 0 -46cqmin; border-radius: 50%; filter: blur(10cqmin); opacity: 0; pointer-events: none;
+  background: radial-gradient(closest-side at 38% 42%, #7C6CF5, transparent), radial-gradient(closest-side at 62% 50%, #34E0C4, transparent), radial-gradient(closest-side at 50% 70%, #FF9EC0, transparent), radial-gradient(closest-side at 52% 30%, #5FA8FF, transparent); }
+.tpx.skyline .tpx-mark { display: block; }
+.tpx.aurora .tpx-mesh { display: block; }
+.tpx.skyline .tpx-t { font-family: 'Outfit', var(--sans); font-weight: 700; letter-spacing: -.02em; font-size: 4.6cqmin; }
+.tpx-mark path { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.tpx-mark rect { opacity: 0; transform-box: fill-box; transform-origin: center; }
+.tpx.skyline.is-in .tpx-mark path { animation: tpx-draw calc(var(--tpx-in) * .62) cubic-bezier(.2, .8, .2, 1) forwards; }
+.tpx.skyline.is-in .tpx-mark path:nth-child(2) { animation-delay: calc(var(--tpx-in) * .08); }
+.tpx.skyline.is-in .tpx-mark path:nth-child(3) { animation-delay: calc(var(--tpx-in) * .16); }
+.tpx.skyline.is-in .tpx-mark path:nth-child(n+4) { animation-delay: calc(var(--tpx-in) * .28); }
+.tpx.skyline.is-in .tpx-mark rect { animation: tpx-lit calc(var(--tpx-in) * .36) var(--ease) calc(var(--tpx-in) * .62) forwards; }
+.tpx.skyline.is-in .tpx-t, .tpx.skyline.is-in .tpx-s { animation: tpx-rise calc(var(--tpx-in) * .5) var(--ease) calc(var(--tpx-in) * .4) both; }
+.tpx.skyline.is-in .tpx-s { animation-delay: calc(var(--tpx-in) * .55); }
+.tpx.skyline:is(.is-hold, .is-out) .tpx-mark path { stroke-dashoffset: 0; }
+.tpx.skyline:is(.is-hold, .is-out) .tpx-mark rect { opacity: 1; }
+.tpx.skyline.is-hold .tpx-mark rect { animation: tpx-glow 1.6s ease-in-out infinite alternate; }
+.tpx.skyline.is-out { animation: tpx-lift var(--tpx-out) cubic-bezier(.2, .8, .2, 1) forwards; }
+.tpx.aurora.is-in .tpx-mesh { animation: tpx-bloom var(--tpx-in) var(--ease) forwards; }
+.tpx.aurora.is-in .tpx-t, .tpx.aurora.is-in .tpx-s { animation: tpx-rise calc(var(--tpx-in) * .7) var(--ease) calc(var(--tpx-in) * .25) both; }
+.tpx.aurora:is(.is-hold, .is-out) .tpx-mesh { opacity: var(--bloom-op, .4); }
+.tpx.aurora.is-hold .tpx-mesh { animation: tpx-breathe 3.6s ease-in-out infinite alternate; }
+.tpx.aurora.is-out .tpx-t, .tpx.aurora.is-out .tpx-s { animation: tpx-words-out calc(var(--tpx-out) * .34) var(--ease) forwards; }
+.tpx.aurora.is-out .tpx-mesh { animation: tpx-fade-out calc(var(--tpx-out) * .46) var(--ease) calc(var(--tpx-out) * .18) forwards; }
+.tpx.aurora.is-out { animation: tpx-fade-out calc(var(--tpx-out) * .52) linear calc(var(--tpx-out) * .48) forwards; }
+.tpx.compact .tpx-mesh { width: 70cqmin; height: 70cqmin; margin: -35cqmin 0 0 -35cqmin; }
+.tpx.compact .tpx-t { font-size: 4.2cqmin; }
+.tpx.compact .tpx-s { display: none; }
+.tpx.calm, .tpx.calm * { animation: none !important; }
+.tpx.calm .tpx-mark path { stroke-dashoffset: 0; }
+.tpx.calm .tpx-mark rect { opacity: 1; }
+.tpx.calm .tpx-mesh { opacity: var(--bloom-op, .4); }
+.tpx.calm.is-out { opacity: 0; transition: opacity var(--tpx-out) linear; }
+@keyframes tpx-draw { to { stroke-dashoffset: 0; } }
+@keyframes tpx-lit { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+@keyframes tpx-glow { from { opacity: 1; } to { opacity: .55; } }
+@keyframes tpx-rise { from { opacity: 0; transform: translateY(1.4cqmin); } to { opacity: 1; transform: none; } }
+@keyframes tpx-lift { to { opacity: 0; transform: translateY(-4%); } }
+@keyframes tpx-bloom { from { opacity: 0; transform: scale(.35); } to { opacity: var(--bloom-op, .4); transform: scale(1); } }
+@keyframes tpx-breathe { from { transform: scale(1) rotate(0deg); } to { transform: scale(1.08) rotate(14deg); } }
+@keyframes tpx-words-out { to { opacity: 0; transform: translateY(-1cqmin); } }
+@keyframes tpx-fade-out { to { opacity: 0; } }
 </style>
 </head>
 <body>
@@ -380,6 +511,7 @@ tr.pick td:first-child { color: var(--accent); }
     <a class="opt" href="#story">Story</a>
     <a class="opt" href="#system">System</a>
     <a class="opt" href="#studio">Studio</a>
+    <a class="opt" href="#transitions">Transitions</a>
     <a class="opt" href="#onboarding">Onboarding</a>
     <a class="opt" href="#build">Build</a>
     <a class="opt" href="#logo">Logo</a>
@@ -407,7 +539,7 @@ tr.pick td:first-child { color: var(--accent); }
       <span>System <b>Aurora · v4 editorial</b></span>
       <span>Layout <b>Studio</b></span>
       <span>Set in <b>Fraunces</b> &amp; <b>IBM Plex</b></span>
-      <span>Updated <b>2026-10-28</b></span>
+      <span>Updated <b>2026-10-29</b></span>
       <span>Live <b><a href="https://bizznex.cheruvathoor.com" style="color:inherit">bizznex.cheruvathoor.com</a></b></span>
     </div>
   </section>
@@ -611,7 +743,7 @@ tr.pick td:first-child { color: var(--accent); }
       <div>
         <h4>Motion</h4>
         <ul class="clean">
-          <li><b>Spatial:</b> things travel to and from where they belong. Pages slide the way you navigate, dialogs grow out of the button you pressed, windows come from the sidebar and go into the dock, and dark mode spreads from its switch.</li>
+          <li><b>Spatial:</b> things travel to and from where they belong. Dialogs grow out of the button you pressed, windows come from the sidebar and go into the dock, and dark mode spreads from its switch. Switching pages and the big moments use transition screens (<a href="#transitions">§ 08</a>).</li>
           <li>Three curves: <code>--ease</code> <code>cubic-bezier(.22, 1, .36, 1)</code> for states, <code>--ease-sp</code> <code>cubic-bezier(.2, .8, .2, 1)</code> for travel, <code>--spring</code> for the toast.</li>
           <li>One speed dial: every duration is multiplied by <code>--m: 1.5</code> (<code>MOTION_SCALE</code> in <code>ui/motion.ts</code>), so the whole product calms down or speeds up together.</li>
           <li>Static blocks never animate; <code>prefers-reduced-motion</code> turns all of it into instant changes.</li>
@@ -620,7 +752,7 @@ tr.pick td:first-child { color: var(--accent); }
     </div>
     <h4>Signature details</h4>
     <ul class="clean">
-      <li><b>Folio numbers</b> in faint serif open every section (01–12 here).</li>
+      <li><b>Folio numbers</b> in faint serif open every section (01–13 here).</li>
       <li><b>§ mono spec-labels</b> in accent-keyed uppercase — the editorial fingerprint.</li>
       <li><b>5% film grain</b> — a fixed SVG fractal-noise overlay removes the flat “screenshot” feel.</li>
       <li><b>Accent-tinted thin scrollbars</b>; <code>::selection</code> uses the accent.</li>
@@ -755,9 +887,82 @@ tr.pick td:first-child { color: var(--accent); }
     </ul>
   </section>
 
-  <!-- 08 · ONBOARDING -->
+  <!-- 08 · TRANSITIONS -->
+  <section class="sec" id="transitions">
+    <header class="sec-h"><span class="folio">08</span><div><p class="spec"><span class="k">§ Motion</span><span>Decided 29 Oct 2026</span></p><h2 class="sec-t">Between the screens</h2></div></header>
+    <p class="sec-lede">BizzNex used to jump: a button spinner, then the workspace all at once, and a hard cut on sign-out. A study of seven moments in three directions settled it: <b>Skyline</b> for the ways in, <b>Aurora</b> for everything else, leaving by <b>fading through paper</b>. Play them here; the timings are the shipped ones.</p>
+
+    <div class="tp" id="tp">
+      <div class="tp-moments" role="group" aria-label="Moment" id="tpMoments"></div>
+      <div class="tp-frame">
+        <div class="tp-bar"><i></i><i></i><i></i><span>bizznex.cheruvathoor.com</span></div>
+        <div class="tp-stage" id="tpStage">
+          <div class="tp-scr" data-s="blank"></div>
+          <div class="tp-scr" data-s="land"><div class="tp-land"><span class="tp-bloom"></span><div class="tp-logo">__MARK__BizzNex</div><h5>Business, run <i>beautifully.</i></h5><div class="tp-row2"><b>Create your workspace</b><span>Explore the demo →</span></div></div></div>
+          <div class="tp-scr" data-s="auth"><div class="tp-auth"><div class="tp-auth-l"><span class="tp-bloom" style="right:-26cqi;top:auto;bottom:-24cqi"></span><div class="tp-logo">__MARK__BizzNex</div><p>Welcome back.</p></div><div class="tp-auth-r"><h4 class="tp-h4">Sign in</h4><div class="tp-notice" data-notice hidden>You were signed out: the demo was refreshed, or this account signed out everywhere.</div><span class="tp-lab">Email</span><div class="tp-in">dennis@northwind.example.com</div><span class="tp-lab">Password</span><div class="tp-in">••••••••••</div><span class="tp-go">Sign in</span></div></div></div>
+          <div class="tp-scr" data-s="wizStart"><div class="tp-wiz"><div class="tp-wiz-rail"><div class="tp-logo">__MARK__BizzNex</div><div class="tp-step on" data-n="01">Welcome</div><div class="tp-step" data-n="02">Your business</div><div class="tp-step" data-n="03">Your goals</div><div class="tp-step" data-n="04">Preferences</div><div class="tp-step" data-n="05">Ready</div></div><div class="tp-wiz-main"><span class="tp-k">Step 1 of 5 · Welcome</span><h6>Welcome to the BizzNex demo.</h6><p>An example business with real projects, customers and deals.</p><div class="tp-wiz-foot"><b>Get started →</b></div></div></div></div>
+          <div class="tp-scr" data-s="wiz"><div class="tp-wiz"><div class="tp-wiz-rail"><div class="tp-logo">__MARK__BizzNex</div><div class="tp-step done" data-n="01">Welcome</div><div class="tp-step done" data-n="02">Your business</div><div class="tp-step done" data-n="03">Your goals</div><div class="tp-step done" data-n="04">Preferences</div><div class="tp-step on" data-n="05">Ready</div></div><div class="tp-wiz-main"><span class="tp-k">Step 5 of 5 · Ready</span><h6>You’re all set, Dennis.</h6><p>Your workspace opens with the steps that match your goals first.</p><div class="tp-wiz-foot"><b>Go to my workspace →</b></div></div></div></div>
+          <div class="tp-scr" data-s="dash"><div class="tp-ws"><div class="tp-side"><div class="tp-logo">__MARK__BizzNex</div><span class="tp-grp">Workspace</span><span class="tp-nav on">Dashboard</span><span class="tp-nav">Projects</span><span class="tp-nav">Tasks</span><span class="tp-grp">CRM</span><span class="tp-nav">Contacts</span><span class="tp-nav">Deals</span><span class="tp-grp">Tools</span><span class="tp-nav">Assistant</span></div><div class="tp-main"><span class="tp-crumb">BizzNex / Dashboard</span><h3 class="tp-h">Good afternoon, Dennis</h3><div class="tp-big">$27,600</div><span class="tp-delta">▲ 78.8%  across the six months</span><div class="tp-rows"><div class="tp-r"><span>Active projects</span><b>2</b></div><div class="tp-r"><span>Open tasks</span><b>3</b></div><div class="tp-r"><span>Pipeline</span><b>$77.5k</b></div></div></div></div></div>
+          <div class="tp-scr" data-s="deals"><div class="tp-ws"><div class="tp-side"><div class="tp-logo">__MARK__BizzNex</div><span class="tp-grp">Workspace</span><span class="tp-nav">Dashboard</span><span class="tp-nav">Projects</span><span class="tp-nav">Tasks</span><span class="tp-grp">CRM</span><span class="tp-nav">Contacts</span><span class="tp-nav on">Deals</span><span class="tp-grp">Tools</span><span class="tp-nav">Assistant</span></div><div class="tp-main"><span class="tp-crumb">BizzNex / Deals</span><h3 class="tp-h">Deals</h3><span class="tp-delta" style="color:var(--muted)">4 DEALS · PIPELINE $77,500 · WON $8,600</span><div class="tp-cols"><div class="tp-col">LEAD<div class="tp-card">Fleet dashboard pilot</div></div><div class="tp-col">QUALIFIED<div class="tp-card">Packaging rollout</div></div><div class="tp-col">PROPOSAL<div class="tp-card">Brand refresh retainer</div></div><div class="tp-col won">WON<div class="tp-card">Seasonal campaign</div></div></div></div></div></div>
+          <div class="tpx" id="tpx" role="status" aria-live="polite"><span class="tpx-mesh" aria-hidden="true"></span>__MARK_TX__<span class="tpx-t" id="tpxT"></span><span class="tpx-s" id="tpxS"></span></div>
+        </div>
+      </div>
+      <div class="tp-ctrl">
+        <button type="button" class="btn primary sm" id="tpPlay" style="color:var(--paper)">▶ Replay</button>
+        <button type="button" class="btn ghost sm" id="tpAll">Play all seven</button>
+        <button type="button" class="tp-chip" id="tpCalm" aria-pressed="false">Reduced motion</button>
+        <button type="button" class="tp-chip" id="tpSlow" aria-pressed="false">Slow ×2</button>
+        <span class="tp-phase" id="tpPhase">ready</span>
+      </div>
+      <p class="tp-note" id="tpNote"></p>
+    </div>
+
+    <div class="scroll-x"><table class="ledger spec-t">
+      <thead><tr><th>Moment</th><th>Screen</th><th>Exit</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>01 Open the app</td><td>Skyline</td><td>Lift</td><td>The first sight of BizzNex in a session; only if loading takes over 300 ms</td></tr>
+        <tr><td>02 Sign in</td><td>Skyline</td><td>Lift</td><td>Arriving in your own workspace, greeted by name</td></tr>
+        <tr><td>03 Open the demo</td><td>Skyline</td><td>Lift</td><td>A visitor’s first look at the product</td></tr>
+        <tr><td>04 Setup finished</td><td>Skyline</td><td>Lift</td><td>The workspace opening for the first time, whole rather than mid-swap</td></tr>
+        <tr><td>05 Sign out</td><td>Aurora</td><td>Fade through paper</td><td>A quiet goodbye, kept short</td></tr>
+        <tr><td>06 Session ended</td><td>Aurora</td><td>Fade through paper</td><td>Says why you were signed out, then sign-in repeats it</td></tr>
+        <tr class="pick"><td>07 Switch features</td><td>Aurora, main column only</td><td>Fade through paper</td><td>Every page change; the sidebar stays put, and a page still loading shows the same Aurora panel</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="two">
+      <div>
+        <h4>Why this split</h4>
+        <ul class="clean">
+          <li><b>Skyline is the brand beat</b> — the mark draws itself and its one window lights: the business opening its doors. Saved for the four ways in, so it never becomes wallpaper.</li>
+          <li><b>Aurora carries the rest</b> — the same mesh that sits behind the landing page and the theme switch, blooming quietly for goodbyes, endings and page changes.</li>
+          <li><b>Fade through paper</b> — words leave, then the glow, then the page appears. The calmest exit: it never competes with the content arriving, reads the same in both themes, and costs nothing to render.</li>
+          <li><b>Switching features</b> replaced the old sideways page slide, so moving around the product and the big moments share one language.</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Explored and set aside</h4>
+        <ul class="clean">
+          <li><b>Ledger</b> — an editorial sentence over the app’s outline. The best fit for Aurora’s rules, but it gave the ways in no sense of arrival.</li>
+          <li><b>Aurora’s first exit</b> — the app opening out of a circle. Replaced: too theatrical for something seen many times a day.</li>
+          <li><b>Settle, Lift, Gather</b> — the glow sinking, rising like a veil, or condensing into a point where you land. Gather was the most “spatial”; paper won on calm.</li>
+        </ul>
+        <h4>Rules for every screen</h4>
+        <ul class="clean">
+          <li><b>No flash</b> — a wait under 300 ms shows nothing; once shown, a screen holds long enough not to blink.</li>
+          <li><b>Say what is happening</b> — every screen names the action; the status line is <code>aria-live</code>.</li>
+          <li><b>Reduced motion</b> — a short cross-fade with the same words; switching features becomes instant.</li>
+          <li><b>One at a time</b> — a request made during a screen just applies its change underneath.</li>
+          <li><b>One scale</b> — every duration is multiplied by the ×1.5 motion scale.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="small" style="margin-top:var(--s3)">Implementation: <code>apps/web/src/ui/transitions.tsx</code> (<code>playTransition</code> covers the screen, makes the change underneath, holds, then exits) and <code>styles/transitions.scss</code>. Timings at ×1.5: Skyline 1.2 s in · 0.72 s out; Aurora 0.72 s in · 0.93 s out; switching features 0.3 s in · 0.5 s hold · 0.57 s out. The full study, with every option, is <code>design-style-guides/bizznex-transitions.html</code>.</p>
+  </section>
+
+  <!-- 09 · ONBOARDING -->
   <section class="sec" id="onboarding">
-    <header class="sec-h"><span class="folio">08</span><div><p class="spec"><span class="k">§ First run</span><span>New · demo · returning</span></p><h2 class="sec-t">Onboarding that knows who you are</h2></div></header>
+    <header class="sec-h"><span class="folio">09</span><div><p class="spec"><span class="k">§ First run</span><span>New · demo · returning</span></p><h2 class="sec-t">Onboarding that knows who you are</h2></div></header>
     <p class="sec-lede">The first minutes decide whether a tool sticks. BizzNex guides people who are new — and gets out of the way of people who aren’t.</p>
     <div class="flow">
       <div class="st"><b>The landing page</b><span>The app opens on a short product page that ends in one choice: create an account, explore the demo, or sign in. It links here for the design story.</span></div>
@@ -777,9 +982,9 @@ tr.pick td:first-child { color: var(--accent); }
     <p class="small"><b>Company lookup.</b> Typing a company name in the business step looks it up in Wikidata (no key, no account) and fills in the website, industry, team size, country and, when listed, a logo. Sample data is a real example business (2 projects, 3 companies, 4 deals, activities, notes, a post, a newsletter, events). Its record ids are remembered, so the checklist never counts it and one click removes it without touching anything the user created.</p>
   </section>
 
-  <!-- 09 · BUILD -->
+  <!-- 10 · BUILD -->
   <section class="sec" id="build">
-    <header class="sec-h"><span class="folio">09</span><div><p class="spec"><span class="k">§ Implementation</span><span>apps/web · apps/api</span></p><h2 class="sec-t">How it ships</h2></div></header>
+    <header class="sec-h"><span class="folio">10</span><div><p class="spec"><span class="k">§ Implementation</span><span>apps/web · apps/api</span></p><h2 class="sec-t">How it ships</h2></div></header>
     <p class="sec-lede">The design is not a mockup — it is the running app. Here is what implements each decision.</p>
     <div class="two">
       <div>
@@ -824,9 +1029,9 @@ tr.pick td:first-child { color: var(--accent); }
     </div>
   </section>
 
-  <!-- 10 · DECISIONS -->
+  <!-- 11 · DECISIONS -->
   <section class="sec">
-    <header class="sec-h"><span class="folio">10</span><div><p class="spec"><span class="k">§ Rationale</span><span>Easy to miss</span></p><h2 class="sec-t">Small decisions log</h2></div></header>
+    <header class="sec-h"><span class="folio">11</span><div><p class="spec"><span class="k">§ Rationale</span><span>Easy to miss</span></p><h2 class="sec-t">Small decisions log</h2></div></header>
     <div class="scroll-x"><table class="ledger spec-t">
       <thead><tr><th>Decision</th><th>Why</th></tr></thead>
       <tbody>
@@ -847,15 +1052,18 @@ tr.pick td:first-child { color: var(--accent); }
         <tr><td>Won and Lost are end states</td><td>A closed deal is reached by “Mark won” or “Mark lost” and left by “Reopen”, so ◀ ▶ can’t close a deal by accident, and the pipeline total counts open deals only.</td></tr>
         <tr><td>Notifications only from the server</td><td>A notification means something happened (a deal won, a campaign sent), so the client can’t invent one.</td></tr>
         <tr><td>The security policy is built into the page</td><td>The build writes the Content-Security-Policy into <code>index.html</code> and hashes its one inline script, so it holds on any host and never goes stale.</td></tr>
+        <tr><td>Skyline in, Aurora for the rest</td><td>The drawn mark is saved for the four ways in, so the brand beat never becomes wallpaper; Aurora carries sign-out, endings and page changes (<a href="#transitions">§ 08</a>).</td></tr>
+        <tr><td>Fade through paper</td><td>Words, then glow, then the page: the calmest of five exits tried, and it never competes with the content arriving.</td></tr>
+        <tr><td>Page switches are transitions too</td><td>Switching features replaced the sideways slide, so moving around and the big moments share one language. The sidebar never moves.</td></tr>
         <tr><td>Free and always live</td><td>Neon Postgres and Render, kept awake by a ping on <code>/health/live</code>, which skips the database so the database can still sleep between visits.</td></tr>
         <tr><td>The Skyline logo</td><td>Three towers on one baseline with one lit window, the light that says the business is open. Developed from the founder’s own reference sketch, then drawn with one stroke on a 48-unit grid so it holds from a 16px tab to a sign. <a href="/brand/skyline.html">Full identity →</a></td></tr>
       </tbody>
     </table></div>
   </section>
 
-  <!-- 11 · THE LOGO -->
+  <!-- 12 · THE LOGO -->
   <section class="sec" id="logo">
-    <header class="sec-h"><span class="folio">11</span><div><p class="spec"><span class="k">§ Identity</span><span>Decided 16 Oct 2026</span></p><h2 class="sec-t">The logo: Skyline</h2></div></header>
+    <header class="sec-h"><span class="folio">12</span><div><p class="spec"><span class="k">§ Identity</span><span>Decided 16 Oct 2026</span></p><h2 class="sec-t">The logo: Skyline</h2></div></header>
     <p class="sec-lede">The name stays <b>BizzNex</b>. The logo is <b>Skyline</b>: three towers standing on one baseline with the name, and one lit window, the light that says the business is open.</p>
 
     <div class="sig-panel" aria-label="The Skyline signature lockup">
@@ -902,17 +1110,18 @@ tr.pick td:first-child { color: var(--accent); }
     <p style="margin-top:var(--s3)"><a class="link" data-brand href="design-style-guides/bizznex-identity-skyline.html">The full Skyline identity: colour, clear space, sizes and real uses <span>↗</span></a></p>
   </section>
 
-  <!-- 12 · KEEP CURRENT -->
+  <!-- 13 · KEEP CURRENT -->
   <section class="sec">
-    <header class="sec-h"><span class="folio">12</span><div><p class="spec"><span class="k">§ Maintenance</span><span>Living document</span></p><h2 class="sec-t">Keeping this current</h2></div></header>
+    <header class="sec-h"><span class="folio">13</span><div><p class="spec"><span class="k">§ Maintenance</span><span>Living document</span></p><h2 class="sec-t">Keeping this current</h2></div></header>
     <div class="status">
-      <span class="badge">Living document · last updated 2026-10-28</span>
+      <span class="badge">Living document · last updated 2026-10-29</span>
       <p class="small" style="margin:12px 0 0">This file is the full case study, served by the app at <code>/case-study.html</code> (live: <a href="https://bizznex.cheruvathoor.com/case-study.html">bizznex.cheruvathoor.com/case-study.html</a>). The app’s opening page (<code>apps/web/src/views/Landing.tsx</code>) tells the product half of the same story and links here. Update both before every production deploy:</p>
       <ul>
         <li><span class="bx"></span><span>Re-diff the tokens against <code>apps/web/src/styles/aurora.scss</code> — palette, type, radius, spacing, motion.</span></li>
         <li><span class="bx"></span><span>Check the page inventory against <code>apps/web/src/nav.ts</code> and each tool in <code>views/tools/*</code>.</span></li>
         <li><span class="bx"></span><span>Check the onboarding table against <code>docs/onboarding-flow.md</code>.</span></li>
         <li><span class="bx"></span><span>Confirm what is still simulated (the “simulated” badges) and the i18n coverage.</span></li>
+        <li><span class="bx"></span><span>Check the transitions player (§ 08) against the timings and words in <code>apps/web/src/ui/transitions.tsx</code>.</span></li>
         <li><span class="bx"></span><span>Bump the date here and in the changelog below.</span></li>
       </ul>
     </div>
@@ -962,6 +1171,92 @@ tr.pick td:first-child { color: var(--accent); }
   }
   document.querySelectorAll('.swt').forEach(function (s) { s.addEventListener('click', function () { s.classList.toggle('on'); s.setAttribute('aria-checked', s.classList.contains('on')); }); });
   document.querySelectorAll('.seg').forEach(function (g) { g.querySelectorAll('button').forEach(function (btn) { btn.addEventListener('click', function () { g.querySelectorAll('button').forEach(function (x) { x.classList.remove('on'); }); btn.classList.add('on'); }); }); });
+})();
+</script>
+
+<script>
+/* § 08 Transitions player: replays the seven moments with the shipped timings
+   (apps/web/src/ui/transitions.tsx: base ms × 1.5). */
+(function () {
+  var stage = document.getElementById('tpStage');
+  if (!stage) return;
+  var MARK = '<svg class="tpx-mark" viewBox="0 0 48 48" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"><path pathLength="1" d="M6 42V25H16"/><path pathLength="1" d="M16 42V11L28 6V42"/><path pathLength="1" d="M28 18H41V42"/><path pathLength="1" d="M32 24.5H37M32 29.5H37M32 34.5H37"/><path pathLength="1" d="M10 30V36"/><path pathLength="1" d="M3.5 42H44.5"/></g><rect x="20.4" y="15.6" width="3.6" height="4.6" rx=".6" fill="var(--accent)"/></svg>';
+  stage.innerHTML = stage.innerHTML.replace(/__MARK_TX__/g, MARK).replace(/__MARK__/g, MARK.replace(' class="tpx-mark"', ''));
+
+  var TIMING = { skyline: [800, 260, 480], aurora: [480, 200, 620], compact: [200, 333, 380] };
+  var MOMENTS = [
+    { label: 'Open the app', kind: 'skyline', from: 'blank', to: 'dash', t: 'Good afternoon, Dennis.', s: 'Opening your workspace', note: 'Opening BizzNex while signed in. Shown only if loading the account takes over 300 ms.' },
+    { label: 'Sign in', kind: 'skyline', from: 'auth', to: 'dash', t: 'Good afternoon, Dennis.', s: 'Loading your projects, customers and deals', note: 'After the password is accepted: greeted by name while the workspace loads.' },
+    { label: 'Open the demo', kind: 'skyline', from: 'land', to: 'wizStart', t: 'Opening the demo business', s: 'A shared example workspace · resets every 30 minutes', note: 'From “Explore the demo” into the five-step demo wizard.' },
+    { label: 'Setup finished', kind: 'skyline', from: 'wiz', to: 'dash', t: 'Your workspace is ready.', s: 'Applying your goals and your look', note: 'The wizard closes behind the screen, so the workspace appears whole.' },
+    { label: 'Sign out', kind: 'aurora', from: 'dash', to: 'auth', t: 'See you soon, Dennis.', s: 'Signing out of this browser', note: 'A quiet goodbye, then sign-in.' },
+    { label: 'Session ended', kind: 'aurora', from: 'dash', to: 'auth', notice: true, t: 'You were signed out.', s: 'The demo was refreshed, or this account signed out everywhere', note: 'The API rejected the session (a demo reset, or “Sign out everywhere”); sign-in then says why.' },
+    { label: 'Switch features', kind: 'aurora', compact: true, inline: true, from: 'dash', to: 'deals', t: 'Deals', s: '', note: 'Every page change, over the main column only; the sidebar stays. A page still loading shows the same Aurora panel.' },
+  ];
+
+  var bar = document.getElementById('tpMoments'), tx = document.getElementById('tpx'), phase = document.getElementById('tpPhase');
+  var note = document.getElementById('tpNote'), cur = 0, timers = [], slow = 1;
+  var calmBtn = document.getElementById('tpCalm');
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) calmBtn.setAttribute('aria-pressed', 'true');
+  MOMENTS.forEach(function (m, i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'tp-mom'; b.dataset.i = i; b.setAttribute('aria-pressed', String(i === 0));
+    b.innerHTML = '<span class="n">0' + (i + 1) + '</span>' + m.label + '<span class="tag' + (m.kind === 'aurora' ? ' aur' : '') + '">' + (m.kind === 'aurora' ? 'Aurora' : 'Skyline') + '</span>';
+    b.addEventListener('click', function () { select(i); play(); });
+    bar.appendChild(b);
+  });
+  function clear() { timers.forEach(clearTimeout); timers = []; }
+  function at(ms, fn) { timers.push(setTimeout(fn, ms)); }
+  function show(name) {
+    stage.querySelectorAll('.tp-scr').forEach(function (s) { s.classList.toggle('on', s.dataset.s === name); });
+  }
+  function select(i) {
+    cur = i;
+    bar.querySelectorAll('.tp-mom').forEach(function (b) { b.setAttribute('aria-pressed', String(+b.dataset.i === i)); });
+    note.textContent = MOMENTS[i].note;
+  }
+  var started = false;                       // set by any play; the scroll auto-play then stands down
+  function play(done) {
+    started = true; clear();
+    var m = MOMENTS[cur], calm = calmBtn.getAttribute('aria-pressed') === 'true';
+    var base = TIMING[m.compact ? 'compact' : m.kind], f = 1.5 * slow;
+    var ms = calm ? [120, 300, 160] : [base[0] * f, base[1] * f, base[2] * f];
+    stage.querySelector('[data-notice]').hidden = !m.notice;
+    show(m.from);
+    tx.className = 'tpx';
+    tx.style.setProperty('--tpx-in', ms[0] + 'ms'); tx.style.setProperty('--tpx-out', ms[2] + 'ms');
+    document.getElementById('tpxT').textContent = m.t;
+    document.getElementById('tpxS').textContent = m.s;
+    phase.textContent = 'before';
+    var cls = 'tpx on ' + m.kind + (m.compact ? ' compact' : '') + (m.inline ? ' inline' : '') + (calm ? ' calm' : '');
+    at(700 * slow, function () {
+      if (calm && m.compact) { show(m.to); phase.textContent = 'instant (reduced motion)'; if (done) at(1200, done); return; }
+      tx.className = cls + ' is-in'; phase.textContent = 'transition';
+      at(ms[0], function () {
+        show(m.to);
+        tx.className = cls + ' is-hold'; phase.textContent = 'holding';
+        at(ms[1], function () {
+          tx.className = cls + ' is-out'; phase.textContent = m.kind === 'aurora' ? 'fading through paper' : 'lifting away';
+          at(ms[2], function () { tx.className = 'tpx'; phase.textContent = 'done · press Replay'; if (done) at(1000 * slow, done); });
+        });
+      });
+    });
+  }
+  document.getElementById('tpPlay').addEventListener('click', function () { play(); });
+  document.getElementById('tpAll').addEventListener('click', function () {
+    var i = 0;
+    (function next() { if (i >= MOMENTS.length) return; select(i++); play(next); })();
+  });
+  calmBtn.addEventListener('click', function () { calmBtn.setAttribute('aria-pressed', String(calmBtn.getAttribute('aria-pressed') !== 'true')); play(); });
+  document.getElementById('tpSlow').addEventListener('click', function (e) {
+    slow = slow === 1 ? 2 : 1; e.currentTarget.setAttribute('aria-pressed', String(slow === 2)); play();
+  });
+  select(0); show('blank');
+  // play the first moment when the section scrolls into view
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { io.disconnect(); if (!started) play(); } }, { threshold: .4 });
+    io.observe(stage);
+  }
 })();
 </script>
 </body>
