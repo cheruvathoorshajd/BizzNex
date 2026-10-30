@@ -13,6 +13,7 @@ design-style-guides/*
 !design-style-guides/bizznex-identity-skyline.html
 !design-style-guides/bizznex-identity.html
 !design-style-guides/bizznex-logo-options.html
+!design-style-guides/assets/skyline-reference.png
 *.html
 !bizznex-case-study.html
 *.md

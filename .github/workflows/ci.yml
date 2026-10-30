@@ -116,3 +116,4 @@ jobs:
           curl -fsS http://localhost:8080/ | grep -q 'http-equiv="Content-Security-Policy"'
           curl -fsSI http://localhost:8080/ | grep -qi 'x-frame-options: deny'
           curl -fsSI http://localhost:8080/case-study.html | grep -qi 'content-security-policy'
+          curl -fsS -o /dev/null http://localhost:8080/brand/reference.png

@@ -52,7 +52,7 @@ services:
         - package.json
         - package-lock.json
         - bizznex-case-study.html
-        - image.png
+        - design-style-guides/assets/skyline-reference.png
         - design-style-guides/bizznex-identity-skyline.html
         - design-style-guides/bizznex-identity.html
         - design-style-guides/bizznex-logo-options.html

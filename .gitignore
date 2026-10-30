@@ -30,3 +30,10 @@ coverage/
 
 # local embedded postgres data
 .pgdata/
+
+# screenshots and other loose images saved into the repo root (design assets live in design-style-guides/assets/)
+/*.png
+/*.jpg
+/*.jpeg
+/*.webp
+Screenshot*.png

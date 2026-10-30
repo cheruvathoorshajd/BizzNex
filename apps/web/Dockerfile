@@ -12,7 +12,7 @@ RUN npm ci --workspace @bizznex/web --workspace @bizznex/shared --include-worksp
 COPY packages/shared ./packages/shared
 COPY apps/web ./apps/web
 # design documents the app links to (case study, brand); see designDocs() in vite.config.ts
-COPY bizznex-case-study.html image.png ./
+COPY bizznex-case-study.html ./
 COPY design-style-guides ./design-style-guides
 
 # API base URL is baked in at build time

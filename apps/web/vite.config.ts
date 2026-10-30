@@ -19,13 +19,13 @@ const caseStudyTiming = (html: string) => {
 
 const DOCS: { url: string; file: string; type: string; rewrite?: (html: string) => string }[] = [
   { url: '/case-study.html', file: 'bizznex-case-study.html', type: 'text/html; charset=utf-8',
-    rewrite: (h) => caseStudyTiming(h.replace('src="image.png"', 'src="/brand/reference.png"')) },
+    rewrite: (h) => caseStudyTiming(h.replace('src="design-style-guides/assets/skyline-reference.png"', 'src="/brand/reference.png"')) },
   // the adopted logo and the two earlier explorations
   { url: '/brand/skyline.html', file: 'design-style-guides/bizznex-identity-skyline.html', type: 'text/html; charset=utf-8',
-    rewrite: (h) => h.replace('src="../image.png"', 'src="reference.png"') },
+    rewrite: (h) => h.replace('src="assets/skyline-reference.png"', 'src="reference.png"') },
   { url: '/brand/identity.html', file: 'design-style-guides/bizznex-identity.html', type: 'text/html; charset=utf-8' },
   { url: '/brand/logo-options.html', file: 'design-style-guides/bizznex-logo-options.html', type: 'text/html; charset=utf-8' },
-  { url: '/brand/reference.png', file: 'image.png', type: 'image/png' },
+  { url: '/brand/reference.png', file: 'design-style-guides/assets/skyline-reference.png', type: 'image/png' },
 ]
 
 function designDocs(): Plugin {
