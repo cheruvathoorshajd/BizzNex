@@ -43,10 +43,10 @@
   position: absolute; left: 50%; top: 50%; width: 92cqmin; height: 92cqmin; margin: -46cqmin 0 0 -46cqmin;
   border-radius: 50%; filter: blur(10cqmin); opacity: 0; pointer-events: none;
   background:
-    radial-gradient(closest-side at 38% 42%, #7C6CF5, transparent),
-    radial-gradient(closest-side at 62% 50%, #34E0C4, transparent),
-    radial-gradient(closest-side at 50% 70%, #FF9EC0, transparent),
-    radial-gradient(closest-side at 52% 30%, #5FA8FF, transparent);
+    radial-gradient(closest-side at 38% 42%, var(--aurora-iris), transparent),
+    radial-gradient(closest-side at 62% 50%, var(--aurora-aqua), transparent),
+    radial-gradient(closest-side at 50% 70%, var(--aurora-blush), transparent),
+    radial-gradient(closest-side at 52% 30%, var(--aurora-sky), transparent);
 }
 .txs-aurora.is-in .txs-mesh { animation: txs-bloom var(--txs-in) var(--ease) forwards; }
 .txs-aurora.is-in .txs-t, .txs-aurora.is-in .txs-s { animation: txs-rise calc(var(--txs-in) * .7) var(--ease) calc(var(--txs-in) * .25) both; }

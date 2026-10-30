@@ -182,7 +182,7 @@
 .lpt-row2 b { background: var(--accent); color: var(--paper); padding: 1.1cqi 2cqi; border-radius: 3px; font-weight: 500; }
 .lpt-row2 span { color: var(--accent); text-decoration: underline; text-underline-offset: 4px; }
 .lpt-bloom { position: absolute; width: 55cqi; height: 55cqi; right: -12cqi; top: -14cqi; border-radius: 50%; filter: blur(7cqi); opacity: var(--bloom-op, .4); pointer-events: none;
-  background: radial-gradient(closest-side at 35% 40%, #7C6CF5, transparent), radial-gradient(closest-side at 65% 55%, #34E0C4, transparent), radial-gradient(closest-side at 50% 75%, #FF9EC0, transparent); }
+  background: radial-gradient(closest-side at 35% 40%, var(--aurora-iris), transparent), radial-gradient(closest-side at 65% 55%, var(--aurora-aqua), transparent), radial-gradient(closest-side at 50% 75%, var(--aurora-blush), transparent); }
 .lpt-wiz { display: grid; grid-template-columns: 20cqi 1fr; height: 100%; }
 .lpt-wiz-rail { background: var(--paper-2); border-right: 1px solid var(--rule-soft); padding: 3.4cqi 2.4cqi; display: grid; align-content: start; gap: 1.6cqi; }
 .lpt-step { display: flex; gap: 1cqi; align-items: center; font-size: 1.35cqi; color: var(--muted); }

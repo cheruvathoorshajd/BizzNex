@@ -2,7 +2,8 @@
    BizzNex · Aurora Design System
    Container-less editorial system — warm paper, one accent,
    hairline rules instead of boxes, near-sharp 3px radius.
-   Derived from BizzNex-Style-Guide.html (the canonical guide).
+   This file is the source of truth for every token. The case study's § 05 is the readable
+   reference, and apps/web/src/designDrift.test.ts fails if it drifts from these values.
    ============================================================ */
 
 :root {
@@ -16,6 +17,8 @@
   --m: 1.5;
   --ease-sp: cubic-bezier(.2, .8, .2, 1);
   --spring: cubic-bezier(.34, 1.56, .64, 1);
+  /* the aurora mesh: the four stops behind heroes, the landing page and the Aurora transition */
+  --aurora-iris: #7C6CF5; --aurora-sky: #5FA8FF; --aurora-aqua: #34E0C4; --aurora-blush: #FF9EC0;
   /* asymmetric spacing scale */
   --s1: 6px; --s2: 12px; --s3: 20px; --s4: 34px; --s5: 56px; --s6: 92px; --s7: 140px;
 }
@@ -310,10 +313,10 @@ tr:hover .row-act, .titem:hover .row-act { opacity: 1; }
 .bloom {
   position: absolute; z-index: 0; top: -30%; right: -12%; width: 60vw; height: 70vh; pointer-events: none; filter: blur(64px); opacity: var(--bloom-op);
   background:
-    radial-gradient(38% 48% at 66% 30%, #7C6CF5 0, transparent 62%),
-    radial-gradient(34% 44% at 90% 18%, #5FA8FF 0, transparent 62%),
-    radial-gradient(40% 42% at 58% 62%, #34E0C4 0, transparent 62%),
-    radial-gradient(34% 40% at 88% 72%, #FF9EC0 0, transparent 62%);
+    radial-gradient(38% 48% at 66% 30%, var(--aurora-iris) 0, transparent 62%),
+    radial-gradient(34% 44% at 90% 18%, var(--aurora-sky) 0, transparent 62%),
+    radial-gradient(40% 42% at 58% 62%, var(--aurora-aqua) 0, transparent 62%),
+    radial-gradient(34% 40% at 88% 72%, var(--aurora-blush) 0, transparent 62%);
 }
 
 /* ── calculator ── */
