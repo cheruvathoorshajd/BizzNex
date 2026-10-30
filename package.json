@@ -16,7 +16,8 @@
     "prisma:generate": "npm run prisma:generate -w @bizznex/api",
     "prisma:migrate": "npm run prisma:migrate -w @bizznex/api",
     "seed": "npm run seed -w @bizznex/api",
-    "db:local": "node scripts/local-db.mjs"
+    "db:local": "node scripts/local-db.mjs",
+    "screenshots": "node scripts/screenshots.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
