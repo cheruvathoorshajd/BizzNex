@@ -85,7 +85,7 @@ export default function Sidebar({ view, onNavigate, onOpenWindow, openWindowIds,
       <div className="brand">
         <Logo />
         <button type="button" className="side-toggle" onClick={toggle} aria-controls="app-sidebar" aria-expanded={!collapsed}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} title={`${collapsed ? 'Expand' : 'Collapse'} sidebar ( [ )`}>
+          aria-label={collapsed ? t('side.expand') : t('side.collapse')} title={`${collapsed ? t('side.expand') : t('side.collapse')} ( [ )`}>
           <Icon name="sidebar" size={16} />
         </button>
       </div>

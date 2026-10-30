@@ -86,12 +86,8 @@ export async function playTransition(
   if (current()?.id === id) set(null);
 }
 
-/** "morning" | "afternoon" | "evening" for greetings. */
+/** "morning" | "afternoon" | "evening" for greetings (i18n/translate.ts builds the words). */
 export const dayPart = (h = new Date().getHours()) => (h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening');
-export const greeting = (name?: string | null) => {
-  const first = name?.trim().split(/\s+/)[0];
-  return `Good ${dayPart()}${first ? `, ${first}` : ''}.`;
-};
 
 interface ViewProps extends TransitionScreen {
   phase: TransitionPhase;

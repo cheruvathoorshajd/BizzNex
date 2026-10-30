@@ -5,8 +5,10 @@ import { dismissEnded, setCredentials } from '../store/authSlice';
 import { setAuthMode, setIntroSeen } from '../store/uiSlice';
 import type { AuthMode } from '../store/uiSlice';
 import { useLoginMutation, useRegisterMutation } from '../services/api';
-import { DEMO, DEMO_SCREEN, useEnterDemo } from '../onboarding/useEnterDemo';
-import { greeting, playTransition } from '../ui/transitions';
+import { DEMO, demoScreen, useEnterDemo } from '../onboarding/useEnterDemo';
+import { playTransition } from '../ui/transitions';
+import { greet } from '../i18n/translate';
+import { useT } from '../i18n/useT';
 import { errorText } from '../services/errors';
 import { cx } from '../utils';
 import Icon from '../ui/Icon';
@@ -55,6 +57,7 @@ const FEATURES = [
 
 export default function Auth() {
   const dispatch = useAppDispatch();
+  const t = useT();
   const switchTheme = useThemeSwitch();
   const theme = useAppSelector((s) => s.ui.theme);
   const ended = useAppSelector((s) => s.auth.ended);
@@ -103,9 +106,9 @@ export default function Auth() {
       const kind = res.user.email === DEMO.email ? 'demo' : m;
       const first = res.user.name?.trim().split(/\s+/)[0];
       void playTransition(
-        kind === 'demo' ? DEMO_SCREEN
-          : m === 'signup' ? { kind: 'skyline', t: first ? `Welcome, ${first}.` : 'Welcome to BizzNex.', s: 'Creating your workspace' }
-          : { kind: 'skyline', t: greeting(res.user.name), s: 'Loading your projects, customers and deals' },
+        kind === 'demo' ? demoScreen(t)
+          : m === 'signup' ? { kind: 'skyline', t: first ? t('tx.welcome', { name: first }) : t('tx.welcomeAnon'), s: t('tx.creating') }
+          : { kind: 'skyline', t: greet(t, res.user.name), s: t('tx.loading') },
         { swap: () => dispatch(setCredentials({ token: res.token, user: res.user, kind })) },
       );
     } catch (err) {

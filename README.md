@@ -600,8 +600,9 @@ records these create are real and persisted.
 
 **Known limits:** lists aren't paginated yet. Deals and activities can't be edited
 beyond their stage or done state, and posts and campaigns can't be edited after they're
-created. Navigation, the dashboard, projects and tasks are translated into Spanish and
-French; the CRM pages, tools, settings, landing, sign-in and onboarding are English-only. The demo resets only when someone signs in to it
+created. Navigation, the dashboard, projects, tasks, the transition screens, the dashboard search and
+the sidebar controls are translated into Spanish and French (a test checks every message exists
+in all three); the CRM pages, tools, settings, landing, sign-in and onboarding are English-only. The demo resets only when someone signs in to it
 (there is no timer), so an idle demo can sit stale until the next visitor arrives, and a
 reset signs out any demo session still open. The company lookup only knows companies listed
 on Wikidata.

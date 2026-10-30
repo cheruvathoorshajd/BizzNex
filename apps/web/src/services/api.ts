@@ -3,6 +3,7 @@ import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolk
 import type { RootState } from '../store';
 import { sessionEnded } from '../store/authSlice';
 import { playTransition } from '../ui/transitions';
+import { translate } from '../i18n/translate';
 import type {
   Project, Task, Note, User, AuthResponse,
   RegisterInput, LoginInput,
@@ -46,8 +47,9 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
   if (result.error?.status === 401 && (apiCtx.getState() as RootState).auth.token && !PASSWORD_CHECKS.includes(url) && !ending) {
     // several requests can fail together: end the session once, behind an Aurora screen
     ending = true;
+    const lang = (apiCtx.getState() as RootState).ui.language;
     void playTransition(
-      { kind: 'aurora', t: 'You were signed out.', s: 'The demo was refreshed, or this account signed out everywhere' },
+      { kind: 'aurora', t: translate(lang, 'tx.ended'), s: translate(lang, 'tx.endedSub') },
       { swap: () => apiCtx.dispatch(sessionEnded()) },
     ).finally(() => { ending = false; });
   }

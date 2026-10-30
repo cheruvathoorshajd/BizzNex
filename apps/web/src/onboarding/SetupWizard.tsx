@@ -12,6 +12,7 @@ import type { BusinessErrors, BusinessProfile } from './BusinessFields';
 import { useOnboarding } from './useOnboarding';
 import Logo from '../ui/Logo';
 import { playTransition } from '../ui/transitions';
+import { useT } from '../i18n/useT';
 
 type StepId = 'welcome' | 'business' | 'goals' | 'look' | 'data' | 'ready';
 const LABELS: Record<StepId, string> = {
@@ -46,6 +47,7 @@ const clearFixed = (e: BusinessErrors, p: Partial<BusinessProfile>): BusinessErr
 
 export default function SetupWizard({ onFinish }: Props) {
   const dispatch = useAppDispatch();
+  const t = useT();
   const theme = useAppSelector((s) => s.ui.theme);
   const language = useAppSelector((s) => s.ui.language);
   const { user, state, update, demo, loaded } = useOnboarding();
@@ -86,7 +88,7 @@ export default function SetupWizard({ onFinish }: Props) {
   const finish = (tour: boolean) => {
     writeStep(stepKey, null);
     void playTransition(
-      { kind: 'skyline', t: 'Your workspace is ready.', s: tour ? 'Starting the tour' : 'Applying your goals and your look' },
+      { kind: 'skyline', t: t('tx.ready'), s: tour ? t('tx.readyTour') : t('tx.readyApply') },
       { swap: () => { update({ wizard: 'done' }); onFinish({ tour, landing }); } },
     );
   };

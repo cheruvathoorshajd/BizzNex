@@ -16,7 +16,8 @@ import WindowLayer from './layout/WindowLayer';
 import Dock from './layout/Dock';
 import { useWindows } from './layout/useWindows';
 import { LABELS } from './nav';
-import { PageLoading, TransitionHost, greeting, playTransition } from './ui/transitions';
+import { PageLoading, TransitionHost, playTransition } from './ui/transitions';
+import { greet } from './i18n/translate';
 import type { ViewId } from './types';
 
 import Dashboard from './views/Dashboard';
@@ -93,6 +94,7 @@ function Root() {
 let bootPlayed = false;
 
 function Gate() {
+  const t = useT();
   const token = useAppSelector((s) => s.auth.token);
   const name = useAppSelector((s) => s.auth.user?.name);
   // loading the account also validates a stored token: a 401 here signs out (see baseQuery in services/api)
@@ -105,13 +107,13 @@ function Gate() {
     if (bootPlayed || !token || !me.isLoading) return;
     bootPlayed = true;
     const ready = new Promise<void>((r) => { settle.current = r; });
-    void playTransition({ kind: 'skyline', t: greeting(name), s: 'Opening your workspace' }, { ready, showAfter: 300 });
+    void playTransition({ kind: 'skyline', t: greet(t, name), s: t('tx.opening') }, { ready, showAfter: 300 });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps -- first mount only
 
   const introSeen = useAppSelector((s) => s.ui.introSeen);
 
   // signed out: the landing page opens every visit → create account / demo / sign in
-  if (!token) return <Suspense fallback={<PageLoading label="Opening BizzNex" />}>{introSeen ? <Auth /> : <Landing />}</Suspense>;
+  if (!token) return <Suspense fallback={<PageLoading label={t('tx.openPage', { page: 'BizzNex' })} />}>{introSeen ? <Auth /> : <Landing />}</Suspense>;
   return <Shell />;
 }
 
@@ -229,7 +231,7 @@ function Shell() {
           <SampleBanner />
           {showIntro && <FeatureIntro key={view} view={view} onDismiss={dismissIntro} />}
           <ErrorBoundary key={`page-${view}`} what="this page">
-            <Suspense fallback={<PageLoading label={`Opening ${t(LABELS[view])}`} />}>{render()}</Suspense>
+            <Suspense fallback={<PageLoading label={t('tx.openPage', { page: t(LABELS[view]) })} />}>{render()}</Suspense>
           </ErrorBoundary>
         </div>
       </div>

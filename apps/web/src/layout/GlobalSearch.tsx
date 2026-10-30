@@ -17,9 +17,10 @@ import { cx, fmtDay } from '../utils';
 type Kind = 'page' | 'project' | 'task' | 'event';
 interface Hit { kind: Kind; id: string; label: string; meta?: string; icon: string; view: ViewId; query?: string; tool?: boolean }
 
+/** Group headings, as message ids. */
 const GROUPS: { kind: Kind; title: string }[] = [
-  { kind: 'page', title: 'Pages & tools' }, { kind: 'project', title: 'Projects' },
-  { kind: 'task', title: 'Tasks' }, { kind: 'event', title: 'Events' },
+  { kind: 'page', title: 'search.pages' }, { kind: 'project', title: 'nav.projects' },
+  { kind: 'task', title: 'nav.tasks' }, { kind: 'event', title: 'nav.events' },
 ];
 const PER_GROUP = 5;
 
@@ -37,12 +38,12 @@ export default function GlobalSearch({ onNavigate, onOpenWindow }: { onNavigate:
   const has = (...fields: (string | null | undefined)[]) => fields.some((f) => f?.toLowerCase().includes(needle));
   const hits: Hit[] = !needle ? [] : [
     ...NAV.flatMap((g) => g.items).filter((i) => has(t(i.labelKey), i.id)).slice(0, PER_GROUP)
-      .map((i): Hit => ({ kind: 'page', id: i.id, label: t(i.labelKey), icon: i.icon, view: i.id, tool: isToolId(i.id), meta: isToolId(i.id) ? 'Tool' : 'Page' })),
+      .map((i): Hit => ({ kind: 'page', id: i.id, label: t(i.labelKey), icon: i.icon, view: i.id, tool: isToolId(i.id), meta: isToolId(i.id) ? t('search.tool') : t('search.page') })),
     ...projects.filter((p) => has(p.name, p.owner)).slice(0, PER_GROUP)
       .map((p): Hit => ({ kind: 'project', id: p.id, label: p.name, icon: 'folder', view: 'projects', query: p.name,
-        meta: `${p.tasks.length} ${p.tasks.length === 1 ? 'task' : 'tasks'}` })),
+        meta: t('search.taskCount', { n: p.tasks.length }) })),
     ...projects.flatMap((p) => p.tasks.map((tk) => ({ tk, p }))).filter(({ tk }) => has(tk.name, tk.description)).slice(0, PER_GROUP)
-      .map(({ tk, p }): Hit => ({ kind: 'task', id: tk.id, label: tk.name, icon: 'check', view: 'tasks', query: tk.name, meta: `${p.name} · ${tk.status}` })),
+      .map(({ tk, p }): Hit => ({ kind: 'task', id: tk.id, label: tk.name, icon: 'check', view: 'tasks', query: tk.name, meta: `${p.name} · ${t('status.' + tk.status)}` })),
     ...events.filter((e) => has(e.name, e.category, e.location)).slice(0, PER_GROUP)
       .map((e): Hit => ({ kind: 'event', id: e.id, label: e.name, icon: 'calendar', view: 'events', query: e.name,
         meta: [e.startsAt && fmtDay(e.startsAt), e.location].filter(Boolean).join(' · ') })),
@@ -81,8 +82,8 @@ export default function GlobalSearch({ onNavigate, onOpenWindow }: { onNavigate:
       <label className="top-search" data-tour="top-search">
         <Icon name="search" size={16} style={{ color: 'var(--muted)' }} />
         <input
-          ref={inputRef} className="top-search-inp" value={q} placeholder="Search projects, tasks, events, tools…"
-          role="combobox" aria-label="Search BizzNex" aria-expanded={showList} aria-controls={listId} aria-autocomplete="list"
+          ref={inputRef} className="top-search-inp" value={q} placeholder={t('search.placeholder')}
+          role="combobox" aria-label={t('search.label')} aria-expanded={showList} aria-controls={listId} aria-autocomplete="list"
           aria-activedescendant={showList && hits[cur] ? `${listId}-${cur}` : undefined}
           onChange={(e) => { setQ(e.target.value); setOpen(true); setActive(0); }}
           onFocus={() => setOpen(true)} onKeyDown={onKey}
@@ -92,13 +93,13 @@ export default function GlobalSearch({ onNavigate, onOpenWindow }: { onNavigate:
 
       {showList && (
         <div className="gsearch-pop">
-          <ul id={listId} role="listbox" aria-label="Search results">
-            {hits.length === 0 && <li className="gsearch-empty" role="presentation">No projects, tasks, events or tools match “{q.trim()}”.</li>}
+          <ul id={listId} role="listbox" aria-label={t('search.results')}>
+            {hits.length === 0 && <li className="gsearch-empty" role="presentation">{t('search.empty', { q: q.trim() })}</li>}
             {GROUPS.map((g) => {
               const items = hits.filter((h) => h.kind === g.kind);
               if (!items.length) return null;
               return [
-                <li key={`${g.kind}-title`} className="gsearch-grp" role="presentation">{g.title}</li>,
+                <li key={`${g.kind}-title`} className="gsearch-grp" role="presentation">{t(g.title)}</li>,
                 ...items.map((h) => {
                   const i = hits.indexOf(h);
                   return (
@@ -113,8 +114,8 @@ export default function GlobalSearch({ onNavigate, onOpenWindow }: { onNavigate:
                       <span className="t">{h.label}</span>
                       {h.meta && <span className="m">{h.meta}</span>}
                       {h.tool && (
-                        <button type="button" tabIndex={-1} className="gsearch-win" title="Open in a window (Shift+Enter)"
-                          aria-label={`Open ${h.label} in a window`} onClick={(e) => { e.stopPropagation(); choose(h, true); }}>
+                        <button type="button" tabIndex={-1} className="gsearch-win" title={t('search.openInTitle')}
+                          aria-label={t('search.openIn', { name: h.label })} onClick={(e) => { e.stopPropagation(); choose(h, true); }}>
                           <Icon name="external" size={13} />
                         </button>
                       )}
@@ -124,7 +125,7 @@ export default function GlobalSearch({ onNavigate, onOpenWindow }: { onNavigate:
               ];
             })}
           </ul>
-          <p className="gsearch-foot" aria-hidden="true">↑ ↓ move · Enter open · Shift+Enter opens a tool in a window · Esc close</p>
+          <p className="gsearch-foot" aria-hidden="true">{t('search.hint')}</p>
         </div>
       )}
     </div>
