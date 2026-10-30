@@ -518,16 +518,25 @@ the API sees it, which is how `TRUST_PROXY` was verified on Render.
 
 ## 10 · Testing & CI
 
-- **Unit** (82): Jest for the API, 61 (auth, account, assistant, campaigns, ownership checks,
+- **Unit** (90): Jest for the API, 61 (auth, account, assistant, campaigns, ownership checks,
   error mapping, company lookup, demo reset, onboarding, projects), and Vitest for the web app,
-  21 (date handling, the calculator, error text).
+  29: date handling, the calculator, error text; **design drift** (`designDrift.test.ts`: the
+  case study's tokens and the Skyline page's palette must match `aurora.scss`, and the case
+  study's transition timings must match `transition-timing.json`); and **i18n** (Spanish and
+  French have every English message).
+- **Browser** (8, `npm run test:e2e -w @bizznex/web`): Playwright in Google Chrome, against the
+  real API. The landing player, opening the demo (Skyline, then a wizard with one scrollbar),
+  switching features (Aurora over the main column only), the foldable sidebar (pop-out without
+  moving the page, remembered, avatar aligned), the dashboard search (tools, projects, events,
+  opened already filtered), labels naming their fields, sign-out, and a rejected session.
 - **E2E** (6): `apps/api/test/app.e2e-spec.ts` runs against a live PostgreSQL via
   supertest. It covers health and liveness, register → create → list, cross-account isolation
   (another user's records can't be read, edited, deleted or *linked*), and session revocation
   after a password change.
 - **CI** (`.github/workflows/ci.yml`, every push and PR), two jobs:
   - **build-test**: `npm ci`, migrations on a Postgres 16 service, then typecheck → lint (all
-    workspaces) → unit tests → build → e2e.
+    workspaces; missing labels and click-only controls are errors) → unit tests → build → API
+    e2e → browser tests (the report is uploaded when they fail).
   - **docker**: builds both production images, boots the API image in production mode against
     Postgres (migrations on start, then `/health`), and checks the web image serves the app with
     its CSP and security headers. Render deploys from the same Dockerfile, so a broken image fails
@@ -588,8 +597,9 @@ shipped tokens, components and tool inventory before each production deploy.
 
 ## 12 · Honest status
 
-**Working and verified:** typecheck and lint clean in all three workspaces, 82 unit
-tests, 6 e2e tests against Postgres, both production Docker images built and booted in CI, a
+**Working and verified:** typecheck and lint clean in all three workspaces (accessibility
+rules for labels and click targets are errors), 90 unit tests, 6 API e2e tests against
+Postgres, 8 browser tests in Chrome, both production Docker images built and booted in CI, a
 clean production build, and browser runs of the onboarding, settings and CRUD flows (including
 dates in a US time zone). **Deployed** on Render + Neon and checked live: `/health` reports the
 database up, the client IP is the visitor's own, and forged forwarding headers are ignored.

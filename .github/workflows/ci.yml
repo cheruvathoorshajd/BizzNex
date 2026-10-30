@@ -63,6 +63,20 @@ jobs:
       - name: E2E (API)
         run: npm run test:e2e -w @bizznex/api
 
+      # The UI in a real browser (Playwright, using the runner's Google Chrome): landing player,
+      # demo, transitions, foldable sidebar, dashboard search, labels, sign-out, session ended.
+      # Playwright starts the built API and a preview of the built web app itself.
+      - name: Browser smoke tests
+        run: npm run test:e2e -w @bizznex/web
+
+      - name: Upload the browser test report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report
+          retention-days: 7
+
   # Build both production images and boot the API image the way a host would (production mode,
   # migrations on start), so a broken Dockerfile fails here and not on the first deploy.
   docker:

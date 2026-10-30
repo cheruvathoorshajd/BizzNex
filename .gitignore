@@ -37,3 +37,8 @@ coverage/
 /*.jpeg
 /*.webp
 Screenshot*.png
+
+# Playwright (apps/web)
+apps/web/e2e/.auth/
+apps/web/playwright-report/
+apps/web/test-results/

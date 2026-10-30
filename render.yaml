@@ -58,6 +58,8 @@ services:
         - design-style-guides/bizznex-logo-options.html
       ignoredPaths:
         - "apps/web/src/**/*.test.ts"
+        - "apps/web/e2e/**"
+        - apps/web/playwright.config.ts
     envVars:
       - key: VITE_API_URL
         sync: false # the API's URL, e.g. https://bizznex-api.onrender.com (baked in at build time)
