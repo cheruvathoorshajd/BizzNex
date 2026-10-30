@@ -39,7 +39,7 @@ sign-in once its last reset is 30 minutes old. To run it yourself, see [§ 8](#8
 > first change, recipes, and troubleshooting. This README is the *what and why*;
 > onboarding is the *how*.
 
-> **Design artefacts:** canonical style guide → [`BizzNex-Style-Guide.html`](./BizzNex-Style-Guide.html) ·
+> **Design artefacts:** tokens → [`aurora.scss`](./apps/web/src/styles/aurora.scss) (source of truth) ·
 > full design story → [`bizznex-case-study.html`](./bizznex-case-study.html) ([read it live](https://bizznex.cheruvathoor.com/case-study.html)) ·
 > condensed write-up → [`CASE-STUDY.md`](./CASE-STUDY.md)
 
@@ -615,11 +615,12 @@ teams and roles, CSV import, and the ERP modules (finance, inventory, orders, HR
 
 | File | What it is |
 |---|---|
-| [`BizzNex-Style-Guide.html`](./BizzNex-Style-Guide.html) | **Canonical** interactive style guide — *Aurora, Edition 2026*. Theme toggle, click-to-copy swatches. |
+| [`apps/web/src/styles/aurora.scss`](./apps/web/src/styles/aurora.scss) | **Source of truth** for every design token, light and dark. The case study's § 05 renders them; a test keeps the two in step. |
+| [`BizzNex-Style-Guide.html`](./BizzNex-Style-Guide.html) | A signpost to the token sources (it used to be a copy of `option-1-aurora.html` that had drifted) |
 | [`bizznex-case-study.html`](./bizznex-case-study.html) | Full design case study — thesis, three directions, v1→v4 history, token reference, component gallery, windowing paradigms, decision log. Renders itself in Aurora. **Living document.** Live at [bizznex.cheruvathoor.com/case-study.html](https://bizznex.cheruvathoor.com/case-study.html). |
 | [`CASE-STUDY.md`](./CASE-STUDY.md) | Condensed markdown write-up |
 | `design-style-guides/index.html` | Index of the visual direction options |
-| `design-style-guides/option-1-aurora.html` | **Aurora ✅** (identical to the root style guide) |
+| `design-style-guides/option-1-aurora.html` | **Aurora ✅** — the chosen direction, as explored on 16 Oct 2026 (a dated snapshot; tokens have moved on) |
 | `design-style-guides/option-2-meridian.html` | Meridian ✕ |
 | `design-style-guides/option-3-nocturne.html` | Nocturne ✕ |
 | `design-style-guides/windows-option-1-hybrid.html` | Hybrid — basis for Studio |

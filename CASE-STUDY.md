@@ -1,9 +1,9 @@
 # BizzNex — Design Case Study & Rebuild
 
 This document records how the BizzNex visual identity was designed, and how the
-application was rebuilt on top of it. The canonical, interactive style guide lives
-alongside this file as **[`BizzNex-Style-Guide.html`](./BizzNex-Style-Guide.html)**
-(open it in any browser).
+application was rebuilt on top of it. The design tokens live in
+**[`apps/web/src/styles/aurora.scss`](./apps/web/src/styles/aurora.scss)** (the source of truth); the
+interactive case study, **[`bizznex-case-study.html`](./bizznex-case-study.html)** § 05, renders them.
 
 **See it live:** the app is at **[bizznex.cheruvathoor.com](https://bizznex.cheruvathoor.com)** (click *Explore the demo*), and the
 full interactive case study is at [bizznex.cheruvathoor.com/case-study.html](https://bizznex.cheruvathoor.com/case-study.html).

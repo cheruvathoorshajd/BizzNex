@@ -526,8 +526,8 @@ Edit `apps/web/src/styles/aurora.scss` — **both** the `:root[data-theme="light
 `:root[data-theme="dark"]` blocks. A token defined in only one theme is a bug that's
 invisible until someone toggles.
 
-Then update the design docs: `BizzNex-Style-Guide.html` is the canonical guide, and
-`bizznex-case-study.html` mirrors the token table.
+Then update the token table in `bizznex-case-study.html` (§ 05). `npm run test` fails
+(`designDrift.test.ts`) until the case study matches `aurora.scss`.
 
 ### Reset your local database
 
@@ -641,7 +641,7 @@ kill -9 <pid>
 ### Docs
 - Features or decisions → `README.md`
 - Deploy steps → `DEPLOYMENT.md`
-- Design tokens → `BizzNex-Style-Guide.html` **and** `bizznex-case-study.html`
+- Design tokens → `apps/web/src/styles/aurora.scss`, then the case study's § 05 (a test checks they match)
 - Dev workflow → this file
 
 ---
